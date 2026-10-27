@@ -35,7 +35,6 @@ export function Logo() {
     <Link href="/" className="logo" aria-label="4Everclips home">
       <FourMark />
       <EverWord />
-      <span className="logo-tag">CLIPS</span>
     </Link>
   );
 }
