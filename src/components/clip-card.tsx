@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EyeIcon, PlayIcon } from "@/components/icons";
+import { InlinePlayer } from "@/components/inline-player";
 import { Avatar, VerifiedMark } from "@/components/people";
 import { Vista } from "@/components/vista";
 import { categoryLabel } from "@/lib/categories";
@@ -40,14 +41,21 @@ export function ClipCard({ clip }: { clip: Clip }) {
   const duration = formatDuration(clip.duration_seconds);
   return (
     <article className={`clip-card q-${rarityFor(clip.view_count).key}`}>
-      <Link href={href} className="thumb" tabIndex={-1} aria-hidden="true">
+      <InlinePlayer
+        clipId={clip.id}
+        sourceType={clip.source_type}
+        sourceId={clip.source_id}
+        platform={clip.platform}
+        title={clip.title}
+        className="thumb"
+      >
         <ClipThumbImage clip={clip} />
         <span className="overlay-chip overlay-tl">{platformLabel(clip.platform)}</span>
         <span className="play-dot">
           <PlayIcon size={18} style={{ marginLeft: 3 }} />
         </span>
         {duration ? <span className="overlay-chip overlay-br">{duration}</span> : null}
-      </Link>
+      </InlinePlayer>
       <div className="clip-body">
         <Link href={href} className={`clip-title ${rarityClass(clip.view_count)}`}>
           {clip.title}

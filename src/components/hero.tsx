@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ClipThumbImage } from "@/components/clip-card";
 import { PlayIcon } from "@/components/icons";
+import { InlinePlayer } from "@/components/inline-player";
 import { VerifiedMark } from "@/components/people";
 import { categoryLabel, musicLabel } from "@/lib/categories";
 import { formatCount, formatDuration } from "@/lib/format";
@@ -17,7 +18,14 @@ export function Hero({ clip, feature }: { clip: Clip; feature: Feature | null })
   const maker = clip.creator?.display_name ?? clip.channel_name;
   return (
     <section aria-labelledby="hero-title" className="showcase">
-      <Link href={href} className="showcase-media" aria-label={`Watch ${clip.title}`} tabIndex={-1}>
+      <InlinePlayer
+        clipId={clip.id}
+        sourceType={clip.source_type}
+        sourceId={clip.source_id}
+        platform={clip.platform}
+        title={clip.title}
+        className="showcase-media"
+      >
         <ClipThumbImage clip={clip} />
         <span className="player-play">
           <PlayIcon size={32} style={{ marginLeft: 4 }} />
@@ -25,7 +33,7 @@ export function Hero({ clip, feature }: { clip: Clip; feature: Feature | null })
         <span className="overlay-chip overlay-tl" style={{ left: 16, top: 16, height: 28 }}>
           {platformLabel(clip.platform)}
         </span>
-      </Link>
+      </InlinePlayer>
 
       <div className="showcase-side">
         <div className="wow-tip">
