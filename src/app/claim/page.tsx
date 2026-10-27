@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MiniClip } from "@/components/clip-card";
 import { CheckIcon } from "@/components/icons";
 import { getViewer } from "@/lib/auth";
+import { enabledProviders, providerList } from "@/lib/auth-providers";
 import { getChannels, getClipByShortId } from "@/lib/queries";
 import { platformLabel } from "@/lib/video";
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = { title: "Claim your video" };
 export default async function ClaimPage({ searchParams }: { searchParams: Promise<{ clip?: string }> }) {
   const { clip: shortId } = await searchParams;
   const clip = shortId ? await getClipByShortId(shortId) : null;
-  const viewer = await getViewer();
+  const [viewer, providers] = await Promise.all([getViewer(), enabledProviders()]);
   const channels = viewer ? await getChannels(viewer.userId) : [];
   const alreadyYours = Boolean(clip && viewer && clip.creator_id === viewer.userId);
   const platform = clip ? platformLabel(clip.platform) : "YouTube or Twitch";
@@ -43,7 +44,8 @@ export default async function ClaimPage({ searchParams }: { searchParams: Promis
                 "Good, that part's done."
               ) : (
                 <>
-                  Use Discord, Twitch or Google. <Link href={`/login?next=${encodeURIComponent(`/claim${shortId ? `?clip=${shortId}` : ""}`)}`}>Log in</Link>
+                  {providers.length > 0 ? `Use ${providerList(providers)}. ` : null}
+                  <Link href={`/login?next=${encodeURIComponent(`/claim${shortId ? `?clip=${shortId}` : ""}`)}`}>Log in</Link>
                 </>
               )}
             </span>

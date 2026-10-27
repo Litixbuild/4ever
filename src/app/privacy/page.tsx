@@ -16,8 +16,8 @@ export default function PrivacyPage() {
 
           <h2>When you log in</h2>
           <p>
-            You log in with Discord, Twitch or Google. They send us your account name, profile picture and email
-            address. We use the name and picture for your profile. Your email is kept by our login provider and is never
+            You log in with an account you already have, like Discord, Twitch or Google. That service sends us your
+            account name, profile picture and email address. We use the name and picture for your profile. Your email is kept by our login provider and is never
             shown on the site.
           </p>
 

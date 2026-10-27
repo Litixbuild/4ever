@@ -19,4 +19,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Title colors come from `src/lib/rarity.ts`. Never print tier names (Legendary, Epic, etc.) in the UI.
 - Database changes go in a new file under `supabase/migrations/` with Row Level Security for any new table.
 - Styling is plain CSS in `src/app/globals.css`. Reuse its classes (`btn`, `card`, `seg`, `chip`, `clip-grid`, ...) before adding new ones.
+- Login buttons come from `enabledProviders()` in `src/lib/auth-providers.ts`, which reads which providers are switched on in Supabase. Don't hard-code the list of login options in pages.
 - Run `npm test`, `npm run typecheck` and `npm run lint` before committing.

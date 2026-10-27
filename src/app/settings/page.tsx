@@ -4,6 +4,7 @@ import { removeChannel } from "@/app/settings/actions";
 import { CheckIcon, StreamIcon, VideoIcon } from "@/components/icons";
 import { DeleteAccount, ProfileForm, TwitchLink, YouTubeCheck, YouTubeStart } from "@/components/settings-forms";
 import { requireViewer } from "@/lib/auth";
+import { enabledProviders } from "@/lib/auth-providers";
 import { badgeInfo, titleFor } from "@/lib/badges";
 import { getBadges, getChannels } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -26,12 +27,14 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   }
 
   const supabase = await createClient();
-  const [{ data: userData }, channels, badges] = await Promise.all([
+  const [{ data: userData }, channels, badges, providers] = await Promise.all([
     supabase.auth.getUser(),
     getChannels(viewer.userId),
     getBadges(viewer.userId),
+    enabledProviders(),
   ]);
   const twitchLinked = Boolean(userData.user?.identities?.some((i) => i.provider === "twitch"));
+  const twitchOpen = twitchLinked || providers.includes("twitch");
   const titles = badges
     .map((b) => ({ key: b.badge, label: titleFor(b.badge, profile.display_name) ?? badgeInfo(b.badge)?.name ?? b.badge }))
     .filter((t) => Boolean(t.label));
@@ -134,9 +137,11 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           <p className="small muted" style={{ margin: 0 }}>
             {twitch.length > 0
               ? "Your Twitch channel is verified. Clips and videos from it are credited to you."
-              : "Link your Twitch account and your channel is verified instantly. Twitch already proves you own it."}
+              : twitchOpen
+                ? "Link your Twitch account and your channel is verified instantly. Twitch already proves you own it."
+                : "Twitch verification opens soon. Your clips still show your Twitch channel name in the meantime."}
           </p>
-          {twitch.length === 0 ? <TwitchLink linked={twitchLinked} /> : null}
+          {twitch.length === 0 && twitchOpen ? <TwitchLink linked={twitchLinked} /> : null}
         </div>
       </section>
 

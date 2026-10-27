@@ -1,21 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import type { LoginProvider } from "@/lib/auth-providers";
 import { createClient } from "@/lib/supabase/client";
 
-type Provider = "discord" | "twitch" | "google";
+const BUTTONS: Record<LoginProvider, { label: string; note: string }> = {
+  discord: { label: "Continue with Discord", note: "" },
+  twitch: { label: "Continue with Twitch", note: "Verifies your Twitch channel automatically" },
+  google: { label: "Continue with Google", note: "" },
+};
 
-const PROVIDERS: { id: Provider; label: string; note: string }[] = [
-  { id: "discord", label: "Continue with Discord", note: "" },
-  { id: "twitch", label: "Continue with Twitch", note: "Verifies your Twitch channel automatically" },
-  { id: "google", label: "Continue with Google", note: "" },
-];
-
-export function LoginButtons({ next }: { next: string }) {
-  const [pending, setPending] = useState<Provider | null>(null);
+export function LoginButtons({ next, providers }: { next: string; providers: LoginProvider[] }) {
+  const [pending, setPending] = useState<LoginProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function login(provider: Provider) {
+  async function login(provider: LoginProvider) {
     setPending(provider);
     setError(null);
     const supabase = createClient();
@@ -25,23 +24,31 @@ export function LoginButtons({ next }: { next: string }) {
     });
     if (authError) {
       setPending(null);
-      setError("That login option isn't available right now. Try another one.");
+      setError(
+        providers.length > 1
+          ? "That login option isn't available right now. Try another one."
+          : "Logging in isn't working right now. Try again in a minute.",
+      );
     }
   }
 
   return (
     <div className="stack" style={{ gap: 12 }}>
-      {PROVIDERS.map((provider) => (
-        <div key={provider.id} className="stack-sm" style={{ gap: 4 }}>
+      {providers.map((id) => (
+        <div key={id} className="stack-sm" style={{ gap: 4 }}>
           <button
             type="button"
-            className="btn btn-ghost btn-lg btn-block"
-            onClick={() => login(provider.id)}
+            className={`btn btn-lg btn-block btn-${id}`}
+            onClick={() => login(id)}
             disabled={pending !== null}
           >
-            {pending === provider.id ? "Opening…" : provider.label}
+            {pending === id ? "Opening…" : BUTTONS[id].label}
           </button>
-          {provider.note ? <span className="tiny muted" style={{ textAlign: "center" }}>{provider.note}</span> : null}
+          {BUTTONS[id].note ? (
+            <span className="tiny muted" style={{ textAlign: "center" }}>
+              {BUTTONS[id].note}
+            </span>
+          ) : null}
         </div>
       ))}
       {error ? (

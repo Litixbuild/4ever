@@ -392,6 +392,31 @@ textarea::placeholder {
   background: rgba(255, 138, 128, 0.1);
   color: var(--red);
 }
+/* Login buttons in each service's own color, so people spot theirs at a glance */
+.btn-discord {
+  background: #5865f2;
+  color: #fff;
+}
+.btn-discord:hover:not(:disabled) {
+  background: #4752c4;
+  color: #fff;
+}
+.btn-twitch {
+  background: #9146ff;
+  color: #fff;
+}
+.btn-twitch:hover:not(:disabled) {
+  background: #772ce8;
+  color: #fff;
+}
+.btn-google {
+  background: #fff;
+  color: #1f1f1f;
+}
+.btn-google:hover:not(:disabled) {
+  background: #ece8e1;
+  color: #1f1f1f;
+}
 .btn-lg {
   min-height: 48px;
   padding: 0 22px;

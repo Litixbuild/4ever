@@ -31,6 +31,9 @@ the end. Never paste the secret ones anywhere public.
 
 ## 2. Set up logins
 
+The login page only shows the options you've switched on in Supabase, so you can start with Discord alone and add
+Twitch or Google later. A change there shows up on the site within about five minutes, no redeploy needed.
+
 Every login provider needs the same **callback URL**. You'll find it in Supabase under
 **Authentication → Sign In / Providers** when you open any provider. It looks like:
 
@@ -40,10 +43,12 @@ https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback
 
 ### Discord
 
-1. In the Discord Developer Portal, click **New Application** and name it `4Everclips`.
+1. In the Discord Developer Portal, click **New Application** and name it `4Ever`. That's the name people see on
+   Discord's "authorize" screen.
 2. Go to **OAuth2**, add the callback URL under **Redirects**, and save.
 3. Copy the **Client ID**, then click **Reset Secret** and copy the **Client Secret**.
-4. In Supabase, open the **Discord** provider, turn it on, paste both values, and save.
+4. In Supabase, open the **Discord** provider, turn it on, paste both values, and save. If your browser autofills a
+   saved password into the Client Secret box, clear it before pasting.
 
 ### Twitch
 
@@ -70,11 +75,11 @@ https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback
 ### Supabase login settings
 
 1. **Authentication → URL Configuration**:
-   - Site URL: `https://4everclips.com`
-   - Redirect URLs, add all three:
-     - `https://4everclips.com/**`
+   - Site URL: `https://wc4ever.netlify.app` for now. Change it to `https://4everclips.com` once the domain works.
+   - Redirect URLs:
      - `https://wc4ever.netlify.app/**` (the free Netlify address)
      - `http://localhost:3000/**` (for running it on your computer)
+     - `https://4everclips.com/**`, added once the domain is connected and pointing at Netlify
 2. In the authentication settings, turn on **Allow manual linking**. That lets someone who signed up with Discord
    link Twitch later to verify their channel.
 3. Turn **off** the **Email** provider. 4Ever only uses Discord, Twitch and Google, and leaving email on lets

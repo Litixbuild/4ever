@@ -25,7 +25,10 @@ export default function TermsPage() {
 
           <h2>Accounts</h2>
           <ul>
-            <li>You log in with Discord, Twitch or Google. Keep that account secure; you&apos;re responsible for what happens under it.</li>
+            <li>
+              You log in with an account you already have, like Discord, Twitch or Google. Keep that account secure;
+              you&apos;re responsible for what happens under it.
+            </li>
             <li>You must be at least 13 years old to make an account.</li>
             <li>One person, one account. Don&apos;t impersonate anyone.</li>
           </ul>

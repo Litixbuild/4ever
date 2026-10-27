@@ -5,14 +5,29 @@ import { safeNextPath } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
+// Turns the login service's error into something a person can act on.
+function friendlyLoginError(error: string, code: string | null, description: string | null): string {
+  if (error === "access_denied") return "Login was cancelled.";
+  if (code === "provider_email_needs_verification") {
+    return "That account's email isn't verified yet. Verify it with the service first (in Discord: User Settings → My Account), then log in again.";
+  }
+  if (code === "signup_disabled") return "New sign-ups are paused right now. Please check back soon.";
+  return description ?? "Something went wrong logging in. Please try again.";
+}
+
 // Discord, Twitch and Google send people back here after they log in.
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const origin = request.nextUrl.origin;
   const next = safeNextPath(searchParams.get("next"), "/");
 
-  if (searchParams.get("error")) {
-    const reason = searchParams.get("error_description") ?? "Login was cancelled.";
+  const loginError = searchParams.get("error");
+  if (loginError) {
+    const reason = friendlyLoginError(
+      loginError,
+      searchParams.get("error_code"),
+      searchParams.get("error_description"),
+    );
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(reason)}&next=${encodeURIComponent(next)}`);
   }
 
