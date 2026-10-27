@@ -52,9 +52,9 @@ export function Hero({ clip, feature }: { clip: Clip; feature: Feature | null })
             </span>
           ) : null}
           <span className="tip-gap">+{formatCount(clip.view_count)} Views</span>
-          <span>+{formatCount(clip.vote_count)} Votes</span>
+          <span className="tip-extra">+{formatCount(clip.vote_count)} Votes</span>
           <span className="tip-muted tip-extra">{musicLabel(clip.music_source, clip.music_credit)}</span>
-          {feature?.use_text ? <span className="tip-use tip-gap">Use: {feature.use_text}</span> : null}
+          {feature?.use_text ? <span className="tip-use tip-gap tip-extra">Use: {feature.use_text}</span> : null}
           {feature?.flavor_text ? (
             <span className={`tip-flavor ${feature.use_text ? "" : "tip-gap"}`}>
               &ldquo;{feature.flavor_text}&rdquo;

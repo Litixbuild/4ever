@@ -1723,7 +1723,21 @@ button.thumb {
   .showcase-side {
     grid-column: 1;
     grid-row: 2;
-    margin: -40px 14px 0;
+    margin: 12px 0 0;
+    gap: 12px;
+  }
+  .showcase .wow-tip {
+    padding: 12px 14px 14px;
+    font-size: 14px;
+  }
+  .showcase .tip-title {
+    font-size: 22px;
+    margin-bottom: 2px;
+  }
+  .showcase-actions .btn-lg {
+    min-height: 44px;
+    padding: 0 16px;
+    font-size: 14px;
   }
   .showcase-media .player-play {
     left: 50%;
