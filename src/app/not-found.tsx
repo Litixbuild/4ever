@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = { title: "Page not found" };
 
 // A missing page is a dead one: the world goes gray, and the way out is to release your spirit.
 export default function NotFound() {
