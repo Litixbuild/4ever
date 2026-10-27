@@ -67,13 +67,54 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
+  /* Transparent so the backdrop below shows; <html> keeps the base color. */
+  background: transparent;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Backdrop ----------
+   Alliance on the left, Horde on the right, Azeroth in between. It stays put while the page scrolls.
+   The shade is lightest in the open space beside the content column (1280px max) so the two champions
+   fill the sides of wide screens, and darkest behind the content so nothing competes with it. */
+body::before {
+  --backdrop-image: url("/backdrop/azeroth.webp");
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  pointer-events: none;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(180deg, rgba(12, 10, 9, 0.3) 0, rgba(12, 10, 9, 0) 15%, rgba(12, 10, 9, 0) 70%, rgba(12, 10, 9, 0.5) 100%),
+    linear-gradient(
+      90deg,
+      rgba(12, 10, 9, 0.28) 0,
+      rgba(12, 10, 9, 0.42) calc(50% - 700px),
+      rgba(12, 10, 9, 0.84) calc(50% - 540px),
+      rgba(12, 10, 9, 0.88) 50%,
+      rgba(12, 10, 9, 0.84) calc(50% + 540px),
+      rgba(12, 10, 9, 0.42) calc(50% + 700px),
+      rgba(12, 10, 9, 0.28) 100%
+    ),
+    var(--backdrop-image);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+@media (max-width: 760px) {
+  /* Phones only ever show the middle of the scene, so they get a smaller crop of it. */
+  body::before {
+    --backdrop-image: url("/backdrop/azeroth-center.webp");
+  }
 }
 
 main {
