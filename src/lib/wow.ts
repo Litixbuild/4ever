@@ -28,7 +28,12 @@ export const RACES = [
   { name: "Undead", faction: "horde" },
   { name: "Tauren", faction: "horde" },
   { name: "Troll", faction: "horde" },
+  // New in Forever, and playable on both sides.
+  { name: "Skyborne", faction: null },
 ] as const;
+
+// Forever has no realms: each ruleset is one mega-realm per region.
+export const RULESETS = ["Normal", "PvP", "RP", "RP-PvP", "Hardcore"] as const;
 
 export const CLASSES = [
   "Druid",

@@ -913,23 +913,23 @@ textarea::placeholder {
 .glow-ev::before {
   color: #ff2e0f;
   transform-origin: 50% 85%;
-  animation: glow-flicker 2.4s ease-in-out infinite;
+  animation: glow-flicker 5s ease-in-out infinite;
 }
 .glow-ev::after {
   background-image: linear-gradient(0deg, #d0280f 0%, #f04420 22%, #ff8a3d 40%, #ffe2b8 50%, #ff8a3d 60%, #f04420 78%, #d0280f 100%);
   background-size: 100% 300%;
   filter: drop-shadow(0 0 1.5px rgba(255, 70, 20, 0.9)) drop-shadow(0 1px 0 rgba(0, 0, 0, 0.8));
-  animation: glow-rise 3.2s linear infinite;
+  animation: glow-rise 7s linear infinite;
 }
 .glow-er::before {
   color: #2f7dff;
-  animation: glow-pulse 3.6s ease-in-out infinite;
+  animation: glow-pulse 7.5s ease-in-out infinite;
 }
 .glow-er::after {
   background-image: linear-gradient(90deg, #2763e8 0%, #3d86ff 22%, #8cc8ff 40%, #eef8ff 50%, #8cc8ff 60%, #3d86ff 78%, #2763e8 100%);
   background-size: 300% 100%;
   filter: drop-shadow(0 0 1.5px rgba(70, 150, 255, 0.95)) drop-shadow(0 1px 0 rgba(0, 0, 0, 0.8));
-  animation: glow-flow 4.2s linear infinite;
+  animation: glow-flow 9s linear infinite;
 }
 /* EV: heat rising through the letters, the glow flickering like a fire. */
 @keyframes glow-rise {
@@ -1016,6 +1016,20 @@ textarea::placeholder {
   border-bottom: 2px solid transparent;
   text-shadow: var(--game-shadow);
   white-space: nowrap;
+}
+.nav-pair {
+  display: contents;
+}
+.nav-narrow {
+  display: none;
+}
+@media (max-width: 760px) {
+  .main-nav .nav-wide {
+    display: none;
+  }
+  .main-nav .nav-narrow {
+    display: inline;
+  }
 }
 .main-nav a:hover {
   color: var(--flavor);
@@ -2900,6 +2914,370 @@ a.plaque:hover {
   overflow-wrap: anywhere;
 }
 
+/* Phones only: the front page's way into the swipe feed. */
+.feed-cta {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(226, 182, 92, 0.4);
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(60, 40, 14, 0.75), rgba(20, 17, 14, 0.8));
+  color: var(--text);
+  text-decoration: none;
+}
+.feed-cta strong {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 18px;
+  color: var(--flavor);
+}
+.feed-cta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+@media (max-width: 760px) {
+  .feed-cta {
+    display: flex;
+  }
+}
+
+/* ---------- Clip feed (/watch) ----------
+   One clip at a time over the whole screen, like Shorts. Swipe sideways to move between clips;
+   like on the bottom left, comments on the bottom right, the creator's avatar top right. */
+
+.feed {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100dvh;
+  padding: max(10px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(60, 40, 20, 0.35), transparent 70%),
+    #050404;
+  color: var(--text);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.feed-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+.feed-top,
+.feed-bottom {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.feed-count {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--text-3);
+  text-shadow: var(--game-shadow);
+}
+.feed-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  background: rgba(20, 17, 14, 0.75);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.feed-icon-btn:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+.feed-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.feed-person {
+  flex: none;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px var(--gold),
+    0 0 14px rgba(226, 182, 92, 0.45);
+}
+.feed-person .avatar {
+  border: 0;
+}
+.feed-person-empty {
+  box-shadow: 0 0 0 1px var(--line-2);
+}
+.feed-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 980px;
+  min-height: 0;
+  margin: 0 auto;
+}
+.feed-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #000;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+}
+.feed-media iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.feed-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 4px;
+}
+.feed-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.2;
+  text-decoration: none;
+  text-shadow: var(--game-shadow);
+  overflow-wrap: anywhere;
+}
+.feed-title:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+.feed-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.feed-meta > :first-child {
+  color: var(--text-2);
+  font-weight: 700;
+}
+.feed-bottom {
+  align-items: flex-end;
+}
+.feed-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  min-width: 64px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.feed-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  background: rgba(20, 17, 14, 0.85);
+  color: var(--text);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.feed-action:hover .feed-action-icon {
+  border-color: var(--line-strong);
+}
+.feed-action.is-on .feed-action-icon {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--gold-ink);
+}
+.feed-action.is-on {
+  color: var(--gold-hi);
+}
+/* Computers get a bare arrow on each side of the video; phones just swipe. */
+.feed-arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  padding: 12px;
+  border: 0;
+  background: none;
+  color: var(--text-3);
+  transform: translateY(-50%);
+  cursor: pointer;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8));
+  transition: color 0.15s ease;
+}
+.feed-arrow:hover {
+  color: var(--gold-hi);
+}
+.feed-arrow-prev {
+  left: max(8px, calc(50% - 600px));
+}
+.feed-arrow-next {
+  right: max(8px, calc(50% - 600px));
+}
+@media (hover: hover) and (pointer: fine) {
+  .feed-arrow {
+    display: block;
+  }
+}
+/* A new clip slides in from the side it came from. */
+.feed-in-next {
+  animation: feed-from-left 0.28s ease-out;
+}
+.feed-in-prev {
+  animation: feed-from-right 0.28s ease-out;
+}
+@keyframes feed-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+}
+@keyframes feed-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+.feed-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+}
+.feed-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 72dvh;
+  padding: 16px 16px max(16px, env(safe-area-inset-bottom));
+  background: var(--tip-bg);
+  border: 1px solid var(--tip-edge);
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.6);
+  animation: sheet-up 0.22s ease-out;
+  user-select: text;
+  -webkit-user-select: text;
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+.feed-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.feed-sheet-list {
+  flex: 1 1 auto;
+  min-height: 80px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.feed-sheet-list .comment {
+  padding: 10px 2px;
+}
+.comment-name {
+  font-weight: 800;
+  color: var(--text);
+  text-decoration: none;
+}
+.feed-sheet-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.feed-sheet-form .input {
+  flex: 1 1 200px;
+  width: auto;
+}
+/* Phones held sideways: the video takes the screen, info tucks away. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .feed {
+    grid-template-rows: 1fr;
+    padding: 8px 10px;
+  }
+  .feed-top,
+  .feed-bottom {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    width: auto;
+  }
+  .feed-top {
+    top: 8px;
+  }
+  .feed-bottom {
+    bottom: 8px;
+  }
+  .feed-info {
+    display: none;
+  }
+  .feed-stage {
+    max-width: none;
+  }
+  .feed-media {
+    width: min(100%, calc((100dvh - 16px) * 16 / 9));
+  }
+  .feed-action-icon {
+    width: 46px;
+    height: 46px;
+  }
+}
+@media (min-width: 761px) and (min-height: 521px) {
+  .feed-media {
+    width: min(100%, calc((100dvh - 270px) * 16 / 9));
+  }
+}
+
 /* ---------- Small screens ---------- */
 
 /* Phones and small tablets: one compact header row, with the menu as a single scrollable line below it. */
@@ -2989,6 +3367,26 @@ a.plaque:hover {
   .container {
     padding-left: 16px;
     padding-right: 16px;
+  }
+  /* Category chips: one swipeable row instead of four wrapped ones. */
+  .chips {
+    flex-wrap: nowrap;
+    margin: 0 -16px;
+    padding: 0 16px 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+  .chips::-webkit-scrollbar {
+    display: none;
+  }
+  .chip {
+    flex: none;
+  }
+  /* The front-page tooltip keeps its key lines on a phone. */
+  .showcase .tip-extra {
+    display: none;
   }
   /* Segmented controls stay on one line on phones and scroll sideways if they still don't fit. */
   .seg {
@@ -3129,6 +3527,11 @@ a.plaque:hover {
   *::before,
   *::after {
     transition: none !important;
+  }
+  .feed-in-next,
+  .feed-in-prev,
+  .feed-sheet {
+    animation: none;
   }
   .loading-bar > span {
     animation: none;

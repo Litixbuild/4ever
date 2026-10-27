@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { DiamondIcon, DotIcon } from "@/components/icons";
+import { DiamondIcon, DotIcon, TrophyIcon } from "@/components/icons";
 import { LaunchCountdown } from "@/components/launch-countdown";
 import { Avatar } from "@/components/people";
 import { badgeInfo } from "@/lib/badges";
 import { contestPhase, contestStatusLine, contestTileDate, type ContestPhase } from "@/lib/contests";
 import { dateTile, formatCount, formatDate, formatDateTime } from "@/lib/format";
 import type { ActivityItem, TopCreator } from "@/lib/queries";
-import { RARITY_TIERS, rarityClass } from "@/lib/rarity";
+import { rarityClass } from "@/lib/rarity";
 import { site } from "@/lib/site";
 import type { Contest } from "@/lib/types";
 
@@ -172,24 +172,23 @@ export function TopCreatorsCard({ creators }: { creators: TopCreator[] }) {
   );
 }
 
-// Community activity, written the way the game's chat window would show it:
-// videos appear as item links in their quality color, achievements in gold.
+// Recent community activity: new videos (titles in their view color) and achievements.
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
+  const lines = items.filter((item) => item.type !== "contest");
   return (
-    <section aria-labelledby="general-chat" className="chat">
+    <section aria-labelledby="latest-activity" className="chat">
       <div className="chat-tab">
-        <h2 id="general-chat">General</h2>
+        <h2 id="latest-activity">Latest</h2>
       </div>
       <div className="chat-frame">
-        {items.length === 0 ? (
+        {lines.length === 0 ? (
           <p className="chat-line chat-system">Quiet in here. Be the first to share something.</p>
         ) : (
-          items.map((item) => {
+          lines.map((item) => {
             if (item.type === "clip") {
               const who = item.clip.creator?.display_name ?? item.clip.channel_name;
               return (
                 <p key={`c-${item.clip.id}`} className="chat-line">
-                  <span className="chan-new">[New]</span>{" "}
                   {item.clip.creator ? (
                     <Link href={`/u/${item.clip.creator.username}`} className="chat-name">
                       {who}
@@ -199,7 +198,7 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
                   )}{" "}
                   shared{" "}
                   <Link href={`/c/${item.clip.short_id}`} className={`chat-item ${rarityClass(item.clip.view_count)}`}>
-                    [{item.clip.title}]
+                    {item.clip.title}
                   </Link>
                 </p>
               );
@@ -207,26 +206,35 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
             if (item.type === "badge") {
               const badge = badgeInfo(item.badge);
               return (
-                <p key={`b-${item.person.username}-${item.badge}`} className="chat-line chat-achievement">
+                <p key={`b-${item.person.username}-${item.badge}`} className="chat-line">
                   <Link href={`/u/${item.person.username}`} className="chat-name">
                     {item.person.display_name}
                   </Link>{" "}
-                  has earned the achievement <span className="chat-ach">[{badge?.name ?? "Achievement"}]</span>!
+                  unlocked <span className="chat-ach">{badge?.name ?? "an achievement"}</span>
                 </p>
               );
             }
-            return (
-              <p key={`k-${item.contest.id}`} className="chat-line">
-                <span className="chan-contest">[Contest]</span>{" "}
-                <Link href={`/contests/${item.contest.slug}`} className="chat-contest">
-                  {item.contest.title}
-                </Link>{" "}
-                is open. Start recording.
-              </p>
-            );
+            return null;
           })
         )}
       </div>
+    </section>
+  );
+}
+
+// Stands in for contests until they start.
+export function ContestsSoon() {
+  return (
+    <section aria-labelledby="contests-soon" className="card-contest stack" style={{ gap: 8 }}>
+      <span className="row small" style={{ gap: 8, color: "var(--flavor)", fontWeight: 700 }}>
+        <TrophyIcon size={15} /> Coming soon
+      </span>
+      <h2 id="contests-soon" className="h2" style={{ fontSize: 24 }}>
+        Contests
+      </h2>
+      <p className="small" style={{ margin: 0, color: "var(--text-3)" }}>
+        Contests are coming shortly. We&apos;ll announce the first one here.
+      </p>
     </section>
   );
 }
@@ -267,25 +275,9 @@ export function CreatorsBand() {
         <li>
           <span className="numeral">III</span>
           <strong>Get featured</strong>
-          <span className="small muted">Earn titles, climb the Hall of Fame, win contests.</span>
+          <span className="small muted">Earn titles and a spot in the Hall of Fame.</span>
         </li>
       </ol>
     </section>
-  );
-}
-
-// A quiet key for the title colors. Shows numbers only, never tier names.
-export function RarityLegend() {
-  const tiers = [...RARITY_TIERS].reverse();
-  return (
-    <p className="row tiny muted" style={{ gap: "6px 14px", margin: 0 }}>
-      <span>Title color shows views on 4Ever:</span>
-      {tiers.map((tier) => (
-        <span key={tier.key} className="row" style={{ gap: 6 }}>
-          <DotIcon size={8} color={tier.color} />
-          {tier.minViews === 0 ? "New" : `${formatCount(tier.minViews)}+`}
-        </span>
-      ))}
-    </p>
   );
 }

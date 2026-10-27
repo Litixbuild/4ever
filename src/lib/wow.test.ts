@@ -29,6 +29,7 @@ describe("races and classes", () => {
     expect(raceFaction("Undead")).toBe("horde");
     expect(raceFaction("night elf")).toBe("alliance");
     expect(raceFaction("Pandaren")).toBeNull();
+    expect(raceFaction("Skyborne")).toBeNull();
     expect(raceFaction(null)).toBeNull();
   });
 });

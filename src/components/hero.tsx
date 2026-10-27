@@ -38,14 +38,14 @@ export function Hero({ clip, feature }: { clip: Clip; feature: Feature | null })
             <span>{clip.kind === "movie" ? "Movie" : "Clip"}</span>
           </span>
           {duration ? (
-            <span className="tip-split">
+            <span className="tip-split tip-extra">
               <span>Runtime</span>
               <span>{duration}</span>
             </span>
           ) : null}
           <span className="tip-gap">+{formatCount(clip.view_count)} Views</span>
           <span>+{formatCount(clip.vote_count)} Votes</span>
-          <span className="tip-muted">{musicLabel(clip.music_source, clip.music_credit)}</span>
+          <span className="tip-muted tip-extra">{musicLabel(clip.music_source, clip.music_credit)}</span>
           {feature?.use_text ? <span className="tip-use tip-gap">Use: {feature.use_text}</span> : null}
           {feature?.flavor_text ? (
             <span className={`tip-flavor ${feature.use_text ? "" : "tip-gap"}`}>
@@ -109,8 +109,8 @@ export function EmptyHero() {
           <Link href="/submit" className="btn btn-gold btn-lg">
             Submit a Clip
           </Link>
-          <Link href="/contests" className="btn btn-ghost btn-lg">
-            See the contests
+          <Link href="/settings#channels" className="btn btn-ghost btn-lg">
+            Verify your channel
           </Link>
         </div>
       </div>

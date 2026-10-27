@@ -24,4 +24,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - The logo is `Logo` in `src/components/brand.tsx`: the map-filled 4 (`public/brand/four-*.webp`, made from Cameron's artwork) plus EVER, with EV glowing red and ER glowing blue (`.glow-*` in `globals.css`, animations off for reduced motion).
 - Display text is Marcellus with Cinzel's digits swapped in (the `4Ever Figures` face in `globals.css`, file in `src/fonts/`), because Marcellus draws 0 and 1 like O and l. Keep `--font-display` pointing at that stack.
 - Login buttons come from `enabledProviders()` in `src/lib/auth-providers.ts`, which reads which providers are switched on in Supabase. Don't hard-code the list of login options in pages.
+- `/watch` is the full-screen swipe feed (`src/components/clip-feed.tsx`); on phones the Clips menu link opens it.
+- Contests are on hold: `/contests` is a coming-soon page and `/contests/[slug]` redirects there. The contest code (actions, widgets, admin) is kept for later.
+- Profiles follow WoW: Forever: characters have a first and last name (saved together in `main_character`), and the `realm` column holds the ruleset (Normal, PvP, RP, RP-PvP, Hardcore). There are no realms.
 - Run `npm test`, `npm run typecheck` and `npm run lint` before committing.

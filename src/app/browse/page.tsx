@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ClipGrid } from "@/components/clip-card";
-import { SearchIcon } from "@/components/icons";
-import { RarityLegend } from "@/components/widgets";
+import { PlayIcon, SearchIcon } from "@/components/icons";
 import { CATEGORIES, categoryLabel, isCategory, isKind } from "@/lib/categories";
 import { cleanSearch } from "@/lib/format";
 import { isClipSort, listClips, type ClipSort } from "@/lib/queries";
@@ -77,7 +76,15 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
               </>
             ) : null}
           </p>
-          <RarityLegend />
+          {total > 0 && !q && !tag ? (
+            <Link
+              href={kind === "movie" ? "/watch?kind=movie" : "/watch"}
+              className="btn btn-outline-gold"
+              style={{ alignSelf: "flex-start" }}
+            >
+              <PlayIcon size={15} /> Play {kind === "movie" ? "movies" : "clips"} one by one
+            </Link>
+          ) : null}
         </div>
         <form action="/browse" method="get" role="search" id="search" className="browse-search">
           {kind ? <input type="hidden" name="kind" value={kind} /> : null}

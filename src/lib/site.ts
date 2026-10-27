@@ -5,7 +5,7 @@ export const site = {
   shortName: "4Ever",
   tagline: "Movies and clips from World of Warcraft: Forever",
   description:
-    "A fan-made home for World of Warcraft: Forever movies, PvP edits and clips. Submit your best work, vote on the community's, and win contests.",
+    "A fan-made home for World of Warcraft: Forever movies, PvP edits and clips. Share your best work and vote on the community's.",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
   contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@4everclips.com",
   // Your DMCA designated agent (see SETUP.md, "Before launch")

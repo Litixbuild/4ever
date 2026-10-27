@@ -3,52 +3,19 @@ import Link from "next/link";
 import { ClipCard, ClipGrid } from "@/components/clip-card";
 import { EyeIcon, StarIcon, TrophyIcon } from "@/components/icons";
 import { formatDate } from "@/lib/format";
-import { getChampions, getMostViewed, listFeatures } from "@/lib/queries";
+import { getMostViewed, listFeatures } from "@/lib/queries";
 
 export const metadata: Metadata = { title: "Hall of Fame" };
 
 export default async function HallOfFamePage() {
-  const [features, champions, mostViewed] = await Promise.all([listFeatures(24), getChampions(24), getMostViewed(12)]);
+  const [features, mostViewed] = await Promise.all([listFeatures(24), getMostViewed(12)]);
 
   return (
     <div className="container page" style={{ gap: 52 }}>
       <div className="page-head">
         <h1 className="h1">Hall of Fame</h1>
-        <p className="lead">
-          Every Movie of the Week, every contest champion, and the most watched videos of all time.
-        </p>
+        <p className="lead">Every Movie of the Week and the most watched videos of all time.</p>
       </div>
-
-      <section aria-labelledby="champions" className="stack" style={{ gap: 18 }}>
-        <h2 id="champions" className="h2 row" style={{ gap: 12 }}>
-          <TrophyIcon size={24} style={{ color: "var(--flavor)" }} /> Contest champions
-        </h2>
-        {champions.length > 0 ? (
-          <div className="clip-grid">
-            {champions.map(({ contest, clip }) => (
-              <div key={`${contest.id}-${clip.id}`} className="entry place-1">
-                <Link href={`/contests/${contest.slug}`} className="plaque">
-                  <TrophyIcon size={14} /> {contest.title}
-                  <span className="plaque-date">{formatDate(contest.ends_at)}</span>
-                </Link>
-                <ClipCard clip={clip} />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="slot">
-            <span className="slot-icon">
-              <TrophyIcon size={26} />
-            </span>
-            <span className="stack-sm" style={{ gap: 4 }}>
-              <strong>Empty slot</strong>
-              <span className="muted small">
-                Win a contest and your video takes this spot for good. <Link href="/contests">See the contests</Link>
-              </span>
-            </span>
-          </div>
-        )}
-      </section>
 
       <section aria-labelledby="motw" className="stack" style={{ gap: 18 }}>
         <h2 id="motw" className="h2 row" style={{ gap: 12 }}>
@@ -107,6 +74,20 @@ export default async function HallOfFamePage() {
             </span>
           </div>
         )}
+      </section>
+      <section aria-labelledby="champions" className="stack" style={{ gap: 18 }}>
+        <h2 id="champions" className="h2 row" style={{ gap: 12 }}>
+          <TrophyIcon size={24} style={{ color: "var(--flavor)" }} /> Contest champions
+        </h2>
+        <div className="slot">
+          <span className="slot-icon">
+            <TrophyIcon size={26} />
+          </span>
+          <span className="stack-sm" style={{ gap: 4 }}>
+            <strong>Coming soon</strong>
+            <span className="muted small">Contests are coming shortly. Their winners will be honored here.</span>
+          </span>
+        </div>
       </section>
     </div>
   );

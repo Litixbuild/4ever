@@ -13,7 +13,7 @@ import { CharacterTip, hasCharacter } from "@/components/character-tip";
 import { site } from "@/lib/site";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
-import { CLASSES, RACES, raceFaction } from "@/lib/wow";
+import { CLASSES, RACES, RULESETS, raceFaction } from "@/lib/wow";
 
 const initial: FormState = { ok: false, message: null };
 
@@ -44,8 +44,10 @@ function withCurrent(options: readonly string[], current: string): string[] {
 export function ProfileForm({ profile, titles }: { profile: Profile; titles: { key: string; label: string }[] }) {
   const [state, action, pending] = useActionState(updateProfile, initial);
   const [username, setUsername] = useState(profile.username);
+  // Forever characters have a first and a last name; they're saved together as one name.
+  const [first, ...rest] = (profile.main_character ?? "").trim().split(/\s+/);
+  const [names, setNames] = useState({ first: first ?? "", last: rest.join(" ") });
   const [character, setCharacter] = useState({
-    name: profile.main_character ?? "",
     level: profile.main_level ? String(profile.main_level) : "",
     race: profile.main_race ?? "",
     className: profile.main_class ?? "",
@@ -53,6 +55,7 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
     guild: profile.guild ?? "",
     faction: profile.faction ?? "",
   });
+  const fullName = `${names.first.trim()} ${names.last.trim()}`.trim();
   const set = (key: keyof typeof character) => (e: { target: { value: string } }) =>
     setCharacter((c) => ({ ...c, [key]: e.target.value }));
   const host = new URL(site.url).host;
@@ -135,17 +138,31 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
         <legend>Main character (optional)</legend>
         <div className="character-editor">
           <div className="field-grid">
+            <input type="hidden" name="main_character" value={fullName} />
             <div className="field">
-              <label htmlFor="main_character" className="label" style={{ fontSize: 14 }}>
-                Name
+              <label htmlFor="char-first" className="label" style={{ fontSize: 14 }}>
+                First name
               </label>
               <input
-                id="main_character"
-                name="main_character"
+                id="char-first"
                 className="input"
-                value={character.name}
-                onChange={set("name")}
-                maxLength={24}
+                value={names.first}
+                onChange={(e) => setNames((n) => ({ ...n, first: e.target.value.replace(/\s/g, "") }))}
+                maxLength={12}
+                autoComplete="off"
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="char-last" className="label" style={{ fontSize: 14 }}>
+                Last name
+              </label>
+              <input
+                id="char-last"
+                className="input"
+                value={names.last}
+                onChange={(e) => setNames((n) => ({ ...n, last: e.target.value.replace(/\s/g, "") }))}
+                maxLength={11}
+                autoComplete="off"
               />
             </div>
             <div className="field">
@@ -210,16 +227,16 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
             </div>
             <div className="field">
               <label htmlFor="realm" className="label" style={{ fontSize: 14 }}>
-                Realm
+                Ruleset
               </label>
-              <input
-                id="realm"
-                name="realm"
-                className="input"
-                value={character.realm}
-                onChange={set("realm")}
-                maxLength={40}
-              />
+              <select id="realm" name="realm" className="select" value={character.realm} onChange={set("realm")}>
+                <option value="">Choose</option>
+                {withCurrent(RULESETS, character.realm).map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="field">
               <label htmlFor="guild" className="label" style={{ fontSize: 14 }}>
@@ -253,11 +270,11 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
           </div>
           <div className="character-preview" aria-live="polite">
             <span className="help">How it shows on your profile</span>
-            {hasCharacter(character) ? (
-              <CharacterTip character={character} fallbackName={profile.display_name} />
+            {hasCharacter({ ...character, name: fullName }) ? (
+              <CharacterTip character={{ ...character, name: fullName }} fallbackName={profile.display_name} />
             ) : (
               <div className="wow-tip">
-                <span className="tip-muted">Add a name, class or realm and your character shows up here.</span>
+                <span className="tip-muted">Add a name, class or ruleset and your character shows up here.</span>
               </div>
             )}
           </div>

@@ -58,9 +58,8 @@ export default function TermsPage() {
 
           <h2>Contests</h2>
           <p>
-            Each contest has its own rules and dates on its page. Curators pick winners and their decision is final. We
-            may disqualify entries that break the rules or involve vote manipulation. Contests are void where
-            prohibited.
+            Contests are coming soon. When they start, each one will have its own rules and dates, and these terms will
+            be updated.
           </p>
 
           <h2>Copyright</h2>

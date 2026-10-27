@@ -4,7 +4,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Submission rules",
-  description: "What belongs on 4Everclips and how credit, music and contests work.",
+  description: "What belongs on 4Everclips and how credit and music work.",
 };
 
 export default function RulesPage() {
@@ -66,11 +66,7 @@ export default function RulesPage() {
           </ul>
 
           <h2 id="contests">Contests</h2>
-          <ul>
-            <li>Entries must come from your own verified channel. One entry per person per contest.</li>
-            <li>Votes cast while a contest is open count toward its standings. Curators pick the winners.</li>
-            <li>Vote for what you like. Organizing vote trading or using extra accounts gets entries removed.</li>
-          </ul>
+          <p>Contests are coming soon. Their rules will be posted here before the first one starts.</p>
 
           <p>
             Found something that breaks these rules? Use the <Link href="/report">report form</Link>.

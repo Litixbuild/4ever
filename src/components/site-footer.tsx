@@ -15,9 +15,6 @@ export function SiteFooter() {
             Entertainment. World of Warcraft is a trademark of Blizzard Entertainment, Inc. Videos are embedded from
             their original platforms and belong to their creators.
           </p>
-          <p className="tiny faint" style={{ margin: 0 }}>
-            Title colors show how many people have watched a video here, from white to green, blue, purple and orange.
-          </p>
         </div>
         <nav aria-label="Footer" className="footer-cols">
           <div className="stack-sm" style={{ gap: 10 }}>

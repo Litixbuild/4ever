@@ -8,18 +8,10 @@ import { CommentForm } from "@/components/comment-form";
 import { ChevronRightIcon, ClockIcon, ExternalIcon, EyeIcon, TrashIcon } from "@/components/icons";
 import { Avatar, VerifiedMark } from "@/components/people";
 import { VideoPlayer } from "@/components/video-player";
-import { ContestCard } from "@/components/widgets";
 import { getViewer } from "@/lib/auth";
 import { categoryLabel, musicLabel } from "@/lib/categories";
-import { contestPhase } from "@/lib/contests";
 import { formatCount, formatDate, formatDuration, timeAgo } from "@/lib/format";
-import {
-  getClipByShortId,
-  getComments,
-  getMoreFromSameSource,
-  getSpotlightContest,
-  getViewerClipState,
-} from "@/lib/queries";
+import { getClipByShortId, getComments, getMoreFromSameSource, getViewerClipState } from "@/lib/queries";
 import { rarityClass } from "@/lib/rarity";
 import { site } from "@/lib/site";
 import { platformLabel } from "@/lib/video";
@@ -62,11 +54,10 @@ export default async function ClipPage({
   const approved = clip.status === "approved";
   const isSubmitter = viewer?.userId === clip.submitted_by;
 
-  const [state, comments, more, contest] = await Promise.all([
+  const [state, comments, more] = await Promise.all([
     getViewerClipState(clip.id, viewer?.userId ?? null),
     approved ? getComments(clip.id) : Promise.resolve([]),
     getMoreFromSameSource(clip, 4),
-    getSpotlightContest(),
   ]);
 
   const duration = formatDuration(clip.duration_seconds);
@@ -327,11 +318,6 @@ export default async function ClipPage({
                 <MiniClip key={m.id} clip={m} />
               ))}
             </>
-          ) : null}
-          {contest && contestPhase(contest) !== "ended" ? (
-            <div style={{ marginTop: more.length > 0 ? 8 : 0 }}>
-              <ContestCard contest={contest} compact />
-            </div>
           ) : null}
         </aside>
       </div>

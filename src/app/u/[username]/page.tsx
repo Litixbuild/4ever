@@ -76,7 +76,8 @@ export default async function ProfilePage({
     faction: profile.faction,
   };
   const factionLabel = factionName(profile.faction);
-  const shownBadges = BADGES.filter((b) => b.key !== "curator" || earned.has(b.key));
+  // Curator is staff-only and contests are not running yet, so those only show once earned.
+  const shownBadges = BADGES.filter((b) => (b.key !== "curator" && b.key !== "contest_winner") || earned.has(b.key));
 
   const stats_ = [
     {

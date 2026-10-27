@@ -1,17 +1,10 @@
 import Link from "next/link";
 import { ClipGrid } from "@/components/clip-card";
-import { ChevronRightIcon } from "@/components/icons";
+import { ChevronRightIcon, PlayIcon } from "@/components/icons";
 import { EmptyHero, Hero } from "@/components/hero";
-import { ActivityFeed, ContestCard, CreatorsBand, LaunchBar, TopCreatorsCard } from "@/components/widgets";
+import { ActivityFeed, ContestsSoon, CreatorsBand, LaunchBar, TopCreatorsCard } from "@/components/widgets";
 import { CATEGORIES, isCategory, isKind } from "@/lib/categories";
-import {
-  getActivity,
-  getCurrentFeature,
-  getHeroFallback,
-  getSpotlightContest,
-  getTopCreators,
-  listClips,
-} from "@/lib/queries";
+import { getActivity, getCurrentFeature, getHeroFallback, getTopCreators, listClips } from "@/lib/queries";
 
 function homeHref(kind: string | null, cat: string | null) {
   const params = new URLSearchParams();
@@ -26,10 +19,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const kind = isKind(params.kind) ? params.kind : null;
   const cat = isCategory(params.cat) ? params.cat : null;
 
-  const [feature, fresh, contest, creators, activity] = await Promise.all([
+  const [feature, fresh, creators, activity] = await Promise.all([
     getCurrentFeature(),
     listClips({ kind, category: cat, perPage: 9, sort: "new" }),
-    getSpotlightContest(),
     getTopCreators(7, 5),
     getActivity(6),
   ]);
@@ -69,6 +61,18 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </nav>
             ) : null}
           </div>
+
+          {hasAny ? (
+            <Link href="/watch" className="feed-cta">
+              <span className="feed-cta-icon">
+                <PlayIcon size={20} style={{ marginLeft: 3 }} />
+              </span>
+              <span className="stack-sm" style={{ gap: 2 }}>
+                <strong>Swipe through clips</strong>
+                <span className="small muted">Full screen, one at a time.</span>
+              </span>
+            </Link>
+          ) : null}
 
           {hasAny ? (
             <nav aria-label="Categories" className="chips">
@@ -120,7 +124,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </section>
 
         <aside className="split-aside">
-          {contest ? <ContestCard contest={contest} /> : null}
+          <ContestsSoon />
           <TopCreatorsCard creators={creators} />
           <ActivityFeed items={activity} />
         </aside>
