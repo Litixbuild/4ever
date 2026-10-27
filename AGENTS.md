@@ -21,6 +21,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - The page backdrop (Alliance and Horde art) is `body::before` in `globals.css`, with images in `public/backdrop/`. The shade gradients there control how dim it is.
 - Styling is plain CSS in `src/app/globals.css`. Reuse its classes (`btn`, `card`, `seg`, `chip`, `clip-grid`, ...) before adding new ones.
 - The look borrows from the game's UI: `.wow-tip` is the item tooltip (title in a quality color, green "Use:" and "<Made by>" lines, gold flavor text), `.slot` is the empty equipment slot used for empty states, `CharacterTip` shows a player's main the way the unit tooltip does, and `.btn-wow` is the red dialog button.
+- The logo is `Logo` in `src/components/brand.tsx`: the map-filled 4 (`public/brand/four-*.webp`, made from Cameron's artwork) plus EVER, with EV glowing red and ER glowing blue (`.glow-*` in `globals.css`, animations off for reduced motion).
 - Display text is Marcellus with Cinzel's digits swapped in (the `4Ever Figures` face in `globals.css`, file in `src/fonts/`), because Marcellus draws 0 and 1 like O and l. Keep `--font-display` pointing at that stack.
 - Login buttons come from `enabledProviders()` in `src/lib/auth-providers.ts`, which reads which providers are switched on in Supabase. Don't hard-code the list of login options in pages.
 - Run `npm test`, `npm run typecheck` and `npm run lint` before committing.

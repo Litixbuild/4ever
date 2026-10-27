@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Emblem } from "@/components/brand";
+import { FourMark } from "@/components/brand";
 import { LoginButtons } from "@/components/login-buttons";
 import { getViewer } from "@/lib/auth";
 import { enabledProviders } from "@/lib/auth-providers";
@@ -22,7 +22,7 @@ export default async function LoginPage({
   return (
     <div className="container page" style={{ alignItems: "center", paddingTop: 56 }}>
       <section className="dialog login-dialog" aria-labelledby="login-title">
-        <Emblem size={46} />
+        <FourMark height={72} />
         <h1 id="login-title" className="dialog-title">
           Log in to 4Ever
         </h1>

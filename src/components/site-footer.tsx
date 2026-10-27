@@ -1,16 +1,14 @@
 import Link from "next/link";
-import { Emblem } from "@/components/brand";
+import { EverWord, FourMark } from "@/components/brand";
 
 export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="container footer-row">
         <div className="stack-sm" style={{ flex: "1 1 340px", maxWidth: 520, gap: 12 }}>
-          <span className="row" style={{ gap: 10 }}>
-            <Emblem size={24} />
-            <span className="logo-word" style={{ fontSize: 19 }}>
-              4EVER
-            </span>
+          <span className="logo logo-small" aria-label="4Everclips">
+            <FourMark height={36} />
+            <EverWord />
           </span>
           <p className="small muted" style={{ margin: 0 }}>
             A fan-made home for World of Warcraft movies and clips. Not affiliated with or endorsed by Blizzard
