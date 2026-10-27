@@ -20,33 +20,35 @@ export default async function LoginPage({
   if (viewer) redirect(next);
 
   return (
-    <div className="container page" style={{ alignItems: "center" }}>
-      <div className="card stack-lg" style={{ width: "100%", maxWidth: 440, padding: 32 }}>
-        <div className="stack" style={{ alignItems: "center", textAlign: "center", gap: 12 }}>
-          <Emblem size={40} />
-          <h1 className="h2">Welcome back to Azeroth</h1>
-          <p className="muted" style={{ margin: 0 }}>
-            Log in to submit clips, vote, comment, and get credit for your work. No passwords here, just the
-            account you already use.
-          </p>
-        </div>
+    <div className="container page" style={{ alignItems: "center", paddingTop: 56 }}>
+      <section className="dialog login-dialog" aria-labelledby="login-title">
+        <Emblem size={46} />
+        <h1 id="login-title" className="dialog-title">
+          Log in to 4Ever
+        </h1>
+        <p>
+          Submit clips, vote, comment, and get credit for your work. No passwords here, just the account you already
+          use.
+        </p>
         {params.error ? (
-          <p className="notice notice-error" role="alert">
+          <p className="notice notice-error" role="alert" style={{ textAlign: "left" }}>
             {params.error.slice(0, 200)}
           </p>
         ) : null}
-        {providers.length > 0 ? (
-          <LoginButtons next={next} providers={providers} />
-        ) : (
-          <p className="notice notice-warn" role="status">
-            Logins aren&apos;t open yet. Check back soon.
-          </p>
-        )}
-        <p className="tiny muted" style={{ margin: 0, textAlign: "center" }}>
+        <div style={{ width: "100%", marginTop: 6 }}>
+          {providers.length > 0 ? (
+            <LoginButtons next={next} providers={providers} />
+          ) : (
+            <p className="notice notice-warn" role="status">
+              Logins aren&apos;t open yet. Check back soon.
+            </p>
+          )}
+        </div>
+        <p className="tiny muted" style={{ marginTop: 4 }}>
           By logging in you agree to the <Link href="/terms">Terms</Link> and <Link href="/privacy">Privacy</Link>{" "}
           notes. We only keep your name, avatar and email from the login.
         </p>
-      </div>
+      </section>
     </div>
   );
 }

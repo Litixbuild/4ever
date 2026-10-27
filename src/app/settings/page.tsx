@@ -36,7 +36,10 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   const twitchLinked = Boolean(userData.user?.identities?.some((i) => i.provider === "twitch"));
   const twitchOpen = twitchLinked || providers.includes("twitch");
   const titles = badges
-    .map((b) => ({ key: b.badge, label: titleFor(b.badge, profile.display_name) ?? badgeInfo(b.badge)?.name ?? b.badge }))
+    .map((b) => ({
+      key: b.badge,
+      label: titleFor(b.badge, profile.display_name) ?? badgeInfo(b.badge)?.name ?? b.badge,
+    }))
     .filter((t) => Boolean(t.label));
 
   const youtube = channels.filter((c) => c.platform === "youtube");
@@ -46,10 +49,10 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="container page page-narrow" style={{ gap: 40 }}>
       <div className="stack" style={{ gap: 8 }}>
-        <span className="eyebrow">Settings</span>
         <h1 className="h1">Your account</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Logged in as {viewer.email ?? profile.display_name}. <Link href={`/u/${profile.username}`}>View your profile</Link>
+          Logged in as {viewer.email ?? profile.display_name}.{" "}
+          <Link href={`/u/${profile.username}`}>View your profile</Link>
         </p>
       </div>
 
@@ -66,7 +69,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         <ProfileForm profile={profile} titles={titles} />
       </section>
 
-      <section aria-labelledby="channels-head" id="channels" className="stack" style={{ gap: 14, scrollMarginTop: 90 }}>
+      <section aria-labelledby="channels-head" id="channels" className="stack" style={{ gap: 14 }}>
         <div className="stack-sm">
           <h2 id="channels-head" className="h2">
             Verified channels
@@ -102,15 +105,26 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
             <VideoIcon size={18} /> YouTube
           </h3>
           {pendingYouTube.map((c) => (
-            <div key={c.id} className="card-tooltip stack" style={{ gap: 10 }}>
+            <div key={c.id} className="wow-tip" style={{ gap: 10, padding: "16px 18px 18px" }}>
               <span style={{ fontWeight: 800, color: "#fff" }}>Almost there: {c.channel_name}</span>
-              <ol style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 6, fontSize: 14.5 }}>
+              <ol
+                style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 6, fontSize: 14.5 }}
+              >
                 <li>
                   Open YouTube Studio, then <strong>Customization</strong>, then <strong>Basic info</strong>.
                 </li>
                 <li>
                   Paste this code anywhere in your channel description:{" "}
-                  <code style={{ padding: "2px 8px", borderRadius: 6, background: "#000", color: "var(--gold-hi)", fontWeight: 800 }}>
+                  <code
+                    style={{
+                      padding: "2px 8px",
+                      borderRadius: 6,
+                      background: "#000",
+                      color: "var(--gold-hi)",
+                      fontWeight: 800,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
                     {c.verification_code}
                   </code>
                 </li>
@@ -120,7 +134,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
                 <YouTubeCheck channelRowId={c.id} />
                 <form action={removeChannel}>
                   <input type="hidden" name="channelRowId" value={c.id} />
-                  <button type="submit" className="link-button small" style={{ color: "var(--tooltip-muted)" }}>
+                  <button type="submit" className="link-button small" style={{ color: "var(--tip-muted)" }}>
                     Cancel
                   </button>
                 </form>

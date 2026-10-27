@@ -9,12 +9,12 @@ export default function DmcaPage() {
   return (
     <div className="container page page-narrow">
       <article className="stack" style={{ gap: 8 }}>
-        <span className="eyebrow">Legal</span>
         <h1 className="h1">DMCA and copyright</h1>
         <div className="prose">
           <p>
-            4Ever respects the rights of creators and copyright owners. We don&apos;t host video files: every video plays
-            from YouTube or Twitch. We do list them here, and we&apos;ll take a listing down when it infringes your rights.
+            4Ever respects the rights of creators and copyright owners. We don&apos;t host video files: every video
+            plays from YouTube or Twitch. We do list them here, and we&apos;ll take a listing down when it infringes
+            your rights.
           </p>
 
           <h2>The quick way</h2>
@@ -35,8 +35,8 @@ export default function DmcaPage() {
               agent, or the law.
             </li>
             <li>
-              A statement, under penalty of perjury, that the information in your notice is accurate and that you are the
-              copyright owner or authorized to act for them.
+              A statement, under penalty of perjury, that the information in your notice is accurate and that you are
+              the copyright owner or authorized to act for them.
             </li>
           </ol>
 

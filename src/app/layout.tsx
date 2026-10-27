@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource/cinzel/600.css";
-import "@fontsource/cinzel/700.css";
 import "@fontsource/cinzel/900.css";
+import "@fontsource/marcellus/400.css";
 import "@fontsource-variable/manrope";
 import "./globals.css";
 import { SiteFooter } from "@/components/site-footer";
@@ -48,8 +47,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <span className="eyebrow">Almost there</span>
                 <h1 className="h1">4Everclips needs its database keys</h1>
                 <p className="lead">
-                  The site is running, but it isn&apos;t connected to Supabase yet. Add the environment variables
-                  from <code>.env.example</code> in Netlify (Project configuration, Environment variables), then redeploy.
+                  The site is running, but it isn&apos;t connected to Supabase yet. Add the environment variables from{" "}
+                  <code>.env.example</code> in Netlify (Project configuration, Environment variables), then redeploy.
                   SETUP.md walks through every step.
                 </p>
               </div>

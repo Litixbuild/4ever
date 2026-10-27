@@ -3,11 +3,13 @@
 // Tier names are only used in code; the site never prints them.
 // "Views" are plays started on 4Ever, counted once per person per day.
 
+// Colors match the game's item quality colors (rare and epic brightened a touch to stay readable).
+// Keep them in sync with the --q-* colors in globals.css.
 export const RARITY_TIERS = [
-  { key: "legendary", minViews: 2500, color: "#ff9a3d" },
-  { key: "epic", minViews: 750, color: "#c084fc" },
-  { key: "rare", minViews: 200, color: "#60a5fa" },
-  { key: "uncommon", minViews: 50, color: "#4ade80" },
+  { key: "legendary", minViews: 2500, color: "#ff8000" },
+  { key: "epic", minViews: 750, color: "#b35cff" },
+  { key: "rare", minViews: 200, color: "#1f86ff" },
+  { key: "uncommon", minViews: 50, color: "#1eff00" },
   { key: "common", minViews: 0, color: "#f1e9da" },
 ] as const;
 

@@ -1,23 +1,26 @@
 import Link from "next/link";
 
+// A missing page is a dead one: the world goes gray, and the way out is to release your spirit.
 export default function NotFound() {
   return (
-    <div className="container page page-narrow">
-      <div className="empty" style={{ padding: "64px 24px" }}>
-        <span className="eyebrow">Lost in the Barrens</span>
-        <h1 className="h2">This page wandered off</h1>
-        <p className="muted" style={{ margin: 0, maxWidth: 460 }}>
-          The video may have been removed, or the link has a typo. Head back to the front page and try again.
-        </p>
-        <div className="row" style={{ justifyContent: "center" }}>
-          <Link href="/" className="btn btn-gold">
-            Back to the front page
-          </Link>
-          <Link href="/browse" className="btn btn-ghost">
-            Browse clips
-          </Link>
-        </div>
+    <>
+      <div className="ghost-world" aria-hidden="true" />
+      <div className="container page page-narrow" style={{ alignItems: "center", paddingTop: 72 }}>
+        <section className="dialog" aria-labelledby="dead-title">
+          <h1 id="dead-title" className="dialog-title">
+            This page has died
+          </h1>
+          <p>The link may be old, or the video was taken down. Release your spirit and run back to the front page.</p>
+          <div className="dialog-actions">
+            <Link href="/" className="btn btn-wow btn-lg">
+              Release Spirit
+            </Link>
+            <Link href="/browse" className="btn btn-ghost btn-lg">
+              Browse clips
+            </Link>
+          </div>
+        </section>
       </div>
-    </div>
+    </>
   );
 }

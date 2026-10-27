@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { saveContest, setPlacement } from "@/app/admin/actions";
 import { AdminNotice } from "@/components/admin-notice";
+import { PhaseBadge } from "@/components/widgets";
 import { contestPhase } from "@/lib/contests";
 import { formatCount } from "@/lib/format";
 import { requireCurator } from "@/lib/auth";
@@ -19,26 +20,53 @@ function ContestFields({ contest }: { contest?: Contest }) {
           <label htmlFor={`title-${key}`} className="label">
             Title
           </label>
-          <input id={`title-${key}`} name="title" className="input" defaultValue={contest?.title} maxLength={80} required />
+          <input
+            id={`title-${key}`}
+            name="title"
+            className="input"
+            defaultValue={contest?.title}
+            maxLength={80}
+            required
+          />
         </div>
         <div className="field">
           <label htmlFor={`slug-${key}`} className="label">
             Link name
           </label>
-          <input id={`slug-${key}`} name="slug" className="input" defaultValue={contest?.slug} pattern="[a-z0-9\-]{3,60}" required placeholder="first-kill" />
+          <input
+            id={`slug-${key}`}
+            name="slug"
+            className="input"
+            defaultValue={contest?.slug}
+            pattern="[a-z0-9\-]{3,60}"
+            required
+            placeholder="first-kill"
+          />
         </div>
       </div>
       <div className="field">
         <label htmlFor={`tagline-${key}`} className="label">
           Tagline
         </label>
-        <input id={`tagline-${key}`} name="tagline" className="input" defaultValue={contest?.tagline ?? ""} maxLength={160} />
+        <input
+          id={`tagline-${key}`}
+          name="tagline"
+          className="input"
+          defaultValue={contest?.tagline ?? ""}
+          maxLength={160}
+        />
       </div>
       <div className="field">
         <label htmlFor={`description-${key}`} className="label">
           Description
         </label>
-        <textarea id={`description-${key}`} name="description" className="textarea" defaultValue={contest?.description ?? ""} rows={3} />
+        <textarea
+          id={`description-${key}`}
+          name="description"
+          className="textarea"
+          defaultValue={contest?.description ?? ""}
+          rows={3}
+        />
       </div>
       <div className="field">
         <label htmlFor={`rules-${key}`} className="label">
@@ -50,27 +78,56 @@ function ContestFields({ contest }: { contest?: Contest }) {
         <label htmlFor={`prizes-${key}`} className="label">
           Prizes <span className="optional">(one per line)</span>
         </label>
-        <textarea id={`prizes-${key}`} name="prizes" className="textarea" defaultValue={contest?.prizes.join("\n") ?? ""} rows={3} />
-        <p className="help">Blizzard&apos;s video policy requires a license if the total value of all prizes is over $500.</p>
+        <textarea
+          id={`prizes-${key}`}
+          name="prizes"
+          className="textarea"
+          defaultValue={contest?.prizes.join("\n") ?? ""}
+          rows={3}
+        />
+        <p className="help">
+          Blizzard&apos;s video policy requires a license if the total value of all prizes is over $500.
+        </p>
       </div>
       <div className="field-grid">
         <div className="field">
           <label htmlFor={`opens-${key}`} className="label">
             Opens (ET)
           </label>
-          <input id={`opens-${key}`} name="opens_at" type="datetime-local" className="input" defaultValue={contest ? isoToLocalInput(contest.opens_at) : ""} required />
+          <input
+            id={`opens-${key}`}
+            name="opens_at"
+            type="datetime-local"
+            className="input"
+            defaultValue={contest ? isoToLocalInput(contest.opens_at) : ""}
+            required
+          />
         </div>
         <div className="field">
           <label htmlFor={`closes-${key}`} className="label">
             Entries close (ET)
           </label>
-          <input id={`closes-${key}`} name="closes_at" type="datetime-local" className="input" defaultValue={contest ? isoToLocalInput(contest.closes_at) : ""} required />
+          <input
+            id={`closes-${key}`}
+            name="closes_at"
+            type="datetime-local"
+            className="input"
+            defaultValue={contest ? isoToLocalInput(contest.closes_at) : ""}
+            required
+          />
         </div>
         <div className="field">
           <label htmlFor={`ends-${key}`} className="label">
             Voting ends (ET)
           </label>
-          <input id={`ends-${key}`} name="ends_at" type="datetime-local" className="input" defaultValue={contest ? isoToLocalInput(contest.ends_at) : ""} required />
+          <input
+            id={`ends-${key}`}
+            name="ends_at"
+            type="datetime-local"
+            className="input"
+            defaultValue={contest ? isoToLocalInput(contest.ends_at) : ""}
+            required
+          />
         </div>
       </div>
     </>
@@ -96,7 +153,7 @@ export default async function ContestsAdminPage({ searchParams }: { searchParams
               <h2 id={`c-${contest.id}`} className="h3" style={{ fontSize: 18 }}>
                 <Link href={`/contests/${contest.slug}`}>{contest.title}</Link>
               </h2>
-              <span className="pill pill-muted">{phase}</span>
+              <PhaseBadge phase={phase} />
             </div>
 
             {entries.length > 0 ? (
@@ -114,7 +171,9 @@ export default async function ContestsAdminPage({ searchParams }: { searchParams
                       <tr key={entry.clip.id}>
                         <td>
                           <Link href={`/c/${entry.clip.short_id}`}>{entry.clip.title}</Link>
-                          <div className="tiny muted">{entry.clip.creator?.display_name ?? entry.clip.channel_name}</div>
+                          <div className="tiny muted">
+                            {entry.clip.creator?.display_name ?? entry.clip.channel_name}
+                          </div>
                         </td>
                         <td>{formatCount(entry.windowVotes)}</td>
                         <td>

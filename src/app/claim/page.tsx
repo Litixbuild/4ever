@@ -20,11 +20,10 @@ export default async function ClaimPage({ searchParams }: { searchParams: Promis
   return (
     <div className="container page page-narrow" style={{ gap: 28 }}>
       <div className="stack" style={{ gap: 8 }}>
-        <span className="eyebrow">Claim your work</span>
         <h1 className="h1">Is this your video?</h1>
         <p className="lead">
-          Credit on 4Ever comes from the channel that uploaded the video. Prove the channel is yours and every video from
-          it gets your name and a verified check, automatically.
+          Credit on 4Ever comes from the channel that uploaded the video. Prove the channel is yours and every video
+          from it gets your name and a verified check, automatically.
         </p>
       </div>
 
@@ -45,7 +44,9 @@ export default async function ClaimPage({ searchParams }: { searchParams: Promis
               ) : (
                 <>
                   {providers.length > 0 ? `Use ${providerList(providers)}. ` : null}
-                  <Link href={`/login?next=${encodeURIComponent(`/claim${shortId ? `?clip=${shortId}` : ""}`)}`}>Log in</Link>
+                  <Link href={`/login?next=${encodeURIComponent(`/claim${shortId ? `?clip=${shortId}` : ""}`)}`}>
+                    Log in
+                  </Link>
                 </>
               )}
             </span>
@@ -82,7 +83,11 @@ export default async function ClaimPage({ searchParams }: { searchParams: Promis
         <p className="small muted" style={{ margin: 0 }}>
           No hard feelings. Send a removal request and a curator will take it off 4Ever.
         </p>
-        <Link href={`/report${shortId ? `?clip=${shortId}&reason=my_video_remove` : ""}`} className="btn btn-ghost" style={{ alignSelf: "flex-start", marginTop: 6 }}>
+        <Link
+          href={`/report${shortId ? `?clip=${shortId}&reason=my_video_remove` : ""}`}
+          className="btn btn-ghost"
+          style={{ alignSelf: "flex-start", marginTop: 6 }}
+        >
           Request removal
         </Link>
       </div>

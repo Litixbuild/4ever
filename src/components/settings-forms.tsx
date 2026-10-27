@@ -9,22 +9,59 @@ import {
   updateProfile,
   type FormState,
 } from "@/app/settings/actions";
+import { CharacterTip, hasCharacter } from "@/components/character-tip";
+import { site } from "@/lib/site";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
+import { CLASSES, RACES, raceFaction } from "@/lib/wow";
 
 const initial: FormState = { ok: false, message: null };
 
 function Status({ state }: { state: FormState }) {
   if (!state.message) return null;
   return (
-    <p className="small" role="status" style={{ margin: 0, color: state.ok ? "var(--green)" : "var(--red)", fontWeight: 700 }}>
+    <p
+      className="small"
+      role="status"
+      style={{
+        margin: 0,
+        color: state.ok ? "var(--green)" : "var(--red)",
+        fontWeight: 700,
+      }}
+    >
       {state.message}
     </p>
   );
 }
 
+// Keeps a saved value that isn't in the list (typed before the pickers existed) selectable.
+function withCurrent(options: readonly string[], current: string): string[] {
+  return current && !options.some((o) => o.toLowerCase() === current.toLowerCase())
+    ? [...options, current]
+    : [...options];
+}
+
 export function ProfileForm({ profile, titles }: { profile: Profile; titles: { key: string; label: string }[] }) {
   const [state, action, pending] = useActionState(updateProfile, initial);
+  const [username, setUsername] = useState(profile.username);
+  const [character, setCharacter] = useState({
+    name: profile.main_character ?? "",
+    level: profile.main_level ? String(profile.main_level) : "",
+    race: profile.main_race ?? "",
+    className: profile.main_class ?? "",
+    realm: profile.realm ?? "",
+    guild: profile.guild ?? "",
+    faction: profile.faction ?? "",
+  });
+  const set = (key: keyof typeof character) => (e: { target: { value: string } }) =>
+    setCharacter((c) => ({ ...c, [key]: e.target.value }));
+  const host = new URL(site.url).host;
+  const races = withCurrent(
+    RACES.map((r) => r.name),
+    character.race,
+  );
+  const classes = withCurrent(CLASSES, character.className);
+
   return (
     <form action={action} className="form-card" style={{ gap: 22 }}>
       <div className="field-grid">
@@ -32,7 +69,14 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
           <label htmlFor="display_name" className="label">
             Display name
           </label>
-          <input id="display_name" name="display_name" className="input" defaultValue={profile.display_name} maxLength={40} required />
+          <input
+            id="display_name"
+            name="display_name"
+            className="input"
+            defaultValue={profile.display_name}
+            maxLength={40}
+            required
+          />
         </div>
         <div className="field">
           <label htmlFor="username" className="label">
@@ -42,14 +86,15 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
             id="username"
             name="username"
             className="input"
-            defaultValue={profile.username}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             maxLength={24}
             pattern="[A-Za-z0-9_]{3,24}"
             required
             aria-describedby="username-help"
           />
-          <p id="username-help" className="help">
-            Your profile lives at 4everclips.com/u/your-username.
+          <p id="username-help" className="help" style={{ overflowWrap: "anywhere" }}>
+            Your profile lives at {host}/u/{username || "your-name"}. Letters, numbers and underscores.
           </p>
         </div>
       </div>
@@ -58,7 +103,15 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
         <label htmlFor="bio" className="label">
           Bio <span className="optional">(optional)</span>
         </label>
-        <textarea id="bio" name="bio" className="textarea" defaultValue={profile.bio ?? ""} maxLength={280} rows={3} placeholder="Rogue main since 2005..." />
+        <textarea
+          id="bio"
+          name="bio"
+          className="textarea"
+          defaultValue={profile.bio ?? ""}
+          maxLength={280}
+          rows={3}
+          placeholder="Rogue main since 2005..."
+        />
       </div>
 
       <div className="field">
@@ -73,57 +126,140 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
             </option>
           ))}
         </select>
-        <p className="help">{titles.length === 0 ? "Earn achievements to unlock titles." : "Shown under your name on your profile."}</p>
+        <p className="help">
+          {titles.length === 0 ? "Earn achievements to unlock titles." : "Shown under your name on your profile."}
+        </p>
       </div>
 
       <fieldset className="form-section">
         <legend>Main character (optional)</legend>
-        <div className="field-grid">
-          <div className="field">
-            <label htmlFor="main_character" className="label" style={{ fontSize: 14 }}>
-              Name
-            </label>
-            <input id="main_character" name="main_character" className="input" defaultValue={profile.main_character ?? ""} maxLength={24} />
+        <div className="character-editor">
+          <div className="field-grid">
+            <div className="field">
+              <label htmlFor="main_character" className="label" style={{ fontSize: 14 }}>
+                Name
+              </label>
+              <input
+                id="main_character"
+                name="main_character"
+                className="input"
+                value={character.name}
+                onChange={set("name")}
+                maxLength={24}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="main_level" className="label" style={{ fontSize: 14 }}>
+                Level
+              </label>
+              <input
+                id="main_level"
+                name="main_level"
+                type="number"
+                min={1}
+                max={60}
+                className="input"
+                value={character.level}
+                onChange={set("level")}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="main_race" className="label" style={{ fontSize: 14 }}>
+                Race
+              </label>
+              <select
+                id="main_race"
+                name="main_race"
+                className="select"
+                value={character.race}
+                onChange={(e) => {
+                  const race = e.target.value;
+                  setCharacter((c) => ({
+                    ...c,
+                    race,
+                    faction: raceFaction(race) ?? c.faction,
+                  }));
+                }}
+              >
+                <option value="">Choose</option>
+                {races.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="main_class" className="label" style={{ fontSize: 14 }}>
+                Class
+              </label>
+              <select
+                id="main_class"
+                name="main_class"
+                className="select"
+                value={character.className}
+                onChange={set("className")}
+              >
+                <option value="">Choose</option>
+                {classes.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="realm" className="label" style={{ fontSize: 14 }}>
+                Realm
+              </label>
+              <input
+                id="realm"
+                name="realm"
+                className="input"
+                value={character.realm}
+                onChange={set("realm")}
+                maxLength={40}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="guild" className="label" style={{ fontSize: 14 }}>
+                Guild
+              </label>
+              <input
+                id="guild"
+                name="guild"
+                className="input"
+                value={character.guild}
+                onChange={set("guild")}
+                maxLength={40}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="faction" className="label" style={{ fontSize: 14 }}>
+                Faction
+              </label>
+              <select
+                id="faction"
+                name="faction"
+                className="select"
+                value={character.faction}
+                onChange={set("faction")}
+              >
+                <option value="">Not saying</option>
+                <option value="horde">Horde</option>
+                <option value="alliance">Alliance</option>
+              </select>
+            </div>
           </div>
-          <div className="field">
-            <label htmlFor="main_level" className="label" style={{ fontSize: 14 }}>
-              Level
-            </label>
-            <input id="main_level" name="main_level" type="number" min={1} max={60} className="input" defaultValue={profile.main_level ?? ""} />
-          </div>
-          <div className="field">
-            <label htmlFor="main_race" className="label" style={{ fontSize: 14 }}>
-              Race
-            </label>
-            <input id="main_race" name="main_race" className="input" defaultValue={profile.main_race ?? ""} maxLength={24} />
-          </div>
-          <div className="field">
-            <label htmlFor="main_class" className="label" style={{ fontSize: 14 }}>
-              Class
-            </label>
-            <input id="main_class" name="main_class" className="input" defaultValue={profile.main_class ?? ""} maxLength={24} />
-          </div>
-          <div className="field">
-            <label htmlFor="realm" className="label" style={{ fontSize: 14 }}>
-              Realm
-            </label>
-            <input id="realm" name="realm" className="input" defaultValue={profile.realm ?? ""} maxLength={40} />
-          </div>
-          <div className="field">
-            <label htmlFor="guild" className="label" style={{ fontSize: 14 }}>
-              Guild
-            </label>
-            <input id="guild" name="guild" className="input" defaultValue={profile.guild ?? ""} maxLength={40} />
-          </div>
-          <div className="field">
-            <label htmlFor="faction" className="label" style={{ fontSize: 14 }}>
-              Faction
-            </label>
-            <select id="faction" name="faction" className="select" defaultValue={profile.faction ?? ""}>
-              <option value="">Not saying</option>
-              <option value="horde">Horde</option>
-              <option value="alliance">Alliance</option>
-            </select>
+          <div className="character-preview" aria-live="polite">
+            <span className="help">How it shows on your profile</span>
+            {hasCharacter(character) ? (
+              <CharacterTip character={character} fallbackName={profile.display_name} />
+            ) : (
+              <div className="wow-tip">
+                <span className="tip-muted">Add a name, class or realm and your character shows up here.</span>
+              </div>
+            )}
           </div>
         </div>
       </fieldset>
@@ -187,7 +323,9 @@ export function TwitchLink({ linked }: { linked: boolean }) {
     const supabase = createClient();
     const { error: linkError } = await supabase.auth.linkIdentity({
       provider: "twitch",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/settings%23channels` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/settings%23channels`,
+      },
     });
     if (linkError) {
       setOpening(false);
@@ -207,7 +345,13 @@ export function TwitchLink({ linked }: { linked: boolean }) {
   }
   return (
     <div className="stack-sm" style={{ gap: 8 }}>
-      <button type="button" className="btn btn-ghost" onClick={link} disabled={opening} style={{ alignSelf: "flex-start" }}>
+      <button
+        type="button"
+        className="btn btn-ghost"
+        onClick={link}
+        disabled={opening}
+        style={{ alignSelf: "flex-start" }}
+      >
         {opening ? "Opening Twitch…" : "Link my Twitch account"}
       </button>
       {error ? (
@@ -227,7 +371,13 @@ export function DeleteAccount({ username }: { username: string }) {
         Type <code>{username}</code> to delete your account
       </label>
       <div className="row" style={{ gap: 10 }}>
-        <input id="confirm-delete" name="confirm" className="input" autoComplete="off" style={{ flex: "1 1 220px", width: "auto" }} />
+        <input
+          id="confirm-delete"
+          name="confirm"
+          className="input"
+          autoComplete="off"
+          style={{ flex: "1 1 220px", width: "auto" }}
+        />
         <button type="submit" className="btn btn-danger" disabled={pending}>
           {pending ? "Deleting…" : "Delete my account"}
         </button>

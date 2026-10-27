@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import type { LookupResponse } from "@/app/api/lookup/route";
 import { submitClip, type SubmitState } from "@/app/submit/actions";
-import { CheckIcon, InfoIcon, LinkIcon } from "@/components/icons";
+import { InfoIcon, LinkIcon } from "@/components/icons";
 import { Vista } from "@/components/vista";
 import { CATEGORIES, KINDS, MUSIC_SOURCES } from "@/lib/categories";
 import { platformLabel } from "@/lib/video";
@@ -14,12 +14,21 @@ type Preview = Extract<LookupResponse, { ok: true }>["preview"];
 
 const initial: SubmitState = { error: null };
 
+function sourceLabel(sourceType: string): string {
+  if (sourceType === "twitch_clip") return "Twitch clip";
+  if (sourceType === "twitch_video") return "Twitch video";
+  return "YouTube video";
+}
+
 export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedChannel[] }) {
   const [state, action, submitting] = useActionState(submitClip, initial);
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<Preview | null>(null);
-  const [lookupError, setLookupError] = useState<{ message: string; shortId?: string } | null>(null);
+  const [lookupError, setLookupError] = useState<{
+    message: string;
+    shortId?: string;
+  } | null>(null);
   const [owner, setOwner] = useState<"made" | "shared">("made");
   const [kind, setKind] = useState<"movie" | "clip">("movie");
   const [music, setMusic] = useState("original");
@@ -52,12 +61,17 @@ export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedCha
           setLookupError(null);
         } else {
           setPreview(null);
-          setLookupError({ message: data.error, shortId: data.existingShortId });
+          setLookupError({
+            message: data.error,
+            shortId: data.existingShortId,
+          });
         }
       } catch {
         if (id !== requestId.current) return;
         setPreview(null);
-        setLookupError({ message: "We couldn't check that link. Try again in a moment." });
+        setLookupError({
+          message: "We couldn't check that link. Try again in a moment.",
+        });
       } finally {
         if (id === requestId.current) setLoading(false);
       }
@@ -97,25 +111,23 @@ export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedCha
           {loading ? <p className="help">Checking the link…</p> : null}
 
           {!loading && preview ? (
-            <div className="row" style={{ gap: 16, padding: 14, background: "var(--bg)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 14 }}>
-              <span className="mini-thumb" style={{ width: 160 }}>
-                {preview.thumbnailUrl ? <img src={preview.thumbnailUrl} alt="" referrerPolicy="no-referrer" /> : <Vista seed={preview.title} />}
-                {preview.duration ? (
-                  <span className="overlay-chip" style={{ right: 6, bottom: 6, height: 20, fontSize: 11 }}>
-                    {preview.duration}
-                  </span>
-                ) : null}
+            <div className="found">
+              <span className="mini-thumb found-thumb">
+                {preview.thumbnailUrl ? (
+                  <img src={preview.thumbnailUrl} alt="" referrerPolicy="no-referrer" />
+                ) : (
+                  <Vista seed={preview.title} />
+                )}
               </span>
-              <div className="stack-sm" style={{ flex: "1 1 240px", minWidth: 0, gap: 3 }}>
-                <span className="tiny faint" style={{ fontWeight: 800, letterSpacing: "0.1em" }}>
-                  FOUND ON {platformLabel(preview.platform).toUpperCase()}
+              <div className="wow-tip found-tip">
+                <span className="tip-title">{preview.title}</span>
+                <span className="tip-split">
+                  <span>{sourceLabel(preview.sourceType)}</span>
+                  {preview.duration ? <span>{preview.duration}</span> : null}
                 </span>
-                <span style={{ fontWeight: 800, fontSize: 16, lineHeight: 1.3 }}>{preview.title}</span>
-                <span className="small" style={{ color: "var(--text-3)" }}>
-                  Channel: <strong style={{ color: "var(--text)" }}>{preview.channelName}</strong>
-                </span>
-                <span className="row small" style={{ gap: 6, color: "var(--green)", fontWeight: 700 }}>
-                  <CheckIcon size={15} /> We&apos;ll credit this channel automatically
+                <span className="tip-made tip-gap">&lt;Made by {preview.channelName}&gt;</span>
+                <span className="tip-muted small">
+                  Credit is read from {platformLabel(preview.platform)}, so it lands with the right channel.
                 </span>
               </div>
             </div>
@@ -139,14 +151,26 @@ export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedCha
         <legend>Is this your video?</legend>
         <div className="choice-grid">
           <label className="choice">
-            <input type="radio" name="owner" value="made" checked={owner === "made"} onChange={() => setOwner("made")} />
+            <input
+              type="radio"
+              name="owner"
+              value="made"
+              checked={owner === "made"}
+              onChange={() => setOwner("made")}
+            />
             <span className="stack-sm" style={{ gap: 2 }}>
               <strong>I made this</strong>
               <span className="small muted">It goes on your profile with a verified check.</span>
             </span>
           </label>
           <label className="choice">
-            <input type="radio" name="owner" value="shared" checked={owner === "shared"} onChange={() => setOwner("shared")} />
+            <input
+              type="radio"
+              name="owner"
+              value="shared"
+              checked={owner === "shared"}
+              onChange={() => setOwner("shared")}
+            />
             <span className="stack-sm" style={{ gap: 2 }}>
               <strong>I&apos;m sharing someone else&apos;s</strong>
               <span className="small muted">You show as &ldquo;Shared by&rdquo;. The creator gets the credit.</span>
@@ -157,7 +181,9 @@ export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedCha
           {owner === "shared" ? (
             "Thanks for spreading good work. The creator can claim it or ask for it to be removed at any time."
           ) : preview && ownsChannel ? (
-            <span style={{ color: "var(--green)" }}>That&apos;s your verified channel. It&apos;ll show up on your profile.</span>
+            <span style={{ color: "var(--green)" }}>
+              That&apos;s your verified channel. It&apos;ll show up on your profile.
+            </span>
           ) : (
             <>
               To get the verified check, <Link href="/settings#channels">verify your channel in Settings</Link>. You can
@@ -175,7 +201,13 @@ export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedCha
           <input type="hidden" name="kind" value={kind} />
           <div role="group" aria-labelledby="kind-label" className="seg" style={{ background: "var(--bg)" }}>
             {KINDS.map((k) => (
-              <button key={k.value} type="button" aria-pressed={kind === k.value} onClick={() => setKind(k.value)} style={{ flex: 1 }}>
+              <button
+                key={k.value}
+                type="button"
+                aria-pressed={kind === k.value}
+                onClick={() => setKind(k.value)}
+                style={{ flex: 1 }}
+              >
                 {k.label}
               </button>
             ))}
@@ -200,7 +232,13 @@ export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedCha
         <legend>Music in this video</legend>
         {MUSIC_SOURCES.map((m) => (
           <label key={m.value} className="choice choice-row">
-            <input type="radio" name="music" value={m.value} checked={music === m.value} onChange={() => setMusic(m.value)} />
+            <input
+              type="radio"
+              name="music"
+              value={m.value}
+              checked={music === m.value}
+              onChange={() => setMusic(m.value)}
+            />
             <strong>{m.label}</strong>
             {m.note ? (
               <span className="small muted" style={{ marginLeft: "auto" }}>
@@ -234,7 +272,14 @@ export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedCha
         <label htmlFor="notes" className="label">
           Notes for viewers <span className="optional">(optional)</span>
         </label>
-        <textarea id="notes" name="notes" className="textarea" maxLength={600} rows={3} placeholder="What's happening, what to watch for, the story behind it" />
+        <textarea
+          id="notes"
+          name="notes"
+          className="textarea"
+          maxLength={600}
+          rows={3}
+          placeholder="What's happening, what to watch for, the story behind it"
+        />
       </div>
 
       <div className="field">

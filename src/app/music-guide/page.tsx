@@ -11,7 +11,6 @@ export default function MusicGuidePage() {
   return (
     <div className="container page page-narrow">
       <article className="stack" style={{ gap: 8 }}>
-        <span className="eyebrow">For creators</span>
         <h1 className="h1">The music guide</h1>
         <div className="prose">
           <p>
@@ -27,7 +26,7 @@ export default function MusicGuidePage() {
           </p>
 
           <h2>Safe choices</h2>
-          <ul>
+          <ul className="ticks">
             <li>
               <strong>Music you made yourself.</strong> The safest option, and the one that makes a movie feel like
               yours.
@@ -49,7 +48,7 @@ export default function MusicGuidePage() {
           </ul>
 
           <h2>Risky choices</h2>
-          <ul>
+          <ul className="crosses">
             <li>Popular songs from artists and labels, even short pieces of them.</li>
             <li>Covers and remixes of songs you don&apos;t have rights to. The original song is still protected.</li>
             <li>
@@ -68,8 +67,7 @@ export default function MusicGuidePage() {
           <p>
             If a rights holder contacts us, we take the listing down from 4Ever and let you know. Your video on YouTube
             or Twitch is between you and that platform. Questions? Reach us at{" "}
-            <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
-            .
+            <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>.
           </p>
           <p className="small muted">
             This guide is general information to help you pick safer music, not legal advice.

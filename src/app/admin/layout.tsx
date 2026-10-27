@@ -15,7 +15,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="stack" style={{ gap: 14 }}>
         <div className="row-between">
           <div className="stack-sm" style={{ gap: 4 }}>
-            <span className="eyebrow">Curator tools</span>
             <h1 className="h1" style={{ fontSize: 32 }}>
               Admin
             </h1>

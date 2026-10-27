@@ -18,27 +18,26 @@ export function SiteFooter() {
             their original platforms and belong to their creators.
           </p>
           <p className="tiny faint" style={{ margin: 0 }}>
-            Title colors show how many people have watched a video here, from white to green, blue, purple and
-            orange.
+            Title colors show how many people have watched a video here, from white to green, blue, purple and orange.
           </p>
         </div>
         <nav aria-label="Footer" className="footer-cols">
           <div className="stack-sm" style={{ gap: 10 }}>
-            <span className="footer-head">COMMUNITY</span>
+            <span className="footer-head">Community</span>
             <Link href="/browse">Browse</Link>
             <Link href="/contests">Contests</Link>
             <Link href="/creators">Creators</Link>
             <Link href="/hall-of-fame">Hall of Fame</Link>
           </div>
           <div className="stack-sm" style={{ gap: 10 }}>
-            <span className="footer-head">CREATORS</span>
+            <span className="footer-head">Creators</span>
             <Link href="/submit">Submit a clip</Link>
             <Link href="/music-guide">Music guide</Link>
             <Link href="/rules">Submission rules</Link>
             <Link href="/settings">Verify your channel</Link>
           </div>
           <div className="stack-sm" style={{ gap: 10 }}>
-            <span className="footer-head">LEGAL</span>
+            <span className="footer-head">Legal</span>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
             <Link href="/dmca">DMCA</Link>

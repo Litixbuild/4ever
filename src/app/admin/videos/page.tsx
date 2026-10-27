@@ -22,7 +22,10 @@ export default async function VideosAdminPage({
   const admin = createAdminClient();
   let query = admin.from("clips").select(CLIP_COLUMNS).order("created_at", { ascending: false }).limit(50);
   if (status !== "all") query = query.eq("status", status);
-  if (q) query = /^[A-Za-z0-9]{8}$/.test(q) ? query.or(`short_id.eq.${q},title.ilike."%${q}%"`) : query.or(`title.ilike."%${q}%",channel_name.ilike."%${q}%"`);
+  if (q)
+    query = /^[A-Za-z0-9]{8}$/.test(q)
+      ? query.or(`short_id.eq.${q},title.ilike."%${q}%"`)
+      : query.or(`title.ilike."%${q}%",channel_name.ilike."%${q}%"`);
   const { data } = await query;
   const clips = (data ?? []) as unknown as Clip[];
 
@@ -33,7 +36,14 @@ export default async function VideosAdminPage({
         <label htmlFor="video-search" className="sr-only">
           Search videos
         </label>
-        <input id="video-search" name="q" className="input" defaultValue={q} placeholder="Title, channel or short id" style={{ flex: "1 1 280px", width: "auto" }} />
+        <input
+          id="video-search"
+          name="q"
+          className="input"
+          defaultValue={q}
+          placeholder="Title, channel or short id"
+          style={{ flex: "1 1 280px", width: "auto" }}
+        />
         <label htmlFor="video-status" className="sr-only">
           Status
         </label>
@@ -60,12 +70,14 @@ export default async function VideosAdminPage({
                   {clip.title}
                 </Link>
                 <span className="tiny muted">
-                  {clip.short_id} · {clip.channel_name} · {formatCount(clip.view_count)} views · {formatCount(clip.vote_count)} votes ·
-                  added {timeAgo(clip.created_at)}
+                  {clip.short_id} · {clip.channel_name} · {formatCount(clip.view_count)} views ·{" "}
+                  {formatCount(clip.vote_count)} votes · added {timeAgo(clip.created_at)}
                 </span>
               </div>
-              <span className={`pill ${clip.status === "approved" ? "pill-green" : clip.status === "pending" ? "pill-gold" : "pill-red"}`}>
-                {clip.status}
+              <span
+                className={`pill ${clip.status === "approved" ? "pill-green" : clip.status === "pending" ? "pill-gold" : "pill-red"}`}
+              >
+                {clip.status.charAt(0).toUpperCase() + clip.status.slice(1)}
               </span>
             </div>
             <details>
@@ -79,7 +91,14 @@ export default async function VideosAdminPage({
                   <label htmlFor={`t-${clip.id}`} className="label" style={{ fontSize: 14 }}>
                     Title
                   </label>
-                  <input id={`t-${clip.id}`} name="title" className="input" defaultValue={clip.title} maxLength={140} required />
+                  <input
+                    id={`t-${clip.id}`}
+                    name="title"
+                    className="input"
+                    defaultValue={clip.title}
+                    maxLength={140}
+                    required
+                  />
                 </div>
                 <div className="field-grid">
                   <div className="field">
@@ -124,7 +143,13 @@ export default async function VideosAdminPage({
                   <label className="sr-only" htmlFor={`n-${clip.id}`}>
                     Reason
                   </label>
-                  <input id={`n-${clip.id}`} name="note" className="input" placeholder="Reason (optional)" style={{ minHeight: 36, width: 220 }} />
+                  <input
+                    id={`n-${clip.id}`}
+                    name="note"
+                    className="input"
+                    placeholder="Reason (optional)"
+                    style={{ minHeight: 36, width: 220 }}
+                  />
                   <button type="submit" className="btn btn-danger btn-sm">
                     Remove
                   </button>

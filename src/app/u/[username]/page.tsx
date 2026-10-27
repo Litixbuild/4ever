@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CharacterTip, hasCharacter } from "@/components/character-tip";
 import { ClipGrid } from "@/components/clip-card";
 import { DotIcon, LockIcon, StarIcon, StreamIcon, VideoIcon } from "@/components/icons";
 import { Avatar, VerifiedMark } from "@/components/people";
-import { Vista } from "@/components/vista";
 import { getViewer } from "@/lib/auth";
 import { BADGES, titleFor } from "@/lib/badges";
 import { formatCount, formatDate } from "@/lib/format";
+import { bannerFor, factionColor, factionName } from "@/lib/wow";
 import {
   getBadges,
   getChannels,
@@ -37,7 +38,10 @@ function rgba(hex: string, alpha: number) {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
 }
 
-export default async function ProfilePage({ params, searchParams }: Params & { searchParams: Promise<{ tab?: string }> }) {
+export default async function ProfilePage({
+  params,
+  searchParams,
+}: Params & { searchParams: Promise<{ tab?: string }> }) {
   const { username } = await params;
   const { tab: tabParam } = await searchParams;
   const profile = await getProfileByUsername(username);
@@ -62,40 +66,58 @@ export default async function ProfilePage({ params, searchParams }: Params & { s
   const earned = new Set(badges.map((b) => b.badge));
   const title = titleFor(profile.active_title, profile.display_name);
   const titleColor = BADGES.find((b) => b.key === profile.active_title)?.color ?? "var(--purple)";
-  const hasCharacter = Boolean(profile.main_character || profile.main_class || profile.realm);
-  const factionLabel = profile.faction === "horde" ? "Horde" : profile.faction === "alliance" ? "Alliance" : null;
-  const factionColor = profile.faction === "horde" ? "#ff8a80" : "#8fb8ff";
+  const character = {
+    name: profile.main_character,
+    level: profile.main_level,
+    race: profile.main_race,
+    className: profile.main_class,
+    realm: profile.realm,
+    guild: profile.guild,
+    faction: profile.faction,
+  };
+  const factionLabel = factionName(profile.faction);
   const shownBadges = BADGES.filter((b) => b.key !== "curator" || earned.has(b.key));
+
+  const stats_ = [
+    {
+      label: stats.clipCount === 1 ? "Movie or clip" : "Movies and clips",
+      value: formatCount(stats.clipCount),
+    },
+    { label: "Views on 4Ever", value: formatCount(stats.totalViews) },
+    { label: "Votes", value: formatCount(stats.totalVotes) },
+    {
+      label: stats.timesFeatured === 1 ? "Time featured" : "Times featured",
+      value: formatCount(stats.timesFeatured),
+    },
+    { label: "Joined", value: formatDate(profile.created_at) },
+  ];
 
   return (
     <div className="container page" style={{ gap: 44 }}>
       <section aria-label="Profile" className="profile-card">
         <div className="profile-banner">
-          <Vista seed={profile.username} wide />
+          <img src={bannerFor(profile.faction)} alt="" />
           {factionLabel ? (
-            <span
-              className="overlay-chip"
-              style={{ right: 18, top: 18, height: 30, padding: "0 12px", border: `1px solid ${rgba(profile.faction === "horde" ? "#d4433a" : "#4b8ef0", 0.5)}`, color: factionColor, letterSpacing: "0.1em", fontWeight: 800 }}
-            >
-              <DotIcon size={8} color={factionColor} />
-              {factionLabel.toUpperCase()}
+            <span className="faction-chip" style={{ color: factionColor(profile.faction) }}>
+              <DotIcon size={8} color="currentColor" />
+              {factionLabel}
             </span>
           ) : null}
         </div>
         <div className="profile-head">
           <Avatar name={profile.display_name} src={profile.avatar_url} size={116} className="profile-avatar" />
-          <div className="stack-sm" style={{ flex: "999 1 360px", minWidth: 0, gap: 6, paddingTop: 16 }}>
-            <h1 className="h1 row" style={{ gap: 10, fontSize: "clamp(28px, 4vw, 38px)" }}>
+          <div className="stack-sm" style={{ flex: "999 1 360px", minWidth: 0, gap: 6, paddingTop: 14 }}>
+            <h1 className="h1 row" style={{ gap: 12, fontSize: "clamp(32px, 4vw, 44px)" }}>
               {profile.display_name}
               {verifiedChannels.length > 0 ? <VerifiedMark size={26} /> : null}
             </h1>
             <span className="small muted">@{profile.username}</span>
             {title ? (
-              <span style={{ fontWeight: 700, color: titleColor }}>{title}</span>
+              <span className="profile-title" style={{ color: titleColor }}>
+                {title}
+              </span>
             ) : null}
-            {profile.bio ? (
-              <p style={{ margin: "4px 0 0", fontSize: 16, color: "var(--text-3)", maxWidth: 600 }}>{profile.bio}</p>
-            ) : null}
+            {profile.bio ? <p className="profile-bio">{profile.bio}</p> : null}
             <div className="row" style={{ marginTop: 10 }}>
               {verifiedChannels.map((c) => (
                 <a
@@ -116,59 +138,18 @@ export default async function ProfilePage({ params, searchParams }: Params & { s
               ) : null}
             </div>
           </div>
-          {hasCharacter ? (
-            <div className="card-tooltip stack-sm" style={{ flex: "1 1 260px", gap: 3, fontSize: 14 }}>
-              <span className="tiny" style={{ fontWeight: 800, letterSpacing: "0.12em", color: "var(--tooltip-muted)" }}>
-                MAIN CHARACTER
-              </span>
-              {profile.main_character ? (
-                <span className="display" style={{ fontSize: 20, color: "#fff" }}>
-                  {profile.main_character}
-                </span>
-              ) : null}
-              {profile.main_level || profile.main_race || profile.main_class ? (
-                <span>
-                  {[profile.main_level ? `Level ${profile.main_level}` : null, profile.main_race, profile.main_class]
-                    .filter(Boolean)
-                    .join(" ")}
-                </span>
-              ) : null}
-              {profile.realm || factionLabel ? (
-                <span style={{ color: "var(--tooltip-muted)" }}>
-                  {profile.realm}
-                  {profile.realm && factionLabel ? " · " : ""}
-                  {factionLabel ? <span style={{ color: factionColor }}>{factionLabel}</span> : null}
-                </span>
-              ) : null}
-              {profile.guild ? <span style={{ color: "var(--green)" }}>&lt;{profile.guild}&gt;</span> : null}
-            </div>
+          {hasCharacter(character) ? (
+            <CharacterTip character={character} fallbackName={profile.display_name} className="profile-character" />
           ) : null}
         </div>
-      </section>
-
-      <section aria-label="Stats" className="stat-grid">
-        <div className="stat">
-          <span className="stat-value">{formatCount(stats.clipCount)}</span>
-          <span className="small muted">Movies and clips</span>
-        </div>
-        <div className="stat">
-          <span className="stat-value">{formatCount(stats.totalViews)}</span>
-          <span className="small muted">Views on 4Ever</span>
-        </div>
-        <div className="stat">
-          <span className="stat-value">{formatCount(stats.totalVotes)}</span>
-          <span className="small muted">Votes</span>
-        </div>
-        <div className="stat">
-          <span className="stat-value">{formatCount(stats.timesFeatured)}</span>
-          <span className="small muted">Times featured</span>
-        </div>
-        <div className="stat">
-          <span className="stat-value" style={{ fontSize: 24, lineHeight: "36px" }}>
-            {formatDate(profile.created_at)}
-          </span>
-          <span className="small muted">Joined</span>
-        </div>
+        <dl className="profile-stats">
+          {stats_.map((stat) => (
+            <div key={stat.label}>
+              <dd>{stat.value}</dd>
+              <dt>{stat.label}</dt>
+            </div>
+          ))}
+        </dl>
       </section>
 
       <section aria-labelledby="achievements" className="stack" style={{ gap: 16 }}>
@@ -183,14 +164,27 @@ export default async function ProfilePage({ params, searchParams }: Params & { s
               <div
                 key={badge.key}
                 className={`achievement ${has ? "" : "achievement-locked"}`}
-                style={{ borderColor: rgba(has ? badge.color : "#8c8273", has ? 0.32 : 0.45) }}
+                style={{
+                  borderColor: rgba(has ? badge.color : "#8c8273", has ? 0.32 : 0.45),
+                }}
               >
-                <span className="achievement-icon" style={{ background: rgba(has ? badge.color : "#8c8273", 0.12), border: `1px solid ${rgba(has ? badge.color : "#8c8273", 0.35)}`, color }}>
+                <span
+                  className="achievement-icon"
+                  style={{
+                    background: rgba(has ? badge.color : "#8c8273", 0.12),
+                    border: `1px solid ${rgba(has ? badge.color : "#8c8273", 0.35)}`,
+                    color,
+                  }}
+                >
                   {has ? <StarIcon size={22} /> : <LockIcon size={20} />}
                 </span>
                 <span className="stack-sm" style={{ gap: 0, minWidth: 0 }}>
-                  <span style={{ fontWeight: 800, fontSize: 15, color: has ? badge.color : "var(--text-3)" }}>{badge.name}</span>
-                  <span className="small muted">{has ? badge.description : `Not earned yet. ${badge.description}.`}</span>
+                  <span className="achievement-name" style={{ color: has ? badge.color : "var(--text-3)" }}>
+                    {badge.name}
+                  </span>
+                  <span className="small muted">
+                    {has ? badge.description : `Not earned yet. ${badge.description}.`}
+                  </span>
                 </span>
               </div>
             );

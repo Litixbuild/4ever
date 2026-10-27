@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ClipGrid } from "@/components/clip-card";
+import { SearchIcon } from "@/components/icons";
 import { RarityLegend } from "@/components/widgets";
 import { CATEGORIES, categoryLabel, isCategory, isKind } from "@/lib/categories";
 import { cleanSearch } from "@/lib/format";
@@ -37,7 +38,10 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
   const cat = isCategory(p.cat) ? p.cat : null;
   const sort: ClipSort = isClipSort(p.sort) ? p.sort : "new";
   const q = cleanSearch(p.q);
-  const tag = (p.tag ?? "").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 24);
+  const tag = (p.tag ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "")
+    .slice(0, 24);
   const page = Math.max(1, Math.min(500, Number.parseInt(p.page ?? "1", 10) || 1));
 
   const { clips, total } = await listClips({ kind, category: cat, sort, q, tag, page, perPage: PER_PAGE });
@@ -61,19 +65,42 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="container page" style={{ gap: 28 }}>
-      <div className="stack" style={{ gap: 10 }}>
-        <span className="eyebrow">Browse</span>
-        <h1 className="h1">{heading(kind, cat, q, tag)}</h1>
-        <p className="muted" style={{ margin: 0 }}>
-          {total === 1 ? "1 video" : `${total.toLocaleString("en-US")} videos`}
-          {q || tag ? (
-            <>
-              {" "}
-              · <Link href={href({ q: null, tag: null })}>Clear search</Link>
-            </>
-          ) : null}
-        </p>
-        <RarityLegend />
+      <div className="browse-head">
+        <div className="stack" style={{ gap: 10, flex: "1 1 360px", minWidth: 0 }}>
+          <h1 className="h1">{heading(kind, cat, q, tag)}</h1>
+          <p className="muted" style={{ margin: 0 }}>
+            {total === 1 ? "1 video" : `${total.toLocaleString("en-US")} videos`}
+            {q || tag ? (
+              <>
+                {". "}
+                <Link href={href({ q: null, tag: null })}>Clear search</Link>
+              </>
+            ) : null}
+          </p>
+          <RarityLegend />
+        </div>
+        <form action="/browse" method="get" role="search" id="search" className="browse-search">
+          {kind ? <input type="hidden" name="kind" value={kind} /> : null}
+          {cat ? <input type="hidden" name="cat" value={cat} /> : null}
+          {sort !== "new" ? <input type="hidden" name="sort" value={sort} /> : null}
+          <label htmlFor="browse-q" className="sr-only">
+            Search videos
+          </label>
+          <div className="input-icon" style={{ flex: 1 }}>
+            <SearchIcon size={17} />
+            <input
+              id="browse-q"
+              name="q"
+              type="search"
+              className="input"
+              defaultValue={q}
+              placeholder="Search titles and channels"
+            />
+          </div>
+          <button type="submit" className="btn btn-ghost">
+            Search
+          </button>
+        </form>
       </div>
 
       <div className="row-between">
@@ -88,9 +115,13 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
             Clips
           </Link>
         </nav>
-        <nav aria-label="Sort" className="seg">
+        <nav aria-label="Sort" className="seg seg-sort">
           {SORTS.map((s) => (
-            <Link key={s.value} href={href({ sort: s.value === "new" ? null : s.value })} aria-current={sort === s.value ? "true" : undefined}>
+            <Link
+              key={s.value}
+              href={href({ sort: s.value === "new" ? null : s.value })}
+              aria-current={sort === s.value ? "true" : undefined}
+            >
               {s.label}
             </Link>
           ))}
@@ -102,7 +133,12 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
           All categories
         </Link>
         {CATEGORIES.map((c) => (
-          <Link key={c.value} href={href({ cat: c.value })} className="chip" aria-current={cat === c.value ? "true" : undefined}>
+          <Link
+            key={c.value}
+            href={href({ cat: c.value })}
+            className="chip"
+            aria-current={cat === c.value ? "true" : undefined}
+          >
             {c.label}
           </Link>
         ))}
@@ -112,13 +148,22 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
         <ClipGrid clips={clips} />
       ) : (
         <div className="empty">
-          <h2 className="h3">No videos found</h2>
-          <p className="muted" style={{ margin: 0 }}>
-            Try a different filter, or be the one who fills this spot.
+          <h2 className="h-gold">{q ? `Nothing matches “${q}”` : "Nothing here yet"}</h2>
+          <p className="muted" style={{ margin: 0, maxWidth: 440 }}>
+            {q
+              ? "Try a different word, or check the spelling. Searches look at video titles and channel names."
+              : "No videos in this category yet. Share one and it shows up here."}
           </p>
-          <Link href="/submit" className="btn btn-gold">
-            Submit a Clip
-          </Link>
+          <div className="row" style={{ justifyContent: "center" }}>
+            {q || tag || cat || kind ? (
+              <Link href="/browse" className="btn btn-ghost">
+                Browse everything
+              </Link>
+            ) : null}
+            <Link href="/submit" className="btn btn-gold">
+              Submit a Clip
+            </Link>
+          </div>
         </div>
       )}
 

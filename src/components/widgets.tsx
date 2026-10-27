@@ -1,15 +1,24 @@
 import Link from "next/link";
-import { ArrowRightIcon, BellIcon, DiamondIcon, DotIcon } from "@/components/icons";
+import { DiamondIcon, DotIcon } from "@/components/icons";
+import { LaunchCountdown } from "@/components/launch-countdown";
 import { Avatar } from "@/components/people";
 import { badgeInfo } from "@/lib/badges";
-import { contestPhase, contestStatusLine, contestTileDate } from "@/lib/contests";
-import { dateTile, formatCount } from "@/lib/format";
+import { contestPhase, contestStatusLine, contestTileDate, type ContestPhase } from "@/lib/contests";
+import { dateTile, formatCount, formatDate, formatDateTime } from "@/lib/format";
 import type { ActivityItem, TopCreator } from "@/lib/queries";
-import { RARITY_TIERS } from "@/lib/rarity";
+import { RARITY_TIERS, rarityClass } from "@/lib/rarity";
 import { site } from "@/lib/site";
 import type { Contest } from "@/lib/types";
 
-const PRIZE_COLORS = ["var(--orange)", "var(--purple)", "var(--blue)", "var(--green)"];
+// Prizes are listed like loot, best first.
+export const PRIZE_COLORS = ["var(--q-legendary)", "var(--q-epic)", "var(--q-rare)", "var(--q-uncommon)"];
+
+const PHASE_LABELS: Record<ContestPhase, string> = {
+  upcoming: "Coming up",
+  open: "Open for entries",
+  voting: "Voting",
+  ended: "Finished",
+};
 
 // Whether to show the launch banner, and whether Forever is live yet.
 function launchState(now = Date.now()) {
@@ -23,25 +32,73 @@ export function LaunchBar() {
   const { show, live } = launchState();
   if (!show) return null;
   return (
-    <section aria-label="Launch week" className="launch-bar">
-      <span className="pill pill-orange">
-        <DotIcon size={8} color="var(--orange)" />
-        {live ? "Forever is live" : "Launch week"}
+    <section aria-label="Launch" className="launch-bar">
+      <span className="launch-sigil" aria-hidden="true">
+        <DotIcon size={8} color="var(--q-legendary)" />
       </span>
       <p>
         {live ? (
-          <>World of Warcraft: Forever is live. Share your first-day moments and get featured.</>
+          <>
+            <strong>World of Warcraft: Forever is live.</strong> Share your first-day moments and get featured.
+          </>
         ) : (
           <>
-            World of Warcraft: Forever goes live <strong style={{ color: "var(--text)" }}>Nov 4 at 6 PM ET</strong>.
-            Share your first-day moments and get featured.
+            <strong>World of Warcraft: Forever</strong> goes live Nov 4 at 6 PM ET
           </>
         )}
       </p>
-      <Link href="/submit" className="row" style={{ gap: 6, minHeight: 44, fontWeight: 700, textDecoration: "none" }}>
-        Share a launch clip <ArrowRightIcon />
+      {live ? null : <LaunchCountdown at={site.launchAt} />}
+      <Link href="/submit" className="launch-link">
+        Share a launch clip
       </Link>
     </section>
+  );
+}
+
+export function PhaseBadge({ phase }: { phase: ContestPhase }) {
+  return (
+    <span className={`phase phase-${phase}`}>
+      <DotIcon size={7} color="currentColor" />
+      {PHASE_LABELS[phase]}
+    </span>
+  );
+}
+
+export function PrizeList({ prizes }: { prizes: string[] }) {
+  return (
+    <ul className="diamond-list">
+      {prizes.map((prize, i) => (
+        <li key={prize}>
+          <DiamondIcon color={PRIZE_COLORS[i % PRIZE_COLORS.length]} />
+          {prize}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// The three dates every contest runs on, with the one coming up next highlighted.
+// Dates only in `compact` mode (the contests page feature); full times on the contest page itself.
+export function ContestTimeline({ contest, compact = false }: { contest: Contest; compact?: boolean }) {
+  const phase = contestPhase(contest);
+  const current = { upcoming: 0, open: 1, voting: 2, ended: 3 }[phase];
+  const steps = [
+    { label: "Entries open", at: contest.opens_at },
+    { label: "Entries close", at: contest.closes_at },
+    { label: "Voting ends", at: contest.ends_at },
+  ];
+  return (
+    <ol className="timeline">
+      {steps.map((step, i) => (
+        <li key={step.label} data-state={i < current ? "done" : i === current ? "next" : "later"}>
+          <span className="timeline-mark">{["I", "II", "III"][i]}</span>
+          <span className="timeline-text">
+            <strong>{step.label}</strong>
+            <span>{compact ? formatDate(step.at) : formatDateTime(step.at)}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -50,48 +107,33 @@ export function ContestCard({ contest, compact = false }: { contest: Contest; co
   const phase = contestPhase(contest);
   return (
     <section aria-labelledby={`contest-${contest.id}`} className="card-contest stack">
-      <div className="row" style={{ gap: 14, flexWrap: "nowrap" }}>
+      <div className="row" style={{ gap: 14, flexWrap: "nowrap", alignItems: "flex-start" }}>
         <span className="date-tile" aria-hidden="true">
           <span className="m">{tile.month}</span>
           <span className="d">{tile.day}</span>
         </span>
-        <div className="stack-sm" style={{ gap: 2, minWidth: 0 }}>
-          <span className="eyebrow eyebrow-orange" style={{ fontSize: 11.5 }}>
-            {phase === "open" ? "Contest · open now" : phase === "voting" ? "Contest · voting" : "Contest"}
-          </span>
-          <h2 id={`contest-${contest.id}`} className="h2" style={{ fontSize: 25 }}>
-            {contest.title}
+        <div className="stack-sm" style={{ gap: 6, minWidth: 0 }}>
+          <PhaseBadge phase={phase} />
+          <h2 id={`contest-${contest.id}`} className="h2" style={{ fontSize: 26 }}>
+            <Link href={`/contests/${contest.slug}`} style={{ color: "inherit", textDecoration: "none" }}>
+              {contest.title}
+            </Link>
           </h2>
         </div>
       </div>
-      {contest.tagline ? (
-        <p className="muted" style={{ margin: 0, color: "var(--text-3)" }}>
-          {contest.tagline}
-        </p>
-      ) : null}
+      {contest.tagline ? <p style={{ margin: 0, color: "var(--text-3)" }}>{contest.tagline}</p> : null}
       <p className="small" style={{ margin: 0, color: "var(--text-2)" }}>
         {contestStatusLine(contest)}
       </p>
-      {!compact && contest.prizes.length > 0 ? (
-        <ul className="diamond-list">
-          {contest.prizes.map((prize, i) => (
-            <li key={prize}>
-              <DiamondIcon color={PRIZE_COLORS[i % PRIZE_COLORS.length]} />
-              {prize}
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      {!compact && contest.prizes.length > 0 ? <PrizeList prizes={contest.prizes} /> : null}
       <Link href={`/contests/${contest.slug}`} className="btn btn-outline-gold btn-block">
-        {phase === "upcoming" ? (
-          <>
-            <BellIcon /> See the details
-          </>
-        ) : phase === "open" ? (
-          "Enter or vote"
-        ) : (
-          "See the entries"
-        )}
+        {phase === "upcoming"
+          ? "See the details"
+          : phase === "open"
+            ? "Enter or vote"
+            : phase === "voting"
+              ? "Vote on the entries"
+              : "See the results"}
       </Link>
     </section>
   );
@@ -99,33 +141,28 @@ export function ContestCard({ contest, compact = false }: { contest: Contest; co
 
 export function TopCreatorsCard({ creators }: { creators: TopCreator[] }) {
   return (
-    <section aria-labelledby="top-creators" className="card stack-sm" style={{ gap: 10 }}>
+    <section aria-labelledby="top-creators" className="card stack-sm" style={{ gap: 6 }}>
       <div className="row-between" style={{ alignItems: "baseline" }}>
-        <h2 id="top-creators" className="h3">
+        <h2 id="top-creators" className="h-gold">
           Top creators
         </h2>
-        <span className="small muted">This week</span>
+        <span className="tiny muted">Votes this week</span>
       </div>
       {creators.length === 0 ? (
-        <p className="small muted" style={{ margin: 0 }}>
+        <p className="small muted" style={{ margin: "6px 0 0" }}>
           Nobody yet. Votes on verified creators&apos; videos put them here.
         </p>
       ) : (
         <ol className="list-plain ranked">
           {creators.map((creator, i) => (
             <li key={creator.id}>
-              <span style={{ width: 18, fontSize: 13, fontWeight: 800, color: i === 0 ? "var(--gold-hi)" : "var(--faint)" }}>
-                {i + 1}
-              </span>
+              <span className={`rank ${i === 0 ? "rank-first" : ""}`}>{i + 1}</span>
               <Avatar name={creator.display_name} src={creator.avatar_url} size={34} />
-              <Link
-                href={`/u/${creator.username}`}
-                style={{ flex: 1, color: "var(--text)", textDecoration: "none", fontWeight: 700, minWidth: 0 }}
-              >
+              <Link href={`/u/${creator.username}`} className="ranked-name">
                 {creator.display_name}
               </Link>
-              <span className="small muted" style={{ fontWeight: 700 }}>
-                {formatCount(creator.votes)} votes
+              <span className="small muted" style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
+                {formatCount(creator.votes)}
               </span>
             </li>
           ))}
@@ -135,52 +172,61 @@ export function TopCreatorsCard({ creators }: { creators: TopCreator[] }) {
   );
 }
 
+// Community activity, written the way the game's chat window would show it:
+// videos appear as item links in their quality color, achievements in gold.
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
   return (
-    <section aria-labelledby="general-chat" className="card-sunken stack-sm" style={{ gap: 10 }}>
-      <div className="row" style={{ gap: 8 }}>
-        <DotIcon size={8} color="var(--green)" />
-        <h2 id="general-chat" className="h3">
-          General
-        </h2>
-        <span className="tiny faint" style={{ marginLeft: "auto" }}>
-          Community activity
-        </span>
+    <section aria-labelledby="general-chat" className="chat">
+      <div className="chat-tab">
+        <h2 id="general-chat">General</h2>
       </div>
-      {items.length === 0 ? (
-        <p className="small muted" style={{ margin: 0 }}>
-          Quiet in here. Be the first to share something.
-        </p>
-      ) : (
-        <div className="feed">
-          {items.map((item) => {
+      <div className="chat-frame">
+        {items.length === 0 ? (
+          <p className="chat-line chat-system">Quiet in here. Be the first to share something.</p>
+        ) : (
+          items.map((item) => {
             if (item.type === "clip") {
+              const who = item.clip.creator?.display_name ?? item.clip.channel_name;
               return (
-                <p key={`c-${item.clip.id}`}>
-                  <span className="chan chan-new">[New]</span>{" "}
-                  <Link href={`/c/${item.clip.short_id}`}>{item.clip.title}</Link> by{" "}
-                  {item.clip.creator?.display_name ?? item.clip.channel_name}
+                <p key={`c-${item.clip.id}`} className="chat-line">
+                  <span className="chan-new">[New]</span>{" "}
+                  {item.clip.creator ? (
+                    <Link href={`/u/${item.clip.creator.username}`} className="chat-name">
+                      {who}
+                    </Link>
+                  ) : (
+                    <span className="chat-name">{who}</span>
+                  )}{" "}
+                  shared{" "}
+                  <Link href={`/c/${item.clip.short_id}`} className={`chat-item ${rarityClass(item.clip.view_count)}`}>
+                    [{item.clip.title}]
+                  </Link>
                 </p>
               );
             }
             if (item.type === "badge") {
               const badge = badgeInfo(item.badge);
               return (
-                <p key={`b-${item.person.username}-${item.badge}`} className="achievement-line">
-                  <Link href={`/u/${item.person.username}`}>{item.person.display_name}</Link> has earned the
-                  achievement [{badge?.name ?? "Achievement"}]!
+                <p key={`b-${item.person.username}-${item.badge}`} className="chat-line chat-achievement">
+                  <Link href={`/u/${item.person.username}`} className="chat-name">
+                    {item.person.display_name}
+                  </Link>{" "}
+                  has earned the achievement <span className="chat-ach">[{badge?.name ?? "Achievement"}]</span>!
                 </p>
               );
             }
             return (
-              <p key={`k-${item.contest.id}`}>
-                <span className="chan chan-contest">[Contest]</span>{" "}
-                <Link href={`/contests/${item.contest.slug}`}>{item.contest.title}</Link> is open. Start recording.
+              <p key={`k-${item.contest.id}`} className="chat-line">
+                <span className="chan-contest">[Contest]</span>{" "}
+                <Link href={`/contests/${item.contest.slug}`} className="chat-contest">
+                  {item.contest.title}
+                </Link>{" "}
+                is open. Start recording.
               </p>
             );
-          })}
-        </div>
-      )}
+          })
+        )}
+      </div>
     </section>
   );
 }
@@ -188,8 +234,7 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
 export function CreatorsBand() {
   return (
     <section aria-labelledby="creators-band" className="band">
-      <div className="stack" style={{ flex: "1 1 380px", gap: 12 }}>
-        <span className="eyebrow">For creators</span>
+      <div className="stack" style={{ flex: "1 1 380px", gap: 14 }}>
         <h2 id="creators-band" className="h2">
           Made a movie? Bring it home.
         </h2>
@@ -206,7 +251,7 @@ export function CreatorsBand() {
           </Link>
         </div>
       </div>
-      <ol className="steps">
+      <ol className="steps band-steps">
         <li>
           <span className="numeral">I</span>
           <strong>Paste a link</strong>
@@ -215,7 +260,9 @@ export function CreatorsBand() {
         <li>
           <span className="numeral">II</span>
           <strong>Get the credit</strong>
-          <span className="small muted">We read the real channel from YouTube or Twitch, so credit can&apos;t be faked.</span>
+          <span className="small muted">
+            We read the real channel from YouTube or Twitch, so credit can&apos;t be faked.
+          </span>
         </li>
         <li>
           <span className="numeral">III</span>
@@ -232,7 +279,7 @@ export function RarityLegend() {
   const tiers = [...RARITY_TIERS].reverse();
   return (
     <p className="row tiny muted" style={{ gap: "6px 14px", margin: 0 }}>
-      <span>Title color = views on 4Ever:</span>
+      <span>Title color shows views on 4Ever:</span>
       {tiers.map((tier) => (
         <span key={tier.key} className="row" style={{ gap: 6 }}>
           <DotIcon size={8} color={tier.color} />

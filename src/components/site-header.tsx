@@ -26,16 +26,20 @@ export async function SiteHeader() {
             <SearchIcon size={17} />
             <input id="site-search" name="q" type="search" placeholder="Search clips, creators, zones" />
           </form>
+          <Link href="/browse#search" className="btn btn-ghost btn-icon search-link" aria-label="Search">
+            <SearchIcon size={18} />
+          </Link>
 
           {profile ? (
             <UserMenu
               summary={
                 <>
                   <Avatar name={profile.display_name} src={profile.avatar_url} size={36} />
-                  <span>{profile.display_name}</span>
+                  <span className="user-name">{profile.display_name}</span>
                 </>
               }
             >
+              <span className="user-menu-title">{profile.display_name}</span>
               <Link href={`/u/${profile.username}`}>
                 <UserIcon /> Your profile
               </Link>
@@ -59,8 +63,11 @@ export async function SiteHeader() {
             </Link>
           )}
 
-          <Link href="/submit" className="btn btn-gold">
-            <PlusIcon /> Submit a Clip
+          <Link href="/submit" className="btn btn-gold submit-btn">
+            <PlusIcon />
+            <span>
+              Submit<span className="submit-rest"> a Clip</span>
+            </span>
           </Link>
         </div>
       </div>

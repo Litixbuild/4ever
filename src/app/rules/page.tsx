@@ -11,7 +11,6 @@ export default function RulesPage() {
   return (
     <div className="container page page-narrow">
       <article className="stack" style={{ gap: 8 }}>
-        <span className="eyebrow">Community</span>
         <h1 className="h1">Submission rules</h1>
         <div className="prose">
           <p>
@@ -19,7 +18,7 @@ export default function RulesPage() {
             it worth visiting.
           </p>
 
-          <h2>What belongs here</h2>
+          <h2 id="what-belongs">What belongs here</h2>
           <ul>
             <li>World of Warcraft videos, with World of Warcraft: Forever front and center.</li>
             <li>PvP movies, raid kills, duels, machinima, funny moments, lore pieces, leveling stories.</li>
@@ -29,23 +28,27 @@ export default function RulesPage() {
             </li>
           </ul>
 
-          <h2>Credit</h2>
+          <h2 id="credit">Credit</h2>
           <ul>
-            <li>Credit always goes to the channel that uploaded the video. We read it from YouTube or Twitch directly.</li>
-            <li>Sharing someone else&apos;s video is fine. Reuploading it to your own channel and submitting that is not.</li>
+            <li>
+              Credit always goes to the channel that uploaded the video. We read it from YouTube or Twitch directly.
+            </li>
+            <li>
+              Sharing someone else&apos;s video is fine. Reuploading it to your own channel and submitting that is not.
+            </li>
             <li>
               Creators can verify their channel in <Link href="/settings#channels">Settings</Link> to get the verified
               check, and can ask for any of their videos to come down at any time.
             </li>
           </ul>
 
-          <h2>Music</h2>
+          <h2 id="music">Music</h2>
           <p>
             Only use music you have the rights to. Tell us what&apos;s in the video when you submit, and credit licensed
             tracks. The <Link href="/music-guide">music guide</Link> covers what&apos;s safe.
           </p>
 
-          <h2>Not allowed</h2>
+          <h2 id="not-allowed">Not allowed</h2>
           <ul>
             <li>Harassment, hate, or targeting real people.</li>
             <li>Sexual or graphic content.</li>
@@ -53,7 +56,7 @@ export default function RulesPage() {
             <li>Spam, misleading titles, or videos that aren&apos;t World of Warcraft.</li>
           </ul>
 
-          <h2>Review and limits</h2>
+          <h2 id="review">Review and limits</h2>
           <ul>
             <li>Every submission is checked by a curator before it goes live. Curators have the final say.</li>
             <li>
@@ -62,7 +65,7 @@ export default function RulesPage() {
             </li>
           </ul>
 
-          <h2>Contests</h2>
+          <h2 id="contests">Contests</h2>
           <ul>
             <li>Entries must come from your own verified channel. One entry per person per contest.</li>
             <li>Votes cast while a contest is open count toward its standings. Curators pick the winners.</li>

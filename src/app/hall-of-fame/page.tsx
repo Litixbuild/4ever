@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ClipCard, ClipGrid } from "@/components/clip-card";
-import { StarIcon, TrophyIcon } from "@/components/icons";
+import { EyeIcon, StarIcon, TrophyIcon } from "@/components/icons";
 import { formatDate } from "@/lib/format";
 import { getChampions, getMostViewed, listFeatures } from "@/lib/queries";
 
@@ -11,72 +11,100 @@ export default async function HallOfFamePage() {
   const [features, champions, mostViewed] = await Promise.all([listFeatures(24), getChampions(24), getMostViewed(12)]);
 
   return (
-    <div className="container page" style={{ gap: 48 }}>
-      <div className="stack" style={{ gap: 8 }}>
-        <span className="eyebrow">Hall of Fame</span>
-        <h1 className="h1">The legends of 4Ever</h1>
-        <p className="lead">Every Movie of the Week, every contest champion, and the most watched videos of all time.</p>
+    <div className="container page" style={{ gap: 52 }}>
+      <div className="page-head">
+        <h1 className="h1">Hall of Fame</h1>
+        <p className="lead">
+          Every Movie of the Week, every contest champion, and the most watched videos of all time.
+        </p>
       </div>
 
-      <section aria-labelledby="champions" className="stack" style={{ gap: 16 }}>
-        <h2 id="champions" className="h2 row" style={{ gap: 10 }}>
-          <TrophyIcon size={22} style={{ color: "var(--gold-hi)" }} /> Contest champions
+      <section aria-labelledby="champions" className="stack" style={{ gap: 18 }}>
+        <h2 id="champions" className="h2 row" style={{ gap: 12 }}>
+          <TrophyIcon size={24} style={{ color: "var(--flavor)" }} /> Contest champions
         </h2>
         {champions.length > 0 ? (
           <div className="clip-grid">
             {champions.map(({ contest, clip }) => (
-              <div key={`${contest.id}-${clip.id}`} className="stack-sm" style={{ gap: 8 }}>
-                <Link href={`/contests/${contest.slug}`} className="pill pill-gold" style={{ alignSelf: "flex-start", textDecoration: "none" }}>
-                  {contest.title}
+              <div key={`${contest.id}-${clip.id}`} className="entry place-1">
+                <Link href={`/contests/${contest.slug}`} className="plaque">
+                  <TrophyIcon size={14} /> {contest.title}
+                  <span className="plaque-date">{formatDate(contest.ends_at)}</span>
                 </Link>
                 <ClipCard clip={clip} />
               </div>
             ))}
           </div>
         ) : (
-          <div className="empty">
-            <p className="muted" style={{ margin: 0 }}>
-              No champions crowned yet. <Link href="/contests">See the contests</Link>
-            </p>
+          <div className="slot">
+            <span className="slot-icon">
+              <TrophyIcon size={26} />
+            </span>
+            <span className="stack-sm" style={{ gap: 4 }}>
+              <strong>Empty slot</strong>
+              <span className="muted small">
+                Win a contest and your video takes this spot for good. <Link href="/contests">See the contests</Link>
+              </span>
+            </span>
           </div>
         )}
       </section>
 
-      <section aria-labelledby="motw" className="stack" style={{ gap: 16 }}>
-        <h2 id="motw" className="h2 row" style={{ gap: 10 }}>
-          <StarIcon size={20} style={{ color: "var(--orange)" }} /> Movies of the Week
+      <section aria-labelledby="motw" className="stack" style={{ gap: 18 }}>
+        <h2 id="motw" className="h2 row" style={{ gap: 12 }}>
+          <StarIcon size={22} style={{ color: "var(--q-legendary)" }} /> Movies of the Week
         </h2>
         {features.length > 0 ? (
           <div className="clip-grid">
-            {features.map((feature) => (
-              <div key={feature.id} className="stack-sm" style={{ gap: 8 }}>
-                <span className="pill pill-orange" style={{ alignSelf: "flex-start" }}>
-                  Week of {formatDate(feature.starts_at)}
-                </span>
-                {feature.clip ? <ClipCard clip={feature.clip} /> : null}
-              </div>
-            ))}
+            {features.map((feature) =>
+              feature.clip ? (
+                <div key={feature.id} className="entry">
+                  <span className="plaque plaque-plain">Week of {formatDate(feature.starts_at)}</span>
+                  <ClipCard clip={feature.clip} />
+                  {feature.use_text || feature.flavor_text ? (
+                    <div className="wow-tip mini-tip">
+                      {feature.use_text ? <span className="tip-use">Use: {feature.use_text}</span> : null}
+                      {feature.flavor_text ? (
+                        <span className="tip-flavor">&ldquo;{feature.flavor_text}&rdquo;</span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null,
+            )}
           </div>
         ) : (
-          <div className="empty">
-            <p className="muted" style={{ margin: 0 }}>
-              The first Movie of the Week is picked soon after launch.
-            </p>
+          <div className="slot">
+            <span className="slot-icon">
+              <StarIcon size={26} />
+            </span>
+            <span className="stack-sm" style={{ gap: 4 }}>
+              <strong>Empty slot</strong>
+              <span className="muted small">
+                Every week curators put one video on the front page. The first pick comes right after launch.
+              </span>
+            </span>
           </div>
         )}
       </section>
 
-      <section aria-labelledby="most-watched" className="stack" style={{ gap: 16 }}>
-        <h2 id="most-watched" className="h2">
-          Most watched of all time
+      <section aria-labelledby="most-watched" className="stack" style={{ gap: 18 }}>
+        <h2 id="most-watched" className="h2 row" style={{ gap: 12 }}>
+          <EyeIcon size={22} style={{ color: "var(--q-epic)" }} /> Most watched of all time
         </h2>
         {mostViewed.length > 0 ? (
           <ClipGrid clips={mostViewed} />
         ) : (
-          <div className="empty">
-            <p className="muted" style={{ margin: 0 }}>
-              Nothing here yet.
-            </p>
+          <div className="slot">
+            <span className="slot-icon">
+              <EyeIcon size={26} />
+            </span>
+            <span className="stack-sm" style={{ gap: 4 }}>
+              <strong>Empty slot</strong>
+              <span className="muted small">
+                The most watched videos on 4Ever land here. <Link href="/submit">Share yours</Link>
+              </span>
+            </span>
           </div>
         )}
       </section>

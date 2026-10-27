@@ -8,10 +8,9 @@ export default function TermsPage() {
   return (
     <div className="container page page-narrow">
       <article className="stack" style={{ gap: 8 }}>
-        <span className="eyebrow">Legal</span>
         <h1 className="h1">Terms of use</h1>
         <div className="prose">
-          <p className="small muted">Last updated November 2026</p>
+          <p className="small muted">Last updated October 2026</p>
           <p>
             These terms cover your use of {site.name} (&ldquo;4Ever&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;). By
             using the site you agree to them. If you don&apos;t agree, please don&apos;t use the site.
@@ -52,8 +51,9 @@ export default function TermsPage() {
 
           <h2>Comments, votes and profiles</h2>
           <p>
-            You own what you write. You let us show it on the site. Be decent: the <Link href="/rules">community rules</Link>{" "}
-            apply everywhere on 4Ever, and we may remove anything that breaks them.
+            You own what you write. You let us show it on the site. Be decent: the{" "}
+            <Link href="/rules">community rules</Link> apply everywhere on 4Ever, and we may remove anything that breaks
+            them.
           </p>
 
           <h2>Contests</h2>
@@ -65,8 +65,8 @@ export default function TermsPage() {
 
           <h2>Copyright</h2>
           <p>
-            We respect copyright and respond to valid notices. See the <Link href="/dmca">DMCA page</Link> for how to send
-            one. Accounts that repeatedly share infringing material will be closed.
+            We respect copyright and respond to valid notices. See the <Link href="/dmca">DMCA page</Link> for how to
+            send one. Accounts that repeatedly share infringing material will be closed.
           </p>
 
           <h2>Taking things down</h2>

@@ -8,17 +8,16 @@ export default function PrivacyPage() {
   return (
     <div className="container page page-narrow">
       <article className="stack" style={{ gap: 8 }}>
-        <span className="eyebrow">Legal</span>
         <h1 className="h1">Privacy</h1>
         <div className="prose">
-          <p className="small muted">Last updated November 2026</p>
+          <p className="small muted">Last updated October 2026</p>
           <p>We collect as little as we can to run the site. Here&apos;s exactly what, and why.</p>
 
           <h2>When you log in</h2>
           <p>
             You log in with an account you already have, like Discord, Twitch or Google. That service sends us your
-            account name, profile picture and email address. We use the name and picture for your profile. Your email is kept by our login provider and is never
-            shown on the site.
+            account name, profile picture and email address. We use the name and picture for your profile. Your email is
+            kept by our login provider and is never shown on the site.
           </p>
 
           <h2>What you add</h2>
@@ -29,15 +28,15 @@ export default function PrivacyPage() {
 
           <h2>Channel verification</h2>
           <p>
-            If you verify a YouTube channel, we read that channel&apos;s public name and description from YouTube to check
-            your code. If you link Twitch, we save your Twitch channel id and name.
+            If you verify a YouTube channel, we read that channel&apos;s public name and description from YouTube to
+            check your code. If you link Twitch, we save your Twitch channel id and name.
           </p>
 
           <h2>View counts</h2>
           <p>
-            When you press play, we count a view. To count each person only once a day without tracking anyone, we
-            store a one-way scrambled code built from your connection details and the date. We never store your IP
-            address, and the code changes every day so it can&apos;t follow you around.
+            When you press play, we count a view. To count each person only once a day without tracking anyone, we store
+            a one-way scrambled code built from your connection details and the date. We never store your IP address,
+            and the code changes every day so it can&apos;t follow you around.
           </p>
 
           <h2>Reports</h2>
@@ -60,10 +59,12 @@ export default function PrivacyPage() {
 
           <h2>Your choices</h2>
           <ul>
-            <li>Edit your profile any time in <Link href="/settings">Settings</Link>.</li>
             <li>
-              Delete your account in Settings. That removes your profile, votes, favorites and comments. Videos you shared
-              stay up, credited to the channel that made them.
+              Edit your profile any time in <Link href="/settings">Settings</Link>.
+            </li>
+            <li>
+              Delete your account in Settings. That removes your profile, votes, favorites and comments. Videos you
+              shared stay up, credited to the channel that made them.
             </li>
             <li>
               Questions or requests: <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>

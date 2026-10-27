@@ -17,7 +17,11 @@ type PersonRow = {
   user_badges: { badge: string }[];
 };
 
-export default async function PeopleAdminPage({ searchParams }: { searchParams: Promise<{ notice?: string; q?: string }> }) {
+export default async function PeopleAdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string; q?: string }>;
+}) {
   const viewer = await requireCurator();
   const { notice, q: rawQ } = await searchParams;
   const q = cleanSearch(rawQ).replace(/[^a-zA-Z0-9_ ]/g, "");
@@ -39,7 +43,14 @@ export default async function PeopleAdminPage({ searchParams }: { searchParams: 
         <label htmlFor="people-search" className="sr-only">
           Search people
         </label>
-        <input id="people-search" name="q" className="input" defaultValue={q} placeholder="Username or display name" style={{ flex: "1 1 280px", width: "auto" }} />
+        <input
+          id="people-search"
+          name="q"
+          className="input"
+          defaultValue={q}
+          placeholder="Username or display name"
+          style={{ flex: "1 1 280px", width: "auto" }}
+        />
         <button type="submit" className="btn btn-ghost">
           Search
         </button>
@@ -60,7 +71,9 @@ export default async function PeopleAdminPage({ searchParams }: { searchParams: 
                     @{person.username} · joined {formatDate(person.created_at)}
                   </span>
                 </div>
-                <span className={`pill ${person.role === "member" ? "pill-muted" : "pill-gold"}`}>{person.role}</span>
+                <span className={`pill ${person.role === "member" ? "pill-muted" : "pill-gold"}`}>
+                  {person.role.charAt(0).toUpperCase() + person.role.slice(1)}
+                </span>
               </div>
 
               <div className="row" style={{ gap: 8 }}>
@@ -80,7 +93,13 @@ export default async function PeopleAdminPage({ searchParams }: { searchParams: 
                   <label className="sr-only" htmlFor={`b-${person.id}`}>
                     Achievement
                   </label>
-                  <select id={`b-${person.id}`} name="badge" className="select" style={{ minHeight: 36, width: 200 }} defaultValue="">
+                  <select
+                    id={`b-${person.id}`}
+                    name="badge"
+                    className="select"
+                    style={{ minHeight: 36, width: 200 }}
+                    defaultValue=""
+                  >
                     <option value="" disabled>
                       Award an achievement
                     </option>
@@ -103,7 +122,13 @@ export default async function PeopleAdminPage({ searchParams }: { searchParams: 
                   <label className="small muted" htmlFor={`r-${person.id}`}>
                     Role
                   </label>
-                  <select id={`r-${person.id}`} name="role" className="select" defaultValue={person.role} style={{ minHeight: 36, width: 160 }}>
+                  <select
+                    id={`r-${person.id}`}
+                    name="role"
+                    className="select"
+                    defaultValue={person.role}
+                    style={{ minHeight: 36, width: 160 }}
+                  >
                     <option value="member">Member</option>
                     <option value="curator">Curator</option>
                     <option value="admin">Admin</option>

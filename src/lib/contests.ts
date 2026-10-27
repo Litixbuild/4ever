@@ -3,7 +3,10 @@ import type { Contest } from "@/lib/types";
 
 export type ContestPhase = "upcoming" | "open" | "voting" | "ended";
 
-export function contestPhase(contest: Pick<Contest, "opens_at" | "closes_at" | "ends_at">, now = new Date()): ContestPhase {
+export function contestPhase(
+  contest: Pick<Contest, "opens_at" | "closes_at" | "ends_at">,
+  now = new Date(),
+): ContestPhase {
   const t = now.getTime();
   if (t < new Date(contest.opens_at).getTime()) return "upcoming";
   if (t < new Date(contest.closes_at).getTime()) return "open";
@@ -16,9 +19,9 @@ export function contestStatusLine(contest: Contest, now = new Date()): string {
     case "upcoming":
       return `Opens ${formatDateTime(contest.opens_at)}`;
     case "open":
-      return `Open now · entries close ${formatDateTime(contest.closes_at)}`;
+      return `Entries close ${formatDateTime(contest.closes_at)}`;
     case "voting":
-      return `Entries closed · voting until ${formatDateTime(contest.ends_at)}`;
+      return `Voting ends ${formatDateTime(contest.ends_at)}`;
     default:
       return `Ended ${formatDateTime(contest.ends_at)}`;
   }

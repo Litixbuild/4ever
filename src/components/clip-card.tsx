@@ -4,7 +4,7 @@ import { Avatar, VerifiedMark } from "@/components/people";
 import { Vista } from "@/components/vista";
 import { categoryLabel } from "@/lib/categories";
 import { formatCount, formatDuration } from "@/lib/format";
-import { rarityClass } from "@/lib/rarity";
+import { rarityClass, rarityFor } from "@/lib/rarity";
 import type { Clip } from "@/lib/types";
 import { platformLabel } from "@/lib/video";
 
@@ -39,7 +39,7 @@ export function ClipCard({ clip }: { clip: Clip }) {
   const href = `/c/${clip.short_id}`;
   const duration = formatDuration(clip.duration_seconds);
   return (
-    <article className="clip-card">
+    <article className={`clip-card q-${rarityFor(clip.view_count).key}`}>
       <Link href={href} className="thumb" tabIndex={-1} aria-hidden="true">
         <ClipThumbImage clip={clip} />
         <span className="overlay-chip overlay-tl">{platformLabel(clip.platform)}</span>
@@ -89,11 +89,10 @@ export function MiniClip({ clip }: { clip: Clip }) {
         ) : null}
       </span>
       <span className="stack-sm" style={{ gap: 4, minWidth: 0 }}>
-        <span className={rarityClass(clip.view_count)} style={{ fontSize: 14.5, fontWeight: 750, lineHeight: 1.3 }}>
-          {clip.title}
-        </span>
-        <span className="tiny muted">
-          {clip.creator?.display_name ?? clip.channel_name} · {formatCount(clip.view_count)} views
+        <span className={`mini-title ${rarityClass(clip.view_count)}`}>{clip.title}</span>
+        <span className="tiny muted">{clip.creator?.display_name ?? clip.channel_name}</span>
+        <span className="tiny muted row" style={{ gap: 5 }}>
+          <EyeIcon size={12} /> {formatCount(clip.view_count)}
         </span>
       </span>
     </Link>

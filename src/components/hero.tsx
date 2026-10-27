@@ -1,90 +1,79 @@
 import Link from "next/link";
-import { ClipThumbImage, CreditLine } from "@/components/clip-card";
-import { ClockIcon, EyeIcon, MusicIcon, PlayIcon, StarIcon, SwordIcon, UpIcon } from "@/components/icons";
-import { Vista } from "@/components/vista";
+import { ClipThumbImage } from "@/components/clip-card";
+import { PlayIcon } from "@/components/icons";
+import { VerifiedMark } from "@/components/people";
 import { categoryLabel, musicLabel } from "@/lib/categories";
 import { formatCount, formatDuration } from "@/lib/format";
 import { rarityClass } from "@/lib/rarity";
 import type { Clip, Feature } from "@/lib/types";
 import { platformLabel } from "@/lib/video";
 
+// The front page feature. Its details read like an item tooltip from the game:
+// the name in its quality color, white properties, a green "Use:" line, gold flavor text,
+// and the creator credited the way crafted items are, "<Made by …>".
 export function Hero({ clip, feature }: { clip: Clip; feature: Feature | null }) {
   const href = `/c/${clip.short_id}`;
   const duration = formatDuration(clip.duration_seconds);
+  const maker = clip.creator?.display_name ?? clip.channel_name;
   return (
-    <section aria-labelledby="hero-title" className="hero">
-      <Link href={href} className="hero-media thumb" aria-label={`Watch ${clip.title}`}>
+    <section aria-labelledby="hero-title" className="showcase">
+      <Link href={href} className="showcase-media" aria-label={`Watch ${clip.title}`} tabIndex={-1}>
         <ClipThumbImage clip={clip} />
-        <span className="overlay-chip" style={{ left: 18, top: 18, height: 30, padding: "0 12px", color: "var(--gold-hi)", border: "1px solid rgba(242,207,126,0.35)", letterSpacing: "0.1em", fontWeight: 800 }}>
-          <StarIcon size={13} />
-          {feature ? "MOVIE OF THE WEEK" : "TRENDING THIS WEEK"}
+        <span className="player-play">
+          <PlayIcon size={32} style={{ marginLeft: 4 }} />
         </span>
-        <span className="player-play" style={{ width: 84, height: 84 }}>
-          <PlayIcon size={30} style={{ marginLeft: 4 }} />
-        </span>
-        <span className="overlay-chip" style={{ left: 18, bottom: 18, height: 28 }}>
+        <span className="overlay-chip overlay-tl" style={{ left: 16, top: 16, height: 28 }}>
           {platformLabel(clip.platform)}
         </span>
-        {duration ? (
-          <span className="overlay-chip" style={{ right: 18, bottom: 18, height: 28 }}>
-            {duration}
-          </span>
-        ) : null}
       </Link>
 
-      <div className="hero-info">
-        <span className="eyebrow">
-          {clip.kind === "movie" ? "Movie" : "Clip"} · {categoryLabel(clip.category)}
-        </span>
-        <h1 id="hero-title" className={`hero-title ${rarityClass(clip.view_count)}`}>
-          <Link href={href} style={{ color: "inherit", textDecoration: "none" }}>
-            {clip.title}
-          </Link>
-        </h1>
-        <div className="row small muted" style={{ gap: "8px 18px" }}>
+      <div className="showcase-side">
+        <div className="wow-tip">
+          <h1 id="hero-title" className={`tip-title ${rarityClass(clip.view_count)}`}>
+            <Link href={href}>{clip.title}</Link>
+          </h1>
+          <span>{feature ? "Movie of the Week" : "Most watched this week"}</span>
+          <span className="tip-split">
+            <span>{categoryLabel(clip.category)}</span>
+            <span>{clip.kind === "movie" ? "Movie" : "Clip"}</span>
+          </span>
           {duration ? (
-            <span className="row" style={{ gap: 6 }}>
-              <ClockIcon size={15} />
-              {duration}
+            <span className="tip-split">
+              <span>Runtime</span>
+              <span>{duration}</span>
             </span>
           ) : null}
-          <span className="row" style={{ gap: 6 }}>
-            <SwordIcon size={15} />
-            {categoryLabel(clip.category)}
-          </span>
-          <span className="row" style={{ gap: 6 }}>
-            <MusicIcon size={15} />
-            {musicLabel(clip.music_source, clip.music_credit)}
-          </span>
-        </div>
-        {feature && (feature.use_text || feature.flavor_text) ? (
-          <div className="card-tooltip stack-sm" style={{ gap: 4, fontSize: 14 }}>
-            {feature.use_text ? <span className="use-line">Use: {feature.use_text}</span> : null}
-            {feature.flavor_text ? <span className="flavor-line">&ldquo;{feature.flavor_text}&rdquo;</span> : null}
-          </div>
-        ) : null}
-        <div className="row" style={{ gap: 12, flexWrap: "nowrap" }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <CreditLine clip={clip} size={36} />
-          </div>
-          <span className="icon-stat small muted" title="Views on 4Ever">
-            <EyeIcon size={15} /> {formatCount(clip.view_count)}
-          </span>
-          <span className="icon-stat small" style={{ color: "var(--gold-hi)" }} title="Votes">
-            <UpIcon size={15} /> {formatCount(clip.vote_count)}
+          <span className="tip-gap">+{formatCount(clip.view_count)} Views</span>
+          <span>+{formatCount(clip.vote_count)} Votes</span>
+          <span className="tip-muted">{musicLabel(clip.music_source, clip.music_credit)}</span>
+          {feature?.use_text ? <span className="tip-use tip-gap">Use: {feature.use_text}</span> : null}
+          {feature?.flavor_text ? (
+            <span className={`tip-flavor ${feature.use_text ? "" : "tip-gap"}`}>
+              &ldquo;{feature.flavor_text}&rdquo;
+            </span>
+          ) : null}
+          <span className="tip-made tip-gap row" style={{ gap: 6 }}>
+            {clip.creator ? (
+              <Link href={`/u/${clip.creator.username}`} style={{ color: "inherit", textDecoration: "none" }}>
+                &lt;Made by {maker}&gt;
+              </Link>
+            ) : (
+              <span>&lt;Made by {maker}&gt;</span>
+            )}
+            {clip.creator ? <VerifiedMark size={15} /> : null}
           </span>
         </div>
-        <div className="row" style={{ marginTop: "auto" }}>
+        <div className="showcase-actions">
           <Link href={href} className="btn btn-gold btn-lg">
             <PlayIcon size={15} /> Watch now
           </Link>
           {clip.creator ? (
             <Link href={`/u/${clip.creator.username}`} className="btn btn-ghost btn-lg">
-              Creator profile
+              More from {clip.creator.display_name}
             </Link>
           ) : (
             <Link href={`/browse?cat=${clip.category}`} className="btn btn-ghost btn-lg">
-              More like this
+              More {categoryLabel(clip.category)}
             </Link>
           )}
         </div>
@@ -93,26 +82,30 @@ export function Hero({ clip, feature }: { clip: Clip; feature: Feature | null })
   );
 }
 
+// Before anything is shared, the front page invites the first legend.
 export function EmptyHero() {
   return (
-    <section aria-labelledby="hero-title" className="hero">
-      <div className="hero-media thumb" style={{ aspectRatio: "16 / 9" }}>
-        <Vista seed="tarren-mill" />
+    <section aria-labelledby="hero-title" className="showcase">
+      <div className="showcase-media">
+        <img src="/backdrop/scene.webp" alt="" />
       </div>
-      <div className="hero-info">
-        <span className="eyebrow">Movie of the Week</span>
-        <h1 id="hero-title" className="hero-title">
-          The front page is waiting for its first legend
-        </h1>
-        <p className="lead" style={{ margin: 0 }}>
-          4Ever is brand new. Share the best thing you&apos;ve recorded in Forever and it could be the first movie
-          everyone sees here.
-        </p>
-        <div className="card-tooltip stack-sm" style={{ gap: 4, fontSize: 14 }}>
-          <span className="use-line">Use: Be the first.</span>
-          <span className="flavor-line">&ldquo;Every legend starts with a single upload.&rdquo;</span>
+      <div className="showcase-side">
+        <div className="wow-tip">
+          <h1 id="hero-title" className="tip-title rarity-legendary">
+            The First Legend
+          </h1>
+          <span>Unique</span>
+          <span className="tip-split">
+            <span>Movie of the Week</span>
+            <span>Empty slot</span>
+          </span>
+          <span className="tip-use tip-gap">
+            Use: Share the best thing you&apos;ve recorded in Forever. It could be the first movie everyone sees here.
+          </span>
+          <span className="tip-flavor">&ldquo;Every legend starts with a single upload.&rdquo;</span>
+          <span className="tip-made tip-gap">&lt;Made by you&gt;</span>
         </div>
-        <div className="row" style={{ marginTop: "auto" }}>
+        <div className="showcase-actions">
           <Link href="/submit" className="btn btn-gold btn-lg">
             Submit a Clip
           </Link>

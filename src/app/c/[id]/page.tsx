@@ -5,7 +5,7 @@ import { deleteComment } from "@/app/actions/clip";
 import { MiniClip } from "@/components/clip-card";
 import { ClipActions } from "@/components/clip-actions";
 import { CommentForm } from "@/components/comment-form";
-import { ChevronRightIcon, ExternalIcon, EyeIcon, InfoIcon, TrashIcon } from "@/components/icons";
+import { ChevronRightIcon, ClockIcon, ExternalIcon, EyeIcon, TrashIcon } from "@/components/icons";
 import { Avatar, VerifiedMark } from "@/components/people";
 import { VideoPlayer } from "@/components/video-player";
 import { ContestCard } from "@/components/widgets";
@@ -31,7 +31,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const clip = await getClipByShortId(id);
   if (!clip) return { title: "Not found" };
   const by = clip.creator?.display_name ?? clip.channel_name;
-  const description = `${clip.kind === "movie" ? "A movie" : "A clip"} by ${by} · ${categoryLabel(clip.category)} · on ${site.name}`;
+  const where = clip.category === "other" ? "" : ` in ${categoryLabel(clip.category)}`;
+  const description = `A ${clip.kind === "movie" ? "movie" : "clip"} by ${by}${where}. Watch it on ${site.name}.`;
   return {
     title: clip.title,
     description,
@@ -86,7 +87,9 @@ export default async function ClipPage({
 
       {clip.status === "pending" && isSubmitter ? (
         <div className="notice notice-ok" role="status">
-          <strong style={{ color: "var(--text)" }}>{submitted ? "Submitted! " : ""}It&apos;s in the review queue.</strong>
+          <strong style={{ color: "var(--text)" }}>
+            {submitted ? "Submitted! " : ""}It&apos;s in the review queue.
+          </strong>
           <span>Only you and the curators can see this page until it&apos;s approved.</span>
         </div>
       ) : null}
@@ -123,44 +126,47 @@ export default async function ClipPage({
             countView={approved}
           />
 
-          <div className="row-between" style={{ alignItems: "flex-end" }}>
-            <div className="stack-sm" style={{ flex: "1 1 420px", minWidth: 0, gap: 10 }}>
-              <span className="eyebrow">
-                {clip.kind === "movie" ? "Movie" : "Clip"} · {categoryLabel(clip.category)}
-              </span>
-              <h1 className={`h1 ${rarityClass(clip.view_count)}`} style={{ fontSize: "clamp(26px, 3.4vw, 36px)", overflowWrap: "anywhere" }}>
-                {clip.title}
-              </h1>
-              <span className="row small muted" style={{ gap: "4px 14px" }}>
-                {duration ? <span>{duration}</span> : null}
-                <span>Posted {formatDate(clip.published_at ?? clip.created_at)}</span>
-                <span className="icon-stat">
+          <div className="stack-sm" style={{ gap: 14 }}>
+            <h1 className={`h1 clip-h1 ${rarityClass(clip.view_count)}`}>{clip.title}</h1>
+            <div className="row-between" style={{ alignItems: "center", gap: "14px 24px" }}>
+              <span className="meta-row">
+                <Link href={`/browse?kind=${clip.kind}`} className="meta-pill">
+                  {clip.kind === "movie" ? "Movie" : "Clip"}
+                </Link>
+                <Link href={`/browse?cat=${clip.category}`} className="meta-link">
+                  {categoryLabel(clip.category)}
+                </Link>
+                {duration ? (
+                  <span className="meta-item">
+                    <ClockIcon size={14} /> {duration}
+                  </span>
+                ) : null}
+                <span className="meta-item">Posted {formatDate(clip.published_at ?? clip.created_at)}</span>
+                <span className="meta-item">
                   <EyeIcon size={14} /> {formatCount(clip.view_count)} {clip.view_count === 1 ? "view" : "views"}
                 </span>
               </span>
+              {approved ? (
+                <ClipActions
+                  clipId={clip.id}
+                  shortId={clip.short_id}
+                  loggedIn={Boolean(viewer)}
+                  voted={state.voted}
+                  votes={clip.vote_count}
+                  favorited={state.favorited}
+                />
+              ) : null}
             </div>
-            {approved ? (
-              <ClipActions
-                clipId={clip.id}
-                shortId={clip.short_id}
-                loggedIn={Boolean(viewer)}
-                voted={state.voted}
-                votes={clip.vote_count}
-                favorited={state.favorited}
-              />
-            ) : null}
           </div>
 
-          <section aria-label="Credits" className="card" style={{ padding: 0, display: "flex", flexWrap: "wrap", overflow: "hidden" }}>
-            <div className="row" style={{ flex: "1 1 340px", padding: "20px 22px", gap: 14, flexWrap: "nowrap", borderRight: "1px solid var(--line)" }}>
+          <section aria-label="Credits" className="credits">
+            <div className="credits-main">
               {clip.creator ? (
                 <>
-                  <Avatar name={clip.creator.display_name} src={clip.creator.avatar_url} size={54} />
-                  <div className="stack-sm" style={{ gap: 2, minWidth: 0, flex: 1 }}>
-                    <span className="tiny faint" style={{ fontWeight: 800, letterSpacing: "0.12em" }}>
-                      CREATOR
-                    </span>
-                    <Link href={`/u/${clip.creator.username}`} className="row" style={{ gap: 6, color: "var(--text)", textDecoration: "none", fontWeight: 800, fontSize: 17 }}>
+                  <Avatar name={clip.creator.display_name} src={clip.creator.avatar_url} size={56} />
+                  <div className="stack-sm" style={{ gap: 3, minWidth: 0, flex: 1 }}>
+                    <span className="credits-label">Made by</span>
+                    <Link href={`/u/${clip.creator.username}`} className="credits-name">
                       {clip.creator.display_name} <VerifiedMark size={17} />
                     </Link>
                     <span className="small muted">
@@ -173,48 +179,70 @@ export default async function ClipPage({
                 </>
               ) : (
                 <>
-                  <Avatar name={clip.channel_name} size={54} />
-                  <div className="stack-sm" style={{ gap: 2, minWidth: 0, flex: 1 }}>
-                    <span className="tiny faint" style={{ fontWeight: 800, letterSpacing: "0.12em" }}>
-                      CREATOR
-                    </span>
-                    <span style={{ color: "var(--text)", fontWeight: 800, fontSize: 17 }}>{clip.channel_name}</span>
+                  <Avatar name={clip.channel_name} size={56} />
+                  <div className="stack-sm" style={{ gap: 3, minWidth: 0, flex: 1 }}>
+                    <span className="credits-label">Made by</span>
+                    <span className="credits-name">{clip.channel_name}</span>
                     <span className="small muted">
-                      {sourceName} channel · not claimed on 4Ever yet ·{" "}
+                      {sourceName} channel, not claimed on 4Ever yet.{" "}
                       <Link href={`/claim?clip=${clip.short_id}`}>Is this you?</Link>
                     </span>
                   </div>
                   {clip.channel_url ? (
-                    <a href={clip.channel_url} className="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer nofollow">
+                    <a
+                      href={clip.channel_url}
+                      className="btn btn-ghost btn-sm"
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                    >
                       Channel <ExternalIcon size={14} />
                     </a>
                   ) : null}
                 </>
               )}
             </div>
-            <dl style={{ flex: "1 1 280px", margin: 0, padding: "18px 22px", display: "grid", gridTemplateColumns: "auto 1fr", gap: "8px 18px", fontSize: 14 }}>
+            <dl className="credits-facts">
               {sharedBy ? (
                 <>
-                  <dt className="muted">Shared by</dt>
-                  <dd style={{ margin: 0 }}>
+                  <dt>Shared by</dt>
+                  <dd>
                     <Link href={`/u/${sharedBy.username}`} style={{ textDecoration: "none", fontWeight: 700 }}>
                       {sharedBy.display_name}
                     </Link>
                   </dd>
                 </>
               ) : null}
-              <dt className="muted">Music</dt>
-              <dd style={{ margin: 0, color: "var(--text-2)" }}>{musicLabel(clip.music_source, clip.music_credit)}</dd>
-              <dt className="muted">Source</dt>
-              <dd style={{ margin: 0 }}>
-                <a href={clip.source_url} target="_blank" rel="noopener noreferrer nofollow" className="row" style={{ gap: 6, display: "inline-flex", textDecoration: "none", fontWeight: 700 }}>
+              <dt>Music</dt>
+              <dd>{musicLabel(clip.music_source, clip.music_credit)}</dd>
+              <dt>Source</dt>
+              <dd>
+                <a
+                  href={clip.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="row"
+                  style={{ gap: 6, display: "inline-flex", textDecoration: "none", fontWeight: 700 }}
+                >
                   Watch on {sourceName} <ExternalIcon size={13} />
                 </a>
               </dd>
             </dl>
+            <div className="credits-foot">
+              <span>Credit always goes to the channel that uploaded the video.</span>
+              <span className="row" style={{ gap: "6px 18px" }}>
+                {clip.creator ? null : <Link href={`/claim?clip=${clip.short_id}`}>This is my video</Link>}
+                <Link href={`/report?clip=${clip.short_id}`} className="quiet-link">
+                  Report or request removal
+                </Link>
+              </span>
+            </div>
           </section>
 
-          {clip.description ? <p className="prose pre-line" style={{ margin: 0 }}>{clip.description}</p> : null}
+          {clip.description ? (
+            <p className="prose pre-line" style={{ margin: 0 }}>
+              {clip.description}
+            </p>
+          ) : null}
 
           {clip.tags.length > 0 ? (
             <div className="chips">
@@ -226,28 +254,22 @@ export default async function ClipPage({
             </div>
           ) : null}
 
-          <div className="notice">
-            <InfoIcon size={17} />
-            <span style={{ flex: "1 1 260px" }}>Credit always goes to the channel that uploaded the video.</span>
-            <Link href={`/claim?clip=${clip.short_id}`} style={{ fontWeight: 700, textDecoration: "none" }}>
-              This is my video
-            </Link>
-            <Link href={`/report?clip=${clip.short_id}`} style={{ fontWeight: 700, color: "var(--text-3)", textDecoration: "none" }}>
-              Report or request removal
-            </Link>
-          </div>
-
           {approved ? (
             <section aria-labelledby="comments" className="stack" style={{ gap: 14 }}>
-              <h2 id="comments" className="h2" style={{ fontSize: 24 }}>
-                Comments <span className="muted" style={{ fontFamily: "var(--font-body)", fontSize: 16 }}>{comments.length}</span>
+              <h2 id="comments" className="h2" style={{ fontSize: 26 }}>
+                Comments{" "}
+                <span className="muted" style={{ fontFamily: "var(--font-body)", fontSize: 16, textShadow: "none" }}>
+                  {comments.length}
+                </span>
               </h2>
               {viewer ? (
                 <CommentForm clipId={clip.id} shortId={clip.short_id} />
               ) : (
                 <div className="notice">
-                  <Link href={`/login?next=${encodeURIComponent(`/c/${clip.short_id}`)}`}>Log in</Link> to join the
-                  conversation.
+                  <span>
+                    <Link href={`/login?next=${encodeURIComponent(`/c/${clip.short_id}`)}`}>Log in</Link> to join the
+                    conversation.
+                  </span>
                 </div>
               )}
               <div>
@@ -259,13 +281,18 @@ export default async function ClipPage({
                       <div className="stack-sm" style={{ gap: 3, minWidth: 0, flex: 1 }}>
                         <span className="small">
                           {comment.author ? (
-                            <Link href={`/u/${comment.author.username}`} style={{ textDecoration: "none", fontWeight: 800, color: "var(--text)" }}>
+                            <Link
+                              href={`/u/${comment.author.username}`}
+                              style={{ textDecoration: "none", fontWeight: 800, color: "var(--text)" }}
+                            >
                               {comment.author.display_name}
                             </Link>
                           ) : (
                             <strong>Someone</strong>
                           )}
-                          <span className="faint"> · {timeAgo(comment.created_at)}</span>
+                          <span className="faint" style={{ marginLeft: 8 }}>
+                            {timeAgo(comment.created_at)}
+                          </span>
                         </span>
                         <p>{comment.body}</p>
                       </div>
@@ -273,7 +300,12 @@ export default async function ClipPage({
                         <form action={deleteComment}>
                           <input type="hidden" name="commentId" value={comment.id} />
                           <input type="hidden" name="shortId" value={clip.short_id} />
-                          <button type="submit" className="btn btn-ghost btn-sm" aria-label="Delete comment" title="Delete comment">
+                          <button
+                            type="submit"
+                            className="btn btn-ghost btn-sm"
+                            aria-label="Delete comment"
+                            title="Delete comment"
+                          >
                             <TrashIcon size={15} />
                           </button>
                         </form>
@@ -290,7 +322,7 @@ export default async function ClipPage({
         <aside className="split-aside" style={{ gap: 14 }}>
           {more.length > 0 ? (
             <>
-              <h2 className="h3">More from {clip.creator?.display_name ?? clip.channel_name}</h2>
+              <h2 className="h-gold">More from {clip.creator?.display_name ?? clip.channel_name}</h2>
               {more.map((m) => (
                 <MiniClip key={m.id} clip={m} />
               ))}
