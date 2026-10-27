@@ -1,7 +1,10 @@
 # Going live with 4Everclips
 
 This walks through everything from zero to a live site at 4everclips.com. Plan on about an hour the first time.
-Everything here is free to start.
+Everything here is free to start. See "Staying free" at the bottom.
+
+> **Already done for your project:** the database (step 1, parts 1 to 3) is set up in the Supabase project
+> `afvyxicvaejxqgapbppy` ("4Ever" organization, free plan). Start at step 1, part 4.
 
 **You'll need accounts on:** GitHub (you have this), [Supabase](https://supabase.com), [Vercel](https://vercel.com),
 the [Discord Developer Portal](https://discord.com/developers/applications), the
@@ -17,7 +20,8 @@ the end. Never paste the secret ones anywhere public.
 1. In Supabase, click **New project**. Name it `4everclips`, pick a region close to most players (US East is a good
    default), and save the database password somewhere safe.
 2. When it's ready, open **SQL Editor → New query**. Paste the whole file `supabase/migrations/0001_init.sql` and
-   press **Run**. You should see "Success. No rows returned".
+   press **Run**. You should see "Success. No rows returned". Then do the same with
+   `supabase/migrations/0002_lock_down_functions.sql`.
 3. Open another new query, paste `supabase/seed.sql`, and run it. That adds the Launch Week and First Kill contests.
 4. Click **Connect** at the top of the dashboard (or go to **Project Settings → API Keys**) and copy:
    - the **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
@@ -152,12 +156,19 @@ Everything lives under **Admin** (only curators and admins see it):
 - Achievements are awarded automatically: Verified Creator (on verification), Founding Creator (first 50 creators
   with an approved video), Movie of the Week (when featured), Contest Winner (champion placement).
 
-## Costs to keep an eye on
+## Staying free
 
-- **Supabase free plan**: plenty for launch. Free projects pause after a week with no activity, which won't happen
-  on a live site.
-- **Vercel Hobby plan**: free, but meant for non-commercial projects. If you add sponsors or ads, move to Pro.
-- **YouTube Data API**: 10,000 free units a day. Each link lookup uses about one, so this goes a long way.
+Nothing in this setup needs a credit card.
+
+- **Supabase**: keep the organization on the **Free** plan. Free plans can't run up charges. Free projects pause
+  after a week with no activity, which won't happen on a live site.
+- **Vercel**: choose the **Hobby** plan. It's free, but meant for non-commercial projects. If you add sponsors or
+  ads later, move to Pro.
+- **Google Cloud**: don't add a billing account. The YouTube Data API and Google login work without one, and the
+  free YouTube quota (10,000 units a day, about one per link lookup) goes a long way.
+- **Discord, Twitch, GitHub**: free.
+- **Real costs, only when you choose**: the domain (about $10 to $15 a year), the $6 DMCA agent registration, and
+  any contest prizes.
 
 ## Working on it locally
 

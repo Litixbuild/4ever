@@ -36,7 +36,7 @@ creator.
 ## Where things live
 
 ```
-supabase/migrations/0001_init.sql   database tables, security rules, helper functions
+supabase/migrations/                database tables, security rules, helper functions (run in order)
 supabase/seed.sql                   launch contests
 src/app/                            pages (each folder is a URL)
 src/app/admin/                      curator tools
