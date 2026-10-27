@@ -3,8 +3,10 @@
 This walks through everything from zero to a live site at 4everclips.com. Plan on about an hour the first time.
 Everything here is free to start. See "Staying free" at the bottom.
 
-> **Already done for your project:** the database (step 1, parts 1 to 3) is set up in the Supabase project
-> `afvyxicvaejxqgapbppy` ("4Ever" organization, free plan). Start at step 1, part 4.
+> **Already done for your project:** the database is set up in the Supabase project `afvyxicvaejxqgapbppy` ("4Ever"
+> organization, free plan) with its login settings, and Discord login is on (Discord app "4Ever"). The YouTube key
+> lives in the Google Cloud project "4Everclips" (ID `everclips`), and the Twitch app is "4Everclips" in the Twitch
+> Developer Console. The site deploys from the Netlify project `wc4ever`. What's left is step 5.
 
 **You'll need accounts on:** GitHub (you have this), [Supabase](https://supabase.com), [Netlify](https://netlify.com),
 the [Discord Developer Portal](https://discord.com/developers/applications), the
