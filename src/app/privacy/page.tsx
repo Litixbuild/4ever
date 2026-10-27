@@ -53,7 +53,7 @@ export default function PrivacyPage() {
           <h2>Who helps us run the site</h2>
           <ul>
             <li>Supabase stores the database and handles logins.</li>
-            <li>Vercel hosts the website.</li>
+            <li>Netlify hosts the website.</li>
             <li>YouTube and Twitch provide video details and the players.</li>
           </ul>
           <p>We don&apos;t sell your information, and we don&apos;t share it for advertising.</p>

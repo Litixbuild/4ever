@@ -6,11 +6,11 @@ Everything here is free to start. See "Staying free" at the bottom.
 > **Already done for your project:** the database (step 1, parts 1 to 3) is set up in the Supabase project
 > `afvyxicvaejxqgapbppy` ("4Ever" organization, free plan). Start at step 1, part 4.
 
-**You'll need accounts on:** GitHub (you have this), [Supabase](https://supabase.com), [Vercel](https://vercel.com),
+**You'll need accounts on:** GitHub (you have this), [Supabase](https://supabase.com), [Netlify](https://netlify.com),
 the [Discord Developer Portal](https://discord.com/developers/applications), the
 [Twitch Developer Console](https://dev.twitch.tv/console), and [Google Cloud](https://console.cloud.google.com).
 
-Keep a notes file open as you go. You'll collect about ten values (keys, IDs, secrets) and paste them into Vercel at
+Keep a notes file open as you go. You'll collect about ten values (keys, IDs, secrets) and paste them into Netlify at
 the end. Never paste the secret ones anywhere public.
 
 ---
@@ -52,7 +52,7 @@ https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback
    **Confidential**.
 3. Open the app with **Manage**, copy the **Client ID**, and click **New Secret** to get the secret.
 4. In Supabase, open the **Twitch** provider, turn it on, paste both values, and save.
-5. Also save the same two values for Vercel as `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`. The site uses them to
+5. Also save the same two values for Netlify as `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`. The site uses them to
    read clip details.
 
 ### Google (plus the YouTube key)
@@ -73,21 +73,24 @@ https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback
    - Site URL: `https://4everclips.com`
    - Redirect URLs, add all three:
      - `https://4everclips.com/**`
-     - `https://*.vercel.app/**` (so preview deployments work)
+     - `https://wc4ever.netlify.app/**` (the free Netlify address)
      - `http://localhost:3000/**` (for running it on your computer)
 2. In the authentication settings, turn on **Allow manual linking**. That lets someone who signed up with Discord
    link Twitch later to verify their channel.
 3. Turn **off** the **Email** provider. 4Ever only uses Discord, Twitch and Google, and leaving email on lets
    people create password accounts through the API.
 
-## 3. Deploy (Vercel)
+## 3. Deploy (Netlify)
 
-1. In Vercel, click **Add New → Project** and import the `4everclips` repository from GitHub.
-2. Before deploying, open **Environment Variables** and add every value from `.env.example`:
+The site lives in the Netlify project **wc4ever** (team "cjrothid's team"), linked to the GitHub repo
+`Litixbuild/4ever`. Netlify detects Next.js on its own: build command `npm run build`, publish directory `.next`.
+Every push to `main` deploys automatically.
+
+1. **Project configuration → Environment variables** holds every value from `.env.example`:
 
 | Name | Value |
 | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | `https://4everclips.com` |
+| `NEXT_PUBLIC_SITE_URL` | `https://wc4ever.netlify.app` for now, `https://4everclips.com` once the domain is connected |
 | `NEXT_PUBLIC_SUPABASE_URL` | from step 1 |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | from step 1 |
 | `SUPABASE_SECRET_KEY` | from step 1 |
@@ -98,11 +101,14 @@ https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback
 | `NEXT_PUBLIC_CONTACT_EMAIL` | where people can reach you |
 | `NEXT_PUBLIC_DMCA_AGENT_NAME` / `_ADDRESS` / `NEXT_PUBLIC_DMCA_EMAIL` | see step 5 |
 
-3. Click **Deploy**.
-4. Add your domain: **Project → Settings → Domains**, add `4everclips.com` and `www.4everclips.com`. Vercel shows
-   the exact DNS records to add at your domain registrar. It usually goes live within an hour.
+   Tick **Contains secret values** for `SUPABASE_SECRET_KEY`, `TWITCH_CLIENT_SECRET` and `YOUTUBE_API_KEY`. Leave it
+   unticked for anything starting with `NEXT_PUBLIC_`: those are meant to be public, and Netlify's secret scanner
+   would stop the build if it found them in the site's files.
+2. Add your domain: **Domain management → Add a domain**, add `4everclips.com`. Netlify shows the exact DNS records
+   to add at your domain registrar. It usually goes live within an hour. Then update `NEXT_PUBLIC_SITE_URL` and the
+   Supabase Site URL to `https://4everclips.com`.
 
-Whenever you change an environment variable, redeploy (Deployments → the latest one → **Redeploy**).
+Whenever you change an environment variable, redeploy: **Deploys → Trigger deploy → Deploy project**.
 
 ## 4. Make yourself the admin
 
@@ -162,8 +168,11 @@ Nothing in this setup needs a credit card.
 
 - **Supabase**: keep the organization on the **Free** plan. Free plans can't run up charges. Free projects pause
   after a week with no activity, which won't happen on a live site.
-- **Vercel**: choose the **Hobby** plan. It's free, but meant for non-commercial projects. If you add sponsors or
-  ads later, move to Pro.
+- **Netlify**: the **Free** plan never charges. It includes 300 credits a month. A production deploy uses 15, so
+  batch your changes into fewer pushes (about 20 deploys a month fits). Visitors use credits too (2 per 10,000
+  requests, 20 per GB of bandwidth). If credits run out, Netlify pauses the site until next month instead of
+  billing you. Deploy previews and failed deploys are free. Keep an eye on **Usage & billing** around launch.
+  Netlify's AI agent runs also use credits, so leave those off unless you want them.
 - **Google Cloud**: don't add a billing account. The YouTube Data API and Google login work without one, and the
   free YouTube quota (10,000 units a day, about one per link lookup) goes a long way.
 - **Discord, Twitch, GitHub**: free.
@@ -185,8 +194,8 @@ npm run lint
 
 - **Logging in sends you to the wrong site**: check the Site URL and Redirect URLs in Supabase step 2.
 - **Twitch clips say they can't connect**: Twitch needs the site's real domain. Make sure you're visiting through
-  4everclips.com (or the Vercel URL), not an IP address.
+  4everclips.com (or wc4ever.netlify.app), not an IP address.
 - **A YouTube video won't play**: the creator may have turned off embedding. The submit form catches this when the
   YouTube key is set.
-- **"4Everclips needs its database keys" page**: the Supabase variables are missing in Vercel. Add them and
+- **"4Everclips needs its database keys" page**: the Supabase variables are missing in Netlify. Add them and
   redeploy.

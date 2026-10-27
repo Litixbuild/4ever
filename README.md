@@ -28,7 +28,7 @@ creator.
 
 ## Built with
 
-- [Next.js 16](https://nextjs.org) (App Router) on [Vercel](https://vercel.com)
+- [Next.js 16](https://nextjs.org) (App Router) on [Netlify](https://netlify.com)
 - [Supabase](https://supabase.com) for the database, logins, and security rules
 - YouTube Data API and the Twitch API for video details
 - Plain CSS design system in `src/app/globals.css` (Cinzel and Manrope fonts, self-hosted)
