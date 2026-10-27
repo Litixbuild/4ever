@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource/cinzel/900.css";
+import "@fontsource/metamorphous/400.css";
 import "@fontsource/marcellus/400.css";
 import "@fontsource-variable/manrope";
 import "./globals.css";
