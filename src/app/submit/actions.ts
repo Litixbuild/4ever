@@ -84,6 +84,7 @@ export async function submitClip(_prev: SubmitState, formData: FormData): Promis
         channel_id: meta.channelId,
         channel_name: meta.channelName.slice(0, 120),
         channel_url: meta.channelUrl,
+        channel_avatar_url: meta.channelAvatarUrl,
         creator_id: creatorId,
         submitted_by: viewer.userId,
         kind,

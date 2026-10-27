@@ -1,9 +1,9 @@
 // Looks up a YouTube or Twitch link and returns the real details from the platform.
 // Server only. This is what makes credit trustworthy: the channel name always
 // comes from YouTube or Twitch, never from what someone typed.
-import { fetchTwitchClip, fetchTwitchVideo } from "@/lib/twitch";
+import { fetchTwitchClip, fetchTwitchUser, fetchTwitchVideo } from "@/lib/twitch";
 import { canonicalUrl, parseVideoUrl, type VideoRef } from "@/lib/video";
-import { fetchYouTubeVideo, LookupError } from "@/lib/youtube";
+import { fetchYouTubeChannelAvatar, fetchYouTubeVideo, LookupError } from "@/lib/youtube";
 
 export { LookupError };
 
@@ -17,6 +17,7 @@ export type VideoMeta = {
   channelId: string | null;
   channelName: string;
   channelUrl: string | null;
+  channelAvatarUrl: string | null;
 };
 
 export async function lookupVideo(input: string): Promise<VideoMeta> {
@@ -41,4 +42,11 @@ export function lookupErrorMessage(error: unknown): string {
     return "That took too long to load. Try again in a minute.";
   }
   return "Something went wrong reading that link. Try again in a minute.";
+}
+
+// The channel's picture on YouTube or Twitch, for videos saved before we stored it.
+export async function fetchChannelAvatar(platform: string, channelId: string): Promise<string | null> {
+  if (platform === "youtube") return fetchYouTubeChannelAvatar(channelId);
+  const user = await fetchTwitchUser(channelId);
+  return user?.profile_image_url || null;
 }

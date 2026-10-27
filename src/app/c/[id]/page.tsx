@@ -1,3 +1,6 @@
+import { after } from "next/server";
+import { fetchChannelAvatar } from "@/lib/lookup";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -51,6 +54,15 @@ export default async function ClipPage({
   if (!clip) notFound();
 
   const viewer = await getViewer();
+
+  // Older videos were saved without the channel's picture: fetch it once, after the page is sent.
+  if (!clip.channel_avatar_url && clip.channel_id) {
+    const { platform, channel_id: channelId, id } = clip;
+    after(async () => {
+      const avatar = await fetchChannelAvatar(platform, channelId).catch(() => null);
+      if (avatar) await createAdminClient().from("clips").update({ channel_avatar_url: avatar }).eq("id", id);
+    });
+  }
   const approved = clip.status === "approved";
   const isSubmitter = viewer?.userId === clip.submitted_by;
 
@@ -154,7 +166,11 @@ export default async function ClipPage({
             <div className="credits-main">
               {clip.creator ? (
                 <>
-                  <Avatar name={clip.creator.display_name} src={clip.creator.avatar_url} size={56} />
+                  <Avatar
+                    name={clip.creator.display_name}
+                    src={clip.creator.avatar_url ?? clip.channel_avatar_url}
+                    size={56}
+                  />
                   <div className="stack-sm" style={{ gap: 3, minWidth: 0, flex: 1 }}>
                     <span className="credits-label">Made by</span>
                     <Link href={`/u/${clip.creator.username}`} className="credits-name">
@@ -170,7 +186,7 @@ export default async function ClipPage({
                 </>
               ) : (
                 <>
-                  <Avatar name={clip.channel_name} size={56} />
+                  <Avatar name={clip.channel_name} src={clip.channel_avatar_url} size={56} />
                   <div className="stack-sm" style={{ gap: 3, minWidth: 0, flex: 1 }}>
                     <span className="credits-label">Made by</span>
                     <span className="credits-name">{clip.channel_name}</span>

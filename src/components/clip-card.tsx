@@ -22,7 +22,7 @@ export function CreditLine({ clip, size = 22 }: { clip: Clip; size?: number }) {
   if (clip.creator) {
     return (
       <Link href={`/u/${clip.creator.username}`} className="person-link">
-        <Avatar name={clip.creator.display_name} src={clip.creator.avatar_url} size={size} />
+        <Avatar name={clip.creator.display_name} src={clip.creator.avatar_url ?? clip.channel_avatar_url} size={size} />
         <span>{clip.creator.display_name}</span>
         <VerifiedMark size={14} />
       </Link>
@@ -30,7 +30,7 @@ export function CreditLine({ clip, size = 22 }: { clip: Clip; size?: number }) {
   }
   return (
     <span className="person-link" title={`${clip.channel_name} on ${platformLabel(clip.platform)}`}>
-      <Avatar name={clip.channel_name} size={size} />
+      <Avatar name={clip.channel_name} src={clip.channel_avatar_url} size={size} />
       <span>{clip.channel_name}</span>
     </span>
   );

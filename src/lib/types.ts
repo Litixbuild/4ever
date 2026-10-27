@@ -44,6 +44,7 @@ export type Clip = {
   channel_id: string | null;
   channel_name: string;
   channel_url: string | null;
+  channel_avatar_url: string | null;
   creator_id: string | null;
   submitted_by: string | null;
   kind: "movie" | "clip";
@@ -129,7 +130,7 @@ export type Report = {
 // Columns to select for a clip, with the people attached.
 export const CLIP_COLUMNS = `
   id, short_id, platform, source_type, source_id, source_url, title, description,
-  thumbnail_url, duration_seconds, channel_id, channel_name, channel_url,
+  thumbnail_url, duration_seconds, channel_id, channel_name, channel_url, channel_avatar_url,
   creator_id, submitted_by, kind, category, tags, music_source, music_credit,
   status, review_note, published_at, view_count, vote_count, comment_count, created_at,
   creator:profiles!clips_creator_id_fkey ( id, username, display_name, avatar_url ),

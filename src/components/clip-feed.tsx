@@ -23,6 +23,7 @@ export type FeedClip = {
   duration: string;
   category: string;
   channelName: string;
+  channelAvatar: string | null;
   views: number;
   votes: number;
   comments: number;
@@ -171,7 +172,7 @@ export function ClipFeed({
           </Link>
         ) : (
           <span className="feed-person feed-person-empty" title={clip.channelName}>
-            <Avatar name={clip.channelName} size={42} />
+            <Avatar name={clip.channelName} src={clip.channelAvatar} size={42} />
           </span>
         )}
       </div>

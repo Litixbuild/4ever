@@ -22,6 +22,7 @@ function toFeedClip(clip: Clip, voted: boolean): FeedClip {
     sourceType: clip.source_type,
     sourceId: clip.source_id,
     platform: clip.platform,
+    channelAvatar: clip.channel_avatar_url,
     thumbnailUrl: clip.thumbnail_url,
     duration: formatDuration(clip.duration_seconds),
     category: categoryLabel(clip.category),
@@ -34,7 +35,7 @@ function toFeedClip(clip: Clip, voted: boolean): FeedClip {
       ? {
           name: person.display_name,
           username: person.username,
-          avatar: person.avatar_url,
+          avatar: person.avatar_url ?? (clip.creator ? clip.channel_avatar_url : null),
           isCreator: Boolean(clip.creator),
         }
       : null,

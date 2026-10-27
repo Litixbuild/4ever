@@ -33,6 +33,7 @@ export type YouTubeVideo = {
   channelId: string | null;
   channelName: string;
   channelUrl: string | null;
+  channelAvatarUrl: string | null;
 };
 
 type Thumb = { url?: string } | undefined;
@@ -62,6 +63,7 @@ export async function fetchYouTubeVideo(id: string): Promise<YouTubeVideo> {
       channelId: null,
       channelName: data.author_name ?? "Unknown channel",
       channelUrl: data.author_url ?? null,
+      channelAvatarUrl: null,
     };
   }
 
@@ -105,7 +107,20 @@ export async function fetchYouTubeVideo(id: string): Promise<YouTubeVideo> {
     channelId,
     channelName: item.snippet.channelTitle ?? "Unknown channel",
     channelUrl: channelId ? `https://www.youtube.com/channel/${channelId}` : null,
+    channelAvatarUrl: channelId ? await fetchYouTubeChannelAvatar(channelId).catch(() => null) : null,
   };
+}
+
+// The channel's profile picture. Costs one unit of YouTube quota.
+export async function fetchYouTubeChannelAvatar(channelId: string): Promise<string | null> {
+  const key = apiKey();
+  if (!key) return null;
+  const { status, body } = await getJson(`${API}/channels?part=snippet&id=${encodeURIComponent(channelId)}&key=${key}`);
+  if (status !== 200) return null;
+  const item = ((body as { items?: unknown[] })?.items ?? [])[0] as
+    { snippet?: { thumbnails?: { medium?: Thumb; high?: Thumb; default?: Thumb } } } | undefined;
+  const t = item?.snippet?.thumbnails;
+  return t?.medium?.url ?? t?.high?.url ?? t?.default?.url ?? null;
 }
 
 export type YouTubeChannel = {
@@ -116,11 +131,9 @@ export type YouTubeChannel = {
 };
 
 // Accepts a channel link, an @handle, or a channel id.
-export function parseChannelInput(input: string):
-  | { by: "id"; value: string }
-  | { by: "handle"; value: string }
-  | { by: "username"; value: string }
-  | null {
+export function parseChannelInput(
+  input: string,
+): { by: "id"; value: string } | { by: "handle"; value: string } | { by: "username"; value: string } | null {
   const raw = input.trim();
   if (!raw) return null;
   if (/^UC[A-Za-z0-9_-]{22}$/.test(raw)) return { by: "id", value: raw };
@@ -158,8 +171,7 @@ export async function fetchYouTubeChannel(input: string): Promise<YouTubeChannel
   const { status, body } = await getJson(`${API}/channels?part=snippet&${param}&key=${key}`);
   if (status !== 200) throw new LookupError("YouTube didn't answer. Try again in a minute.");
   const item = ((body as { items?: unknown[] })?.items ?? [])[0] as
-    | { id?: string; snippet?: { title?: string; description?: string; customUrl?: string } }
-    | undefined;
+    { id?: string; snippet?: { title?: string; description?: string; customUrl?: string } } | undefined;
   if (!item?.id || !item.snippet) throw new LookupError("We couldn't find that channel.");
   return {
     id: item.id,

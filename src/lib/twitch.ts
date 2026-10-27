@@ -55,7 +55,7 @@ async function helix<T>(path: string): Promise<T[]> {
   throw new LookupError("Twitch didn't answer. Try again in a minute.");
 }
 
-export type TwitchUser = { id: string; login: string; display_name: string };
+export type TwitchUser = { id: string; login: string; display_name: string; profile_image_url?: string };
 
 export async function fetchTwitchUser(id: string): Promise<TwitchUser | null> {
   const users = await helix<TwitchUser>(`users?id=${encodeURIComponent(id)}`);
@@ -70,6 +70,7 @@ export type TwitchVideoInfo = {
   channelId: string;
   channelName: string;
   channelUrl: string;
+  channelAvatarUrl: string | null;
 };
 
 export async function fetchTwitchClip(slug: string): Promise<TwitchVideoInfo> {
@@ -92,6 +93,7 @@ export async function fetchTwitchClip(slug: string): Promise<TwitchVideoInfo> {
     channelId: clip.broadcaster_id,
     channelName: user?.display_name ?? clip.broadcaster_name,
     channelUrl: `https://www.twitch.tv/${login}`,
+    channelAvatarUrl: user?.profile_image_url || null,
   };
 }
 
@@ -107,9 +109,8 @@ export async function fetchTwitchVideo(id: string): Promise<TwitchVideoInfo> {
   }>(`videos?id=${encodeURIComponent(id)}`);
   const video = videos[0];
   if (!video) throw new LookupError("We couldn't find that Twitch video. It may have expired or been deleted.");
-  const thumb = video.thumbnail_url
-    ? video.thumbnail_url.replace("%{width}", "640").replace("%{height}", "360")
-    : null;
+  const user = await fetchTwitchUser(video.user_id).catch(() => null);
+  const thumb = video.thumbnail_url ? video.thumbnail_url.replace("%{width}", "640").replace("%{height}", "360") : null;
   return {
     title: (video.title || "Twitch video").slice(0, 140),
     description: video.description || null,
@@ -118,5 +119,6 @@ export async function fetchTwitchVideo(id: string): Promise<TwitchVideoInfo> {
     channelId: video.user_id,
     channelName: video.user_name,
     channelUrl: `https://www.twitch.tv/${video.user_login}`,
+    channelAvatarUrl: user?.profile_image_url || null,
   };
 }

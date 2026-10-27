@@ -1545,10 +1545,12 @@ button.thumb {
   border-radius: 50%;
   overflow: hidden;
   border: 1px solid rgba(242, 207, 126, 0.4);
-  font-family: var(--font-display);
-  font-weight: 400;
+  /* Initials only show when there's no picture; the body font sits truly centered in the circle. */
+  font-family: var(--font-body);
+  font-weight: 800;
   color: var(--gold-hi);
   line-height: 1;
+  text-align: center;
 }
 .avatar img {
   width: 100%;

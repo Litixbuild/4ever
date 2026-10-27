@@ -27,4 +27,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - `/watch` is the full-screen swipe feed (`src/components/clip-feed.tsx`); on phones the Clips menu link opens it.
 - Contests are on hold: `/contests` is a coming-soon page and `/contests/[slug]` redirects there. The contest code (actions, widgets, admin) is kept for later.
 - Profiles follow WoW: Forever: characters have a first and last name (saved together in `main_character`), the `realm` column holds the ruleset (PvP, PvE, RP-PvP, Hardcore) since there are no realms, and `main_spec` holds the spec. Level is no longer asked for.
+- Clips store the channel's own picture (`channel_avatar_url`, read from YouTube or Twitch at submit time). Credit lines use the creator's 4Ever avatar first, then that picture. Older clips get it filled in the first time their page is opened.
 - Run `npm test`, `npm run typecheck` and `npm run lint` before committing.
