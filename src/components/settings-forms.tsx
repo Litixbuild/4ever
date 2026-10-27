@@ -13,7 +13,7 @@ import { CharacterTip, hasCharacter } from "@/components/character-tip";
 import { site } from "@/lib/site";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
-import { CLASSES, RACES, RULESETS, raceFaction } from "@/lib/wow";
+import { CLASSES, RACES, RULESETS, raceFaction, specsFor } from "@/lib/wow";
 
 const initial: FormState = { ok: false, message: null };
 
@@ -48,7 +48,7 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
   const [first, ...rest] = (profile.main_character ?? "").trim().split(/\s+/);
   const [names, setNames] = useState({ first: first ?? "", last: rest.join(" ") });
   const [character, setCharacter] = useState({
-    level: profile.main_level ? String(profile.main_level) : "",
+    spec: profile.main_spec ?? "",
     race: profile.main_race ?? "",
     className: profile.main_class ?? "",
     realm: profile.realm ?? "",
@@ -166,21 +166,6 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
               />
             </div>
             <div className="field">
-              <label htmlFor="main_level" className="label" style={{ fontSize: 14 }}>
-                Level
-              </label>
-              <input
-                id="main_level"
-                name="main_level"
-                type="number"
-                min={1}
-                max={60}
-                className="input"
-                value={character.level}
-                onChange={set("level")}
-              />
-            </div>
-            <div className="field">
               <label htmlFor="main_race" className="label" style={{ fontSize: 14 }}>
                 Race
               </label>
@@ -215,12 +200,36 @@ export function ProfileForm({ profile, titles }: { profile: Profile; titles: { k
                 name="main_class"
                 className="select"
                 value={character.className}
-                onChange={set("className")}
+                onChange={(e) => {
+                  const className = e.target.value;
+                  // A new class keeps the spec only if that class has a spec by the same name.
+                  setCharacter((c) => ({ ...c, className, spec: specsFor(className).includes(c.spec) ? c.spec : "" }));
+                }}
               >
                 <option value="">Choose</option>
                 {classes.map((c) => (
                   <option key={c} value={c}>
                     {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="main_spec" className="label" style={{ fontSize: 14 }}>
+                Spec
+              </label>
+              <select
+                id="main_spec"
+                name="main_spec"
+                className="select"
+                value={character.spec}
+                onChange={set("spec")}
+                disabled={specsFor(character.className).length === 0}
+              >
+                <option value="">{character.className ? "Choose" : "Pick a class first"}</option>
+                {withCurrent(specsFor(character.className), character.spec).map((sp) => (
+                  <option key={sp} value={sp}>
+                    {sp}
                   </option>
                 ))}
               </select>

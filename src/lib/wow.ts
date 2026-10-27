@@ -33,7 +33,25 @@ export const RACES = [
 ] as const;
 
 // Forever has no realms: each ruleset is one mega-realm per region.
-export const RULESETS = ["Normal", "PvP", "RP", "RP-PvP", "Hardcore"] as const;
+export const RULESETS = ["PvP", "PvE", "RP-PvP", "Hardcore"] as const;
+
+// Each class's specs (talent trees), as people say them: "Shadow Priest", "Marksmanship Hunter".
+export const SPECS: Record<string, readonly string[]> = {
+  Druid: ["Balance", "Feral", "Restoration"],
+  Hunter: ["Beast Mastery", "Marksmanship", "Survival"],
+  Mage: ["Arcane", "Fire", "Frost"],
+  Paladin: ["Holy", "Protection", "Retribution"],
+  Priest: ["Discipline", "Holy", "Shadow"],
+  Rogue: ["Assassination", "Combat", "Subtlety"],
+  Shaman: ["Elemental", "Enhancement", "Restoration"],
+  Warlock: ["Affliction", "Demonology", "Destruction"],
+  Warrior: ["Arms", "Fury", "Protection"],
+};
+
+export function specsFor(className: string | null | undefined): readonly string[] {
+  const key = Object.keys(SPECS).find((c) => c.toLowerCase() === className?.trim().toLowerCase());
+  return key ? SPECS[key] : [];
+}
 
 export const CLASSES = [
   "Druid",

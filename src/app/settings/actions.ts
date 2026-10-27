@@ -31,12 +31,6 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
   const displayName = text(formData, "display_name", 40);
   if (!displayName) return { ok: false, message: "Add a display name." };
 
-  const levelRaw = String(formData.get("main_level") ?? "").trim();
-  const level = levelRaw ? Number.parseInt(levelRaw, 10) : null;
-  if (level !== null && (!Number.isFinite(level) || level < 1 || level > 60)) {
-    return { ok: false, message: "Level should be between 1 and 60." };
-  }
-
   const factionRaw = String(formData.get("faction") ?? "");
   const faction = factionRaw === "horde" || factionRaw === "alliance" ? factionRaw : null;
 
@@ -51,9 +45,9 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
       display_name: displayName,
       bio: text(formData, "bio", 280),
       main_character: text(formData, "main_character", 24),
-      main_level: level,
       main_race: text(formData, "main_race", 24),
       main_class: text(formData, "main_class", 24),
+      main_spec: text(formData, "main_spec", 24),
       realm: text(formData, "realm", 40),
       guild: text(formData, "guild", 40),
       faction,
@@ -82,7 +76,10 @@ export async function startYouTubeVerification(_prev: FormState, formData: FormD
   try {
     channel = await fetchYouTubeChannel(input);
   } catch (error) {
-    return { ok: false, message: error instanceof LookupError ? error.message : "YouTube didn't answer. Try again in a minute." };
+    return {
+      ok: false,
+      message: error instanceof LookupError ? error.message : "YouTube didn't answer. Try again in a minute.",
+    };
   }
 
   const owner = await verifiedOwnerOf("youtube", channel.id);
@@ -90,7 +87,8 @@ export async function startYouTubeVerification(_prev: FormState, formData: FormD
   if (owner) {
     return {
       ok: false,
-      message: "That channel is already verified by another 4Ever account. If that's wrong, use the report form and we'll sort it out.",
+      message:
+        "That channel is already verified by another 4Ever account. If that's wrong, use the report form and we'll sort it out.",
     };
   }
 
@@ -127,7 +125,14 @@ export async function checkYouTubeVerification(_prev: FormState, formData: FormD
     .eq("id", rowId)
     .eq("user_id", viewer.userId)
     .eq("platform", "youtube")
-    .maybeSingle<{ id: string; channel_id: string; channel_name: string; channel_url: string | null; verification_code: string | null; verified_at: string | null }>();
+    .maybeSingle<{
+      id: string;
+      channel_id: string;
+      channel_name: string;
+      channel_url: string | null;
+      verification_code: string | null;
+      verified_at: string | null;
+    }>();
   if (!row) return { ok: false, message: "That channel wasn't found." };
   if (row.verified_at) return { ok: true, message: "Already verified." };
   if (!row.verification_code) return { ok: false, message: "Start verification again to get a new code." };
@@ -136,13 +141,17 @@ export async function checkYouTubeVerification(_prev: FormState, formData: FormD
   try {
     channel = await fetchYouTubeChannel(row.channel_id);
   } catch (error) {
-    return { ok: false, message: error instanceof LookupError ? error.message : "YouTube didn't answer. Try again in a minute." };
+    return {
+      ok: false,
+      message: error instanceof LookupError ? error.message : "YouTube didn't answer. Try again in a minute.",
+    };
   }
 
   if (!channel.description.includes(row.verification_code)) {
     return {
       ok: false,
-      message: "We don't see the code in your channel description yet. YouTube can take a few minutes to update, so try again shortly.",
+      message:
+        "We don't see the code in your channel description yet. YouTube can take a few minutes to update, so try again shortly.",
     };
   }
 
@@ -206,7 +215,9 @@ export async function syncTwitch(): Promise<FormState> {
 export async function deleteAccount(_prev: FormState, formData: FormData): Promise<FormState> {
   const viewer = await getViewer();
   if (!viewer?.profile) return { ok: false, message: "Your login expired. Log in again." };
-  const confirm = String(formData.get("confirm") ?? "").trim().toLowerCase();
+  const confirm = String(formData.get("confirm") ?? "")
+    .trim()
+    .toLowerCase();
   if (confirm !== viewer.profile.username) {
     return { ok: false, message: `Type your username (${viewer.profile.username}) to confirm.` };
   }

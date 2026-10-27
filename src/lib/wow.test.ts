@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bannerFor, CLASSES, classColor, factionName, raceFaction } from "@/lib/wow";
+import { bannerFor, CLASSES, classColor, factionName, raceFaction, specsFor } from "@/lib/wow";
 
 describe("classColor", () => {
   it("knows the classes, in any case", () => {
@@ -31,5 +31,14 @@ describe("races and classes", () => {
     expect(raceFaction("Pandaren")).toBeNull();
     expect(raceFaction("Skyborne")).toBeNull();
     expect(raceFaction(null)).toBeNull();
+  });
+});
+
+describe("specs", () => {
+  it("lists each class's specs, in any case", () => {
+    expect(specsFor("Priest")).toContain("Shadow");
+    expect(specsFor(" hunter ")).toContain("Marksmanship");
+    expect(specsFor("Bard")).toEqual([]);
+    expect(specsFor(null)).toEqual([]);
   });
 });

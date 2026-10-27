@@ -2,7 +2,7 @@ import { classColor, factionColor, factionName } from "@/lib/wow";
 
 export type Character = {
   name: string | null;
-  level: number | string | null;
+  spec: string | null;
   race: string | null;
   className: string | null;
   realm: string | null;
@@ -15,7 +15,7 @@ export function hasCharacter(c: Character): boolean {
 }
 
 // A character the way the game's unit tooltip shows one: name in its class color, <Guild>,
-// level, race and class, then realm and faction.
+// race, spec and class, then ruleset and faction.
 export function CharacterTip({
   character,
   fallbackName,
@@ -26,9 +26,8 @@ export function CharacterTip({
   className?: string;
 }) {
   const faction = factionName(character.faction);
-  const line = [character.level ? `Level ${character.level}` : null, character.race, character.className]
-    .filter(Boolean)
-    .join(" ");
+  // "Troll Shadow Priest": race, then spec and class, the way players say it.
+  const line = [character.race, character.spec, character.className].filter(Boolean).join(" ");
   return (
     <div className={`wow-tip ${className}`} aria-label="Main character">
       <span

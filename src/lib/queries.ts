@@ -270,7 +270,7 @@ export async function getActivity(limit = 6): Promise<ActivityItem[]> {
 }
 
 const PROFILE_COLUMNS =
-  "id, username, display_name, avatar_url, bio, main_character, main_level, main_race, main_class, realm, guild, faction, active_title, role, created_at";
+  "id, username, display_name, avatar_url, bio, main_character, main_level, main_race, main_class, main_spec, realm, guild, faction, active_title, role, created_at";
 
 export const getProfileByUsername = cache(async (username: string): Promise<Profile | null> => {
   const value = username.toLowerCase();

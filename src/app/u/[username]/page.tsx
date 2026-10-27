@@ -68,7 +68,7 @@ export default async function ProfilePage({
   const titleColor = BADGES.find((b) => b.key === profile.active_title)?.color ?? "var(--purple)";
   const character = {
     name: profile.main_character,
-    level: profile.main_level,
+    spec: profile.main_spec,
     race: profile.main_race,
     className: profile.main_class,
     realm: profile.realm,
