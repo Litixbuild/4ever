@@ -105,5 +105,7 @@ export async function deleteClip(_prev: DeleteClipState, formData: FormData): Pr
   if (error) return { error: "That didn't delete. Try again in a moment." };
 
   revalidatePath("/", "layout");
-  redirect(`/u/${viewer.profile?.username ?? ""}?deleted=1`);
+  // Back to the profile tab the delete came from (Made or Shared).
+  const tab = formData.get("tab") === "shared" ? "&tab=shared" : "";
+  redirect(`/u/${viewer.profile?.username ?? ""}?deleted=1${tab}`);
 }

@@ -7,7 +7,8 @@ import { TrashIcon } from "@/components/icons";
 const initial: DeleteClipState = { error: null };
 
 // Two steps so nobody deletes a video by accident.
-export function DeleteClip({ clipId }: { clipId: string }) {
+// `compact` is the small version that sits under a video card on your profile.
+export function DeleteClip({ clipId, compact = false, tab }: { clipId: string; compact?: boolean; tab?: string }) {
   const [state, action, pending] = useActionState(deleteClip, initial);
   const [confirming, setConfirming] = useState(false);
 
@@ -19,7 +20,7 @@ export function DeleteClip({ clipId }: { clipId: string }) {
         style={{ gap: 6 }}
         onClick={() => setConfirming(true)}
       >
-        <TrashIcon size={14} /> Delete this video
+        <TrashIcon size={14} /> {compact ? "Delete" : "Delete this video"}
       </button>
     );
   }
@@ -27,7 +28,12 @@ export function DeleteClip({ clipId }: { clipId: string }) {
   return (
     <form action={action} className="delete-confirm" role="group" aria-label="Confirm delete">
       <input type="hidden" name="clipId" value={clipId} />
-      <span className="small">Delete it from 4Ever? Its votes and comments go too. It stays on YouTube or Twitch.</span>
+      {tab ? <input type="hidden" name="tab" value={tab} /> : null}
+      <span className="small">
+        {compact
+          ? "Delete from 4Ever? It stays on YouTube or Twitch."
+          : "Delete it from 4Ever? Its votes and comments go too. It stays on YouTube or Twitch."}
+      </span>
       <span className="row" style={{ gap: 8 }}>
         <button type="submit" className="btn btn-danger btn-sm" disabled={pending}>
           {pending ? "Deleting…" : "Yes, delete it"}

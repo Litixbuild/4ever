@@ -6,7 +6,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteComment } from "@/app/actions/clip";
 import { MiniClip } from "@/components/clip-card";
-import { DeleteClip } from "@/components/delete-clip";
 import { ClipActions } from "@/components/clip-actions";
 import { CommentForm } from "@/components/comment-form";
 import { ChevronRightIcon, ClockIcon, ExternalIcon, EyeIcon, TrashIcon } from "@/components/icons";
@@ -163,15 +162,6 @@ export default async function ClipPage({
               ) : null}
             </div>
           </div>
-
-          {canDelete ? (
-            <div className="owner-bar">
-              <span className="small">
-                {viewer?.userId === clip.creator_id ? "This is your video." : "You shared this video."}
-              </span>
-              <DeleteClip clipId={clip.id} />
-            </div>
-          ) : null}
 
           <section aria-label="Credits" className="credits">
             <div className="credits-main">

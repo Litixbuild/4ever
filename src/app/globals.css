@@ -3351,22 +3351,10 @@ a.plaque:hover {
     height: 46px;
   }
 }
-/* Shown on a video's page to the person who shared or made it. */
-.owner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px 18px;
-  padding: 12px 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.35);
-  color: var(--text-2);
-}
-.owner-bar .quiet-link {
-  color: var(--text);
-  font-weight: 700;
+/* Under each video card on your own profile. */
+.clip-owner {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
 }
 
 /* Touch screens: a clear layer over the video reads swipes (next and previous) and taps (sound, pause). */

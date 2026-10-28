@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EyeIcon, PlayIcon } from "@/components/icons";
+import { DeleteClip } from "@/components/delete-clip";
 import { InlinePlayer } from "@/components/inline-player";
 import { Avatar, VerifiedMark } from "@/components/people";
 import { Vista } from "@/components/vista";
@@ -36,7 +37,8 @@ export function CreditLine({ clip, size = 22 }: { clip: Clip; size?: number }) {
   );
 }
 
-export function ClipCard({ clip }: { clip: Clip }) {
+// `deletable`: shown on your own profile, so you can remove videos you made or shared.
+export function ClipCard({ clip, deletable = false, tab }: { clip: Clip; deletable?: boolean; tab?: string }) {
   const href = `/c/${clip.short_id}`;
   const duration = formatDuration(clip.duration_seconds);
   return (
@@ -69,16 +71,21 @@ export function ClipCard({ clip }: { clip: Clip }) {
             <span className="sr-only">views</span>
           </span>
         </div>
+        {deletable ? (
+          <div className="clip-owner">
+            <DeleteClip clipId={clip.id} compact tab={tab} />
+          </div>
+        ) : null}
       </div>
     </article>
   );
 }
 
-export function ClipGrid({ clips }: { clips: Clip[] }) {
+export function ClipGrid({ clips, deletable = false, tab }: { clips: Clip[]; deletable?: boolean; tab?: string }) {
   return (
     <div className="clip-grid">
       {clips.map((clip) => (
-        <ClipCard key={clip.id} clip={clip} />
+        <ClipCard key={clip.id} clip={clip} deletable={deletable} tab={tab} />
       ))}
     </div>
   );

@@ -216,7 +216,7 @@ export default async function ProfilePage({
           </nav>
         </div>
         {clips.length > 0 ? (
-          <ClipGrid clips={clips} />
+          <ClipGrid clips={clips} deletable={isOwn && tab !== "favorites"} tab={tab} />
         ) : (
           <div className="empty">
             <p className="muted" style={{ margin: 0 }}>
