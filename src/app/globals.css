@@ -3088,7 +3088,12 @@ a.plaque:hover {
   cursor: default;
 }
 .feed-person {
+  /* A block the exact size of the avatar, so the ring around it is a true circle. */
   flex: none;
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  line-height: 0;
   border-radius: 50%;
   box-shadow:
     0 0 0 2px var(--gold),
