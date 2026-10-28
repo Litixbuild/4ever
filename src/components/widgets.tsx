@@ -186,20 +186,34 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
         ) : (
           lines.map((item) => {
             if (item.type === "clip") {
-              const who = item.clip.creator?.display_name ?? item.clip.channel_name;
+              const clip = item.clip;
+              const title = (
+                <Link href={`/c/${clip.short_id}`} className={`chat-item ${rarityClass(clip.view_count)}`}>
+                  {clip.title}
+                </Link>
+              );
+              // "X shared" only when X really posted it here; otherwise just say whose video it is.
+              if (clip.creator && clip.creator.id === clip.submitted_by) {
+                return (
+                  <p key={`c-${clip.id}`} className="chat-line">
+                    <Link href={`/u/${clip.creator.username}`} className="chat-name">
+                      {clip.creator.display_name}
+                    </Link>{" "}
+                    shared {title}
+                  </p>
+                );
+              }
               return (
-                <p key={`c-${item.clip.id}`} className="chat-line">
-                  {item.clip.creator ? (
-                    <Link href={`/u/${item.clip.creator.username}`} className="chat-name">
-                      {who}
+                <p key={`c-${clip.id}`} className="chat-line">
+                  New from{" "}
+                  {clip.creator ? (
+                    <Link href={`/u/${clip.creator.username}`} className="chat-name">
+                      {clip.creator.display_name}
                     </Link>
                   ) : (
-                    <span className="chat-name">{who}</span>
-                  )}{" "}
-                  shared{" "}
-                  <Link href={`/c/${item.clip.short_id}`} className={`chat-item ${rarityClass(item.clip.view_count)}`}>
-                    {item.clip.title}
-                  </Link>
+                    <span className="chat-name">{clip.channel_name}</span>
+                  )}
+                  : {title}
                 </p>
               );
             }

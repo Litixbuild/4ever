@@ -50,8 +50,8 @@ function isAppleTouch(): boolean {
 }
 
 // One clip at a time, full screen, like Shorts. Swipe up for the next clip, down for the one before;
-// on a computer, the side arrows or arrow keys. Every clip starts playing by itself. Browsers only allow that
-// muted until the visitor has touched the page, so the first clip starts muted and the rest start with sound.
+// on a computer, the side arrows or arrow keys. Every clip starts playing by itself, with sound whenever the
+// browser allows it.
 export function ClipFeed({
   clips,
   startIndex,
@@ -77,7 +77,12 @@ export function ClipFeed({
     () => window.matchMedia("(pointer: coarse)").matches,
     () => false,
   );
-  const [muted, setMuted] = useState(true);
+  // Clips play with sound. Browsers only allow that once the visitor has clicked or tapped something on the site
+  // (opening the feed from the menu counts), so a visitor who lands here straight from a link starts muted until
+  // their first swipe or tap. iPhones never allow it, so there the first tap turns the sound on.
+  const [muted, setMuted] = useState(
+    () => typeof navigator === "undefined" || isAppleTouch() || !(navigator.userActivation?.hasBeenActive ?? false),
+  );
   // Taps on a touch screen: the first one turns the sound on, then each tap pauses or plays.
   const [soundOnFor, setSoundOnFor] = useState<string | null>(null);
   const [paused, setPaused] = useState(false);
@@ -225,9 +230,6 @@ export function ClipFeed({
         <Link href="/" className="feed-icon-btn" aria-label="Close clips">
           <XIcon size={20} />
         </Link>
-        <span className="feed-count" aria-live="polite">
-          {index + 1} of {clips.length}
-        </span>
         {person ? (
           <Link href={`/u/${person.username}`} className="feed-person" aria-label={`${person.name}'s profile`}>
             <Avatar name={person.name} src={person.avatar} size={42} />
@@ -276,8 +278,6 @@ export function ClipFeed({
                 <span className="feed-touch-icon">
                   <PlayIcon size={34} style={{ marginLeft: 4 }} />
                 </span>
-              ) : muted && soundOnFor !== clip.id && clip.platform === "youtube" ? (
-                <span className="feed-sound-hint">Tap for sound</span>
               ) : null}
             </button>
           ) : null}
