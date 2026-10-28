@@ -84,9 +84,16 @@ export function ClipFeed({
     () => typeof navigator === "undefined" || isAppleTouch() || !(navigator.userActivation?.hasBeenActive ?? false),
   );
   // Taps on a touch screen: the first one turns the sound on, then each tap pauses or plays.
-  const [soundOnFor, setSoundOnFor] = useState<string | null>(null);
+  const [soundOn, setSoundOn] = useState(false);
   const [paused, setPaused] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
+  // iPhones only allow sound after a tap on the player itself, and a new player starts silent again. So there one
+  // YouTube player stays open and each new clip is loaded into it: tap once and the sound stays on while you swipe.
+  const apple = useSyncExternalStore(noopSubscribe, isAppleTouch, () => false);
+  const [player, setPlayer] = useState<{ src: string; first: string } | null>(null);
+  const playerReady = useRef(false);
+  const playerVideo = useRef<string | null>(null);
+  const wantedVideo = useRef<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [votes, setVotes] = useState(() =>
     Object.fromEntries(clips.map((c) => [c.id, { voted: c.voted, count: c.votes }])),
@@ -96,6 +103,13 @@ export function ClipFeed({
   const counted = useRef(new Set<string>());
   const touch = useRef<{ x: number; y: number } | null>(null);
   const clip = clips[index];
+  const keepPlayer = Boolean(host && apple && clip?.platform === "youtube");
+  // Open the shared player for the first YouTube clip, and let it go when a Twitch clip comes up.
+  if (keepPlayer && !player && clip && host) {
+    setPlayer({ src: feedEmbed(clip, host, true, touchScreen, false), first: clip.sourceId });
+  } else if (!keepPlayer && player) {
+    setPlayer(null);
+  }
   const feedPath = (shortId: string) => `/watch?start=${shortId}${kind === "clip" ? "" : `&kind=${kind}`}`;
 
   const go = useCallback(
@@ -108,7 +122,6 @@ export function ClipFeed({
       if (!isAppleTouch()) setMuted(false);
       setSheetOpen(false);
       setPaused(false);
-      setSoundOnFor(null);
       window.history.replaceState(null, "", feedPath(clips[next].shortId));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,8 +175,59 @@ export function ClipFeed({
   }
 
   // YouTube's player takes commands from this page (the link asks for that with enablejsapi=1).
-  function command(func: string) {
-    frame.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
+  const command = useCallback((func: string, args: unknown[] = []) => {
+    frame.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "*");
+  }, []);
+
+  // The shared player: load the clip on screen into it once it's ready.
+  const loadWanted = useCallback(() => {
+    const wanted = wantedVideo.current;
+    if (!playerReady.current || !wanted || wanted === playerVideo.current) return;
+    playerVideo.current = wanted;
+    command("loadVideoById", [wanted]);
+  }, [command]);
+
+  useEffect(() => {
+    wantedVideo.current = keepPlayer && clip ? clip.sourceId : null;
+    loadWanted();
+  }, [keepPlayer, clip, loadWanted]);
+
+  // Hear back from the shared player: when it's ready, and when a clip ends (it starts over, like Shorts).
+  useEffect(() => {
+    if (!keepPlayer) return;
+    function onMessage(event: MessageEvent) {
+      if (event.source !== frame.current?.contentWindow || typeof event.data !== "string") return;
+      let data: { event?: string; info?: { playerState?: number } | number | null };
+      try {
+        data = JSON.parse(event.data);
+      } catch {
+        return;
+      }
+      if (data.event === "onReady" || data.event === "initialDelivery") {
+        playerReady.current = true;
+        loadWanted();
+      }
+      const state =
+        data.event === "onStateChange" ? data.info : typeof data.info === "object" ? data.info?.playerState : undefined;
+      if (state === 0) {
+        command("seekTo", [0, true]);
+        command("playVideo");
+      }
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [keepPlayer, command, loadWanted]);
+
+  function onFrameLoad() {
+    setSoundOn(false);
+    if (!keepPlayer || !player) return;
+    playerReady.current = false;
+    playerVideo.current = player.first;
+    // Ask the player to report back (ready, playing, ended).
+    frame.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: "listening", id: "4ever", channel: "widget" }),
+      "*",
+    );
   }
 
   function onTap() {
@@ -173,11 +237,11 @@ export function ClipFeed({
       if (muted && !isAppleTouch()) setMuted(false);
       return;
     }
-    const silent = muted && soundOnFor !== clip.id;
+    const silent = muted && !soundOn;
     if (silent) {
       command("unMute");
       command("playVideo");
-      setSoundOnFor(clip.id);
+      setSoundOn(true);
       setPaused(false);
       return;
     }
@@ -252,7 +316,10 @@ export function ClipFeed({
         </button>
       ) : null}
 
-      <div className={`feed-stage ${direction ? `feed-in-${direction}` : ""}`} key={clip.id}>
+      <div
+        className={`feed-stage ${direction && !keepPlayer ? `feed-in-${direction}` : ""}`}
+        key={keepPlayer ? "player" : clip.id}
+      >
         <div className="feed-media">
           {clip.thumbnailUrl ? (
             <img className="feed-poster" src={clip.thumbnailUrl} alt="" referrerPolicy="no-referrer" />
@@ -260,7 +327,8 @@ export function ClipFeed({
           {host ? (
             <iframe
               ref={frame}
-              src={feedEmbed(clip, host, muted, touchScreen)}
+              src={keepPlayer && player ? player.src : feedEmbed(clip, host, muted, touchScreen, true)}
+              onLoad={onFrameLoad}
               title={clip.title}
               allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen
@@ -272,7 +340,7 @@ export function ClipFeed({
               type="button"
               className="feed-touch"
               onClick={onTap}
-              aria-label={paused ? "Play" : muted && soundOnFor !== clip.id ? "Turn sound on" : "Pause"}
+              aria-label={paused ? "Play" : muted && !soundOn ? "Turn sound on" : "Pause"}
             >
               {paused ? (
                 <span className="feed-touch-icon">
@@ -336,10 +404,12 @@ export function ClipFeed({
 
 // The player link: plays on its own, inline on phones, muted when the browser requires it.
 // On touch screens YouTube's own controls sit under the tap layer, so they're hidden and the clip loops, like Shorts.
-function feedEmbed(clip: FeedClip, host: string, muted: boolean, touchScreen: boolean): string {
+// The shared iPhone player can't use YouTube's loop setting (it would replay the first clip), so it restarts clips itself.
+function feedEmbed(clip: FeedClip, host: string, muted: boolean, touchScreen: boolean, loop: boolean): string {
   const base = embedUrl(clip.sourceType, clip.sourceId, host);
   if (clip.platform === "youtube") {
-    const touch = touchScreen ? `&controls=0&loop=1&playlist=${encodeURIComponent(clip.sourceId)}` : "";
+    const repeat = loop ? `&loop=1&playlist=${encodeURIComponent(clip.sourceId)}` : "";
+    const touch = touchScreen ? `&controls=0${repeat}` : "";
     return `${base}&playsinline=1&enablejsapi=1${touch}${muted ? "&mute=1" : ""}`;
   }
   return `${base}&muted=${muted ? "true" : "false"}`;
