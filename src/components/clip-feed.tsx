@@ -35,6 +35,13 @@ const SWIPE_PX = 50;
 
 const noopSubscribe = () => () => {};
 
+// Phones and tablets: the video fills the screen and a clear layer over it reads swipes and taps.
+function subscribeCoarse(onChange: () => void) {
+  const query = window.matchMedia("(pointer: coarse)");
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
 // iPhones and iPads never let a video start with sound on its own, so there clips always start muted.
 function isAppleTouch(): boolean {
   return (
@@ -65,7 +72,16 @@ export function ClipFeed({
     () => window.location.hostname,
     () => null,
   );
+  const touchScreen = useSyncExternalStore(
+    subscribeCoarse,
+    () => window.matchMedia("(pointer: coarse)").matches,
+    () => false,
+  );
   const [muted, setMuted] = useState(true);
+  // Taps on a touch screen: the first one turns the sound on, then each tap pauses or plays.
+  const [soundOnFor, setSoundOnFor] = useState<string | null>(null);
+  const [paused, setPaused] = useState(false);
+  const frame = useRef<HTMLIFrameElement>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [votes, setVotes] = useState(() =>
     Object.fromEntries(clips.map((c) => [c.id, { voted: c.voted, count: c.votes }])),
@@ -86,6 +102,8 @@ export function ClipFeed({
       // Moving on is a tap or swipe, which lets the next clip play with sound (except on Apple phones).
       if (!isAppleTouch()) setMuted(false);
       setSheetOpen(false);
+      setPaused(false);
+      setSoundOnFor(null);
       window.history.replaceState(null, "", feedPath(clips[next].shortId));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,6 +154,30 @@ export function ClipFeed({
     if (Math.abs(dy) < SWIPE_PX || Math.abs(dy) < Math.abs(dx) * 1.2) return;
     // Finger moving up brings the next clip, like Shorts.
     go(dy < 0 ? 1 : -1);
+  }
+
+  // YouTube's player takes commands from this page (the link asks for that with enablejsapi=1).
+  function command(func: string) {
+    frame.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
+  }
+
+  function onTap() {
+    if (!clip) return;
+    if (clip.platform !== "youtube") {
+      // Twitch's player can't be told to unmute from here, so it reloads with sound instead.
+      if (muted && !isAppleTouch()) setMuted(false);
+      return;
+    }
+    const silent = muted && soundOnFor !== clip.id;
+    if (silent) {
+      command("unMute");
+      command("playVideo");
+      setSoundOnFor(clip.id);
+      setPaused(false);
+      return;
+    }
+    command(paused ? "playVideo" : "pauseVideo");
+    setPaused(!paused);
   }
 
   function onVote() {
@@ -215,12 +257,29 @@ export function ClipFeed({
           ) : null}
           {host ? (
             <iframe
-              src={feedEmbed(clip, host, muted)}
+              ref={frame}
+              src={feedEmbed(clip, host, muted, touchScreen)}
               title={clip.title}
               allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen
               referrerPolicy="strict-origin-when-cross-origin"
             />
+          ) : null}
+          {host && touchScreen ? (
+            <button
+              type="button"
+              className="feed-touch"
+              onClick={onTap}
+              aria-label={paused ? "Play" : muted && soundOnFor !== clip.id ? "Turn sound on" : "Pause"}
+            >
+              {paused ? (
+                <span className="feed-touch-icon">
+                  <PlayIcon size={34} style={{ marginLeft: 4 }} />
+                </span>
+              ) : muted && soundOnFor !== clip.id && clip.platform === "youtube" ? (
+                <span className="feed-sound-hint">Tap for sound</span>
+              ) : null}
+            </button>
           ) : null}
         </div>
 
@@ -276,9 +335,13 @@ export function ClipFeed({
 }
 
 // The player link: plays on its own, inline on phones, muted when the browser requires it.
-function feedEmbed(clip: FeedClip, host: string, muted: boolean): string {
+// On touch screens YouTube's own controls sit under the tap layer, so they're hidden and the clip loops, like Shorts.
+function feedEmbed(clip: FeedClip, host: string, muted: boolean, touchScreen: boolean): string {
   const base = embedUrl(clip.sourceType, clip.sourceId, host);
-  if (clip.platform === "youtube") return `${base}&playsinline=1${muted ? "&mute=1" : ""}`;
+  if (clip.platform === "youtube") {
+    const touch = touchScreen ? `&controls=0&loop=1&playlist=${encodeURIComponent(clip.sourceId)}` : "";
+    return `${base}&playsinline=1&enablejsapi=1${touch}${muted ? "&mute=1" : ""}`;
+  }
   return `${base}&muted=${muted ? "true" : "false"}`;
 }
 

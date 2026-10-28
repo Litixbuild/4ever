@@ -124,7 +124,13 @@ body::before {
   pointer-events: none;
   background-color: var(--bg);
   background-image:
-    linear-gradient(180deg, rgba(12, 10, 9, 0.3) 0, rgba(12, 10, 9, 0) 15%, rgba(12, 10, 9, 0) 70%, rgba(12, 10, 9, 0.5) 100%),
+    linear-gradient(
+      180deg,
+      rgba(12, 10, 9, 0.3) 0,
+      rgba(12, 10, 9, 0) 15%,
+      rgba(12, 10, 9, 0) 70%,
+      rgba(12, 10, 9, 0.5) 100%
+    ),
     linear-gradient(
       90deg,
       rgba(12, 10, 9, 0.28) 0,
@@ -916,7 +922,16 @@ textarea::placeholder {
   animation: glow-flicker 5s ease-in-out infinite;
 }
 .glow-ev::after {
-  background-image: linear-gradient(0deg, #d0280f 0%, #f04420 22%, #ff8a3d 40%, #ffe2b8 50%, #ff8a3d 60%, #f04420 78%, #d0280f 100%);
+  background-image: linear-gradient(
+    0deg,
+    #d0280f 0%,
+    #f04420 22%,
+    #ff8a3d 40%,
+    #ffe2b8 50%,
+    #ff8a3d 60%,
+    #f04420 78%,
+    #d0280f 100%
+  );
   background-size: 100% 300%;
   filter: drop-shadow(0 0 1.5px rgba(255, 70, 20, 0.9)) drop-shadow(0 1px 0 rgba(0, 0, 0, 0.8));
   animation: glow-rise 7s linear infinite;
@@ -926,7 +941,16 @@ textarea::placeholder {
   animation: glow-pulse 7.5s ease-in-out infinite;
 }
 .glow-er::after {
-  background-image: linear-gradient(90deg, #2763e8 0%, #3d86ff 22%, #8cc8ff 40%, #eef8ff 50%, #8cc8ff 60%, #3d86ff 78%, #2763e8 100%);
+  background-image: linear-gradient(
+    90deg,
+    #2763e8 0%,
+    #3d86ff 22%,
+    #8cc8ff 40%,
+    #eef8ff 50%,
+    #8cc8ff 60%,
+    #3d86ff 78%,
+    #2763e8 100%
+  );
   background-size: 300% 100%;
   filter: drop-shadow(0 0 1.5px rgba(70, 150, 255, 0.95)) drop-shadow(0 1px 0 rgba(0, 0, 0, 0.8));
   animation: glow-flow 9s linear infinite;
@@ -2562,7 +2586,9 @@ a.credits-name:hover {
 }
 .place-1 .clip-card {
   border-color: rgba(255, 209, 0, 0.45);
-  box-shadow: 0 0 0 1px rgba(255, 209, 0, 0.15), 0 18px 40px -18px rgba(255, 209, 0, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(255, 209, 0, 0.15),
+    0 18px 40px -18px rgba(255, 209, 0, 0.45);
 }
 .podium {
   display: grid;
@@ -2709,7 +2735,9 @@ a.plaque:hover {
 }
 .profile-avatar {
   margin-top: -62px;
-  box-shadow: 0 0 0 6px var(--surface), 0 10px 30px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 0 0 6px var(--surface),
+    0 10px 30px rgba(0, 0, 0, 0.6);
   border-width: 2px;
   border-color: var(--gold);
 }
@@ -3012,9 +3040,7 @@ a.plaque:hover {
   grid-template-rows: auto 1fr auto;
   height: 100dvh;
   padding: max(10px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
-  background:
-    radial-gradient(ellipse at 50% 40%, rgba(60, 40, 20, 0.35), transparent 70%),
-    #050404;
+  background: radial-gradient(ellipse at 50% 40%, rgba(60, 40, 20, 0.35), transparent 70%), #050404;
   color: var(--text);
   /* Vertical swipes are read by the feed itself; there's nothing behind it to scroll. */
   touch-action: pan-y;
@@ -3329,6 +3355,106 @@ a.plaque:hover {
   .feed-action-icon {
     width: 46px;
     height: 46px;
+  }
+}
+/* Touch screens: a clear layer over the video reads swipes (next and previous) and taps (sound, pause). */
+.feed-touch {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.feed-touch-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+}
+.feed-sound-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+  font-weight: 700;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+/* Phones held upright: the clip fills the whole screen, like Shorts, and everything else floats over it. */
+@media (max-width: 760px) and (orientation: portrait) {
+  .feed {
+    grid-template-rows: 1fr;
+    padding: 0;
+  }
+  .feed-stage {
+    position: absolute;
+    inset: 0;
+    display: block;
+    max-width: none;
+  }
+  .feed-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .feed-top,
+  .feed-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
+  }
+  .feed-top {
+    top: 0;
+    padding: max(10px, env(safe-area-inset-top)) 14px 28px;
+    background: linear-gradient(rgba(0, 0, 0, 0.55), transparent);
+  }
+  .feed-bottom {
+    bottom: 0;
+    padding: 12px 10px max(12px, env(safe-area-inset-bottom));
+    pointer-events: none;
+  }
+  .feed-bottom > * {
+    pointer-events: auto;
+  }
+  .feed-info {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 70px 18px calc(max(12px, env(safe-area-inset-bottom)) + 84px);
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+    pointer-events: none;
+  }
+  .feed-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: 19px;
+    pointer-events: auto;
   }
 }
 @media (min-width: 761px) and (min-height: 521px) {
