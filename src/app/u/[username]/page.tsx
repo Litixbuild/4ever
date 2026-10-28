@@ -41,9 +41,9 @@ function rgba(hex: string, alpha: number) {
 export default async function ProfilePage({
   params,
   searchParams,
-}: Params & { searchParams: Promise<{ tab?: string }> }) {
+}: Params & { searchParams: Promise<{ tab?: string; deleted?: string }> }) {
   const { username } = await params;
-  const { tab: tabParam } = await searchParams;
+  const { tab: tabParam, deleted } = await searchParams;
   const profile = await getProfileByUsername(username);
   if (!profile) notFound();
 
@@ -95,6 +95,11 @@ export default async function ProfilePage({
 
   return (
     <div className="container page" style={{ gap: 44 }}>
+      {deleted ? (
+        <div className="notice notice-ok" role="status">
+          Your video was deleted from 4Ever. It&apos;s still on YouTube or Twitch.
+        </div>
+      ) : null}
       <section aria-label="Profile" className="profile-card">
         <div className="profile-banner">
           <img src={bannerFor(profile.faction)} alt="" />

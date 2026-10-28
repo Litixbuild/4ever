@@ -6,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteComment } from "@/app/actions/clip";
 import { MiniClip } from "@/components/clip-card";
+import { DeleteClip } from "@/components/delete-clip";
 import { ClipActions } from "@/components/clip-actions";
 import { CommentForm } from "@/components/comment-form";
 import { ChevronRightIcon, ClockIcon, ExternalIcon, EyeIcon, TrashIcon } from "@/components/icons";
@@ -65,6 +66,7 @@ export default async function ClipPage({
   }
   const approved = clip.status === "approved";
   const isSubmitter = viewer?.userId === clip.submitted_by;
+  const canDelete = Boolean(viewer && (isSubmitter || viewer.userId === clip.creator_id));
 
   const [state, comments, more] = await Promise.all([
     getViewerClipState(clip.id, viewer?.userId ?? null),
@@ -238,9 +240,12 @@ export default async function ClipPage({
               <span>Credit always goes to the channel that uploaded the video.</span>
               <span className="row" style={{ gap: "6px 18px" }}>
                 {clip.creator ? null : <Link href={`/claim?clip=${clip.short_id}`}>This is my video</Link>}
-                <Link href={`/report?clip=${clip.short_id}`} className="quiet-link">
-                  Report or request removal
-                </Link>
+                {canDelete ? null : (
+                  <Link href={`/report?clip=${clip.short_id}`} className="quiet-link">
+                    Report or request removal
+                  </Link>
+                )}
+                {canDelete ? <DeleteClip clipId={clip.id} /> : null}
               </span>
             </div>
           </section>

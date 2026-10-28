@@ -1933,6 +1933,12 @@ a.credits-name:hover {
   font-weight: 700;
   text-decoration: none;
 }
+.delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 360px;
+}
 .quiet-link {
   color: var(--text-3);
 }

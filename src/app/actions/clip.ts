@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -57,9 +59,10 @@ export async function postComment(_prev: CommentState, formData: FormData): Prom
   const supabase = await createClient();
   const { error } = await supabase.from("comments").insert({ clip_id: clipId, user_id: viewer.userId, body });
   if (error) {
-    const message = error.message.includes("too fast") || error.message.includes("little fast")
-      ? "You're commenting a little fast. Try again in a few seconds."
-      : "Your comment didn't post. Try again in a moment.";
+    const message =
+      error.message.includes("too fast") || error.message.includes("little fast")
+        ? "You're commenting a little fast. Try again in a few seconds."
+        : "Your comment didn't post. Try again in a moment.";
     return { ok: false, message, key };
   }
   revalidatePath(`/c/${shortId}`);
@@ -75,4 +78,32 @@ export async function deleteComment(formData: FormData): Promise<void> {
   const supabase = await createClient();
   await supabase.from("comments").delete().eq("id", commentId);
   revalidatePath(`/c/${shortId}`);
+}
+
+export type DeleteClipState = { error: string | null };
+
+// Creators can delete videos from their own channel, and people can delete what they submitted.
+// The video stays on YouTube or Twitch; only the 4Ever listing (with its votes and comments) goes.
+export async function deleteClip(_prev: DeleteClipState, formData: FormData): Promise<DeleteClipState> {
+  const clipId = String(formData.get("clipId") ?? "");
+  if (!UUID.test(clipId)) return { error: "That video wasn't found." };
+  const viewer = await getViewer();
+  if (!viewer) return { error: "Log in to delete your video." };
+
+  const admin = createAdminClient();
+  const { data: clip } = await admin
+    .from("clips")
+    .select("id, creator_id, submitted_by")
+    .eq("id", clipId)
+    .maybeSingle<{ id: string; creator_id: string | null; submitted_by: string | null }>();
+  if (!clip) return { error: "That video wasn't found." };
+  if (clip.creator_id !== viewer.userId && clip.submitted_by !== viewer.userId) {
+    return { error: "Only the creator or the person who shared it can delete this video." };
+  }
+
+  const { error } = await admin.from("clips").delete().eq("id", clip.id);
+  if (error) return { error: "That didn't delete. Try again in a moment." };
+
+  revalidatePath("/", "layout");
+  redirect(`/u/${viewer.profile?.username ?? ""}?deleted=1`);
 }
