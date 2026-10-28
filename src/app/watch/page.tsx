@@ -3,13 +3,13 @@ import { ClipFeed, type FeedClip } from "@/components/clip-feed";
 import { getViewer } from "@/lib/auth";
 import { categoryLabel, isKind } from "@/lib/categories";
 import { formatDuration } from "@/lib/format";
-import { getClipByShortId, getCurrentFeature, listClips } from "@/lib/queries";
+import { getClipByShortId, listClips } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { Clip } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Clips",
-  description: "Swipe through the most watched World of Warcraft: Forever clips.",
+  description: "Swipe through World of Warcraft: Forever clips.",
 };
 
 function toFeedClip(clip: Clip, voted: boolean): FeedClip {
@@ -42,6 +42,15 @@ function toFeedClip(clip: Clip, voted: boolean): FeedClip {
   };
 }
 
+function shuffle<T>(items: T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 // The swipe feed: one clip at a time, full screen, like Shorts.
 export default async function WatchPage({
   searchParams,
@@ -50,18 +59,14 @@ export default async function WatchPage({
 }) {
   const params = await searchParams;
   const kind = isKind(params.kind) ? params.kind : "clip";
-  const [viewer, { clips }, feature] = await Promise.all([
-    getViewer(),
-    listClips({ kind, sort: "views", perPage: 60 }),
-    getCurrentFeature(),
-  ]);
+  const [viewer, { clips }] = await Promise.all([getViewer(), listClips({ kind, sort: "views", perPage: 60 })]);
 
-  // The featured video plays first, then the most watched in order.
-  const featured = feature?.clip && feature.clip.kind === kind ? feature.clip : null;
-  let list = featured ? [featured, ...clips.filter((c) => c.id !== featured.id)] : clips;
-  if (params.start && !list.some((c) => c.short_id === params.start)) {
-    const startClip = await getClipByShortId(params.start);
-    if (startClip && startClip.status === "approved") list = [startClip, ...list];
+  // A fresh random order every visit, so the same clips aren't always up front.
+  // A clip someone tapped to get here (?start=) still plays first.
+  let list = shuffle(clips);
+  if (params.start) {
+    const startClip = list.find((c) => c.short_id === params.start) ?? (await getClipByShortId(params.start));
+    if (startClip && startClip.status === "approved") list = [startClip, ...list.filter((c) => c.id !== startClip.id)];
   }
 
   let votedIds = new Set<string>();
