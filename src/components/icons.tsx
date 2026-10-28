@@ -128,6 +128,15 @@ export const BookmarkIcon = ({ filled, ...p }: IconProps & { filled?: boolean })
     <path d="M6 3h12v18l-6-4-6 4z" fill={filled ? "currentColor" : "none"} />
   </Base>
 );
+export const ThumbsUpIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) => (
+  <Base {...p}>
+    <path d="M7.5 10.5V21H3.5V10.5z" fill={filled ? "currentColor" : "none"} />
+    <path
+      d="M7.5 10.5L11.2 3.2c1.6 0 2.6 1.3 2.2 2.9L12.7 9.5H19a2 2 0 0 1 2 2.3l-1.2 7.1A2.5 2.5 0 0 1 17.3 21H7.5"
+      fill={filled ? "currentColor" : "none"}
+    />
+  </Base>
+);
 export const CheckIcon = (p: IconProps) => (
   <Base strokeWidth={2.6} {...p}>
     <path d="M5 12.5l4.5 4.5L19 7.5" />

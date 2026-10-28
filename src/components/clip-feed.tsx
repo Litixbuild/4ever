@@ -2,15 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { postComment, toggleVote, type CommentState } from "@/app/actions/clip";
 import type { FeedComment } from "@/app/api/clips/[id]/comments/route";
-import { ChevronRightIcon, CommentIcon, EyeIcon, PlayIcon, UpIcon, XIcon } from "@/components/icons";
+import { ChevronRightIcon, CommentIcon, EyeIcon, PlayIcon, ThumbsUpIcon, XIcon } from "@/components/icons";
 import { Avatar } from "@/components/people";
-import { Vista } from "@/components/vista";
 import { formatCount, timeAgo } from "@/lib/format";
 import { rarityClass } from "@/lib/rarity";
-import { embedUrl, platformLabel } from "@/lib/video";
+import { embedUrl } from "@/lib/video";
 
 export type FeedClip = {
   id: string;
@@ -31,11 +30,21 @@ export type FeedClip = {
   person: { name: string; username: string; avatar: string | null; isCreator: boolean } | null;
 };
 
-// How far a finger has to travel sideways before it counts as a swipe.
+// How far a finger has to travel up or down before it counts as a swipe.
 const SWIPE_PX = 50;
 
-// One clip at a time, full screen. Swiping moves between clips; on a computer, the side arrows or arrow keys do.
-// The first clip waits for a tap so phones allow sound; after that each clip starts on its own.
+const noopSubscribe = () => () => {};
+
+// iPhones and iPads never let a video start with sound on its own, so there clips always start muted.
+function isAppleTouch(): boolean {
+  return (
+    /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+// One clip at a time, full screen, like Shorts. Swipe up for the next clip, down for the one before;
+// on a computer, the side arrows or arrow keys. Every clip starts playing by itself. Browsers only allow that
+// muted until the visitor has touched the page, so the first clip starts muted and the rest start with sound.
 export function ClipFeed({
   clips,
   startIndex,
@@ -50,7 +59,13 @@ export function ClipFeed({
   const router = useRouter();
   const [index, setIndex] = useState(startIndex);
   const [direction, setDirection] = useState<"next" | "prev" | null>(null);
-  const [host, setHost] = useState<string | null>(null);
+  // Twitch needs this site's hostname; it only exists in the browser, so the player mounts after hydration.
+  const host = useSyncExternalStore(
+    noopSubscribe,
+    () => window.location.hostname,
+    () => null,
+  );
+  const [muted, setMuted] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [votes, setVotes] = useState(() =>
     Object.fromEntries(clips.map((c) => [c.id, { voted: c.voted, count: c.votes }])),
@@ -68,6 +83,8 @@ export function ClipFeed({
       if (next < 0 || next >= clips.length) return;
       setDirection(delta === 1 ? "next" : "prev");
       setIndex(next);
+      // Moving on is a tap or swipe, which lets the next clip play with sound (except on Apple phones).
+      if (!isAppleTouch()) setMuted(false);
       setSheetOpen(false);
       window.history.replaceState(null, "", feedPath(clips[next].shortId));
     },
@@ -75,20 +92,22 @@ export function ClipFeed({
     [index, clips],
   );
 
-  // The page behind the feed shouldn't scroll while it's open.
+  // The page behind the feed shouldn't scroll (or pull to refresh) while it's open.
   useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const body = document.body.style;
+    const previous = [body.overflow, body.overscrollBehavior];
+    body.overflow = "hidden";
+    body.overscrollBehavior = "none";
     return () => {
-      document.body.style.overflow = previous;
+      [body.overflow, body.overscrollBehavior] = previous;
     };
   }, []);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (sheetOpen || (event.target as HTMLElement)?.closest?.("textarea, input")) return;
-      if (event.key === "ArrowRight") go(1);
-      if (event.key === "ArrowLeft") go(-1);
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") go(1);
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") go(-1);
       if (event.key === "Escape") router.push("/");
     }
     window.addEventListener("keydown", onKey);
@@ -114,8 +133,9 @@ export function ClipFeed({
     const t = event.changedTouches[0];
     const dx = t.clientX - start.x;
     const dy = t.clientY - start.y;
-    if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) < Math.abs(dy) * 1.2) return;
-    go(dx > 0 ? 1 : -1);
+    if (Math.abs(dy) < SWIPE_PX || Math.abs(dy) < Math.abs(dx) * 1.2) return;
+    // Finger moving up brings the next clip, like Shorts.
+    go(dy < 0 ? 1 : -1);
   }
 
   function onVote() {
@@ -190,35 +210,18 @@ export function ClipFeed({
 
       <div className={`feed-stage ${direction ? `feed-in-${direction}` : ""}`} key={clip.id}>
         <div className="feed-media">
+          {clip.thumbnailUrl ? (
+            <img className="feed-poster" src={clip.thumbnailUrl} alt="" referrerPolicy="no-referrer" />
+          ) : null}
           {host ? (
             <iframe
-              src={`${embedUrl(clip.sourceType, clip.sourceId, host)}${clip.platform === "youtube" ? "&playsinline=1" : ""}`}
+              src={feedEmbed(clip, host, muted)}
               title={clip.title}
               allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen
               referrerPolicy="strict-origin-when-cross-origin"
             />
-          ) : (
-            <button
-              type="button"
-              className="player-facade"
-              onClick={() => setHost(window.location.hostname)}
-              aria-label={`Play ${clip.title}`}
-            >
-              {clip.thumbnailUrl ? (
-                <img src={clip.thumbnailUrl} alt="" referrerPolicy="no-referrer" />
-              ) : (
-                <Vista seed={clip.shortId} />
-              )}
-              <span className="player-play">
-                <PlayIcon size={34} style={{ marginLeft: 4 }} />
-              </span>
-              <span className="player-bar">
-                <span>{clip.duration || "Play"}</span>
-                <span>Plays from {platformLabel(clip.platform)}</span>
-              </span>
-            </button>
-          )}
+          ) : null}
         </div>
 
         <div className="feed-info">
@@ -244,14 +247,14 @@ export function ClipFeed({
           aria-label={vote.voted ? "Remove your like" : "Like this clip"}
         >
           <span className="feed-action-icon">
-            <UpIcon size={24} />
+            <ThumbsUpIcon size={30} filled={vote.voted} />
           </span>
           <span>{formatCount(vote.count)}</span>
         </button>
 
         <button type="button" className="feed-action" onClick={() => setSheetOpen(true)} aria-label="Comments">
           <span className="feed-action-icon">
-            <CommentIcon size={23} />
+            <CommentIcon size={29} />
           </span>
           <span>{formatCount(commentCounts[clip.id] ?? 0)}</span>
         </button>
@@ -270,6 +273,13 @@ export function ClipFeed({
       ) : null}
     </div>
   );
+}
+
+// The player link: plays on its own, inline on phones, muted when the browser requires it.
+function feedEmbed(clip: FeedClip, host: string, muted: boolean): string {
+  const base = embedUrl(clip.sourceType, clip.sourceId, host);
+  if (clip.platform === "youtube") return `${base}&playsinline=1${muted ? "&mute=1" : ""}`;
+  return `${base}&muted=${muted ? "true" : "false"}`;
 }
 
 const initialComment: CommentState = { ok: false, message: null, key: 0 };
