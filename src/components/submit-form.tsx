@@ -293,8 +293,10 @@ export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedCha
         <label className="check">
           <input type="checkbox" name="agree" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
           <span className="small" style={{ color: "var(--text-2)", fontSize: 14.5 }}>
-            The video and its music are mine to share, or I have permission. I&apos;ve read the{" "}
-            <Link href="/rules">submission rules</Link>.
+            {owner === "shared"
+              ? "This is a public video on its creator's own channel, not a reupload of someone else's work. "
+              : "The video and its music are mine to share, or I have permission. "}
+            I&apos;ve read the <Link href="/rules">submission rules</Link>.
           </span>
         </label>
         {state.error ? (

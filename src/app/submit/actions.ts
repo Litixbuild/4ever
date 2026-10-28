@@ -26,7 +26,7 @@ export async function submitClip(_prev: SubmitState, formData: FormData): Promis
   const tags = parseTags(String(formData.get("tags") ?? ""));
   const agreed = formData.get("agree") === "on";
 
-  if (!agreed) return { error: "Please confirm you have the rights to share this video and its music." };
+  if (!agreed) return { error: "Tick the box at the bottom to confirm this video is fine to share." };
   if (!isKind(kind)) return { error: "Choose whether this is a movie or a clip." };
   if (!isCategory(category)) return { error: "Choose a category." };
   if (!isMusicSource(music)) return { error: "Tell us what music is in the video." };

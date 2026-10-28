@@ -37,7 +37,7 @@ async function appToken(forceRefresh = false): Promise<string> {
   return cachedToken.value;
 }
 
-async function helix<T>(path: string): Promise<T[]> {
+export async function helix<T>(path: string): Promise<T[]> {
   const creds = credentials();
   if (!creds) throw new LookupError("Twitch links aren't switched on yet. Try a YouTube link for now.");
   for (let attempt = 0; attempt < 2; attempt++) {
