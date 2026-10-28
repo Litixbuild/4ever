@@ -121,3 +121,20 @@ export function embedUrl(sourceType: string, id: string, parentHost: string): st
       return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0&modestbranding=1`;
   }
 }
+
+// iPhones and iPads never let a video start with sound on its own, only from a tap on the player itself.
+// Browser only.
+export function isAppleTouch(): boolean {
+  return (
+    /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+// The player that replaces a thumbnail after it's pressed. Everywhere else it starts right away with sound;
+// on iPhones a video that starts by itself is forced silent, so there the player waits for a tap on its own
+// play button, which plays with sound. Browser only.
+export function pressedEmbedUrl(sourceType: string, id: string, parentHost: string): string {
+  const url = embedUrl(sourceType, id, parentHost);
+  if (!isAppleTouch()) return url;
+  return url.replace("autoplay=1", "autoplay=0").replace("autoplay=true", "autoplay=false");
+}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PlayIcon } from "@/components/icons";
 import { Vista } from "@/components/vista";
-import { embedUrl, platformLabel } from "@/lib/video";
+import { platformLabel, pressedEmbedUrl } from "@/lib/video";
 
 // Shows the thumbnail first and only loads YouTube or Twitch after a click.
 // That keeps pages fast, keeps trackers away until someone actually watches,
@@ -42,7 +42,7 @@ export function VideoPlayer({
     <div className="player">
       {host ? (
         <iframe
-          src={embedUrl(sourceType, sourceId, host)}
+          src={`${pressedEmbedUrl(sourceType, sourceId, host)}${platform === "youtube" ? "&playsinline=1" : ""}`}
           title={title}
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           allowFullScreen
@@ -50,11 +50,7 @@ export function VideoPlayer({
         />
       ) : (
         <button type="button" className="player-facade" onClick={play} aria-label={`Play ${title}`}>
-          {thumbnailUrl ? (
-            <img src={thumbnailUrl} alt="" referrerPolicy="no-referrer" />
-          ) : (
-            <Vista seed={shortId} />
-          )}
+          {thumbnailUrl ? <img src={thumbnailUrl} alt="" referrerPolicy="no-referrer" /> : <Vista seed={shortId} />}
           <span className="player-play">
             <PlayIcon size={34} style={{ marginLeft: 4 }} />
           </span>

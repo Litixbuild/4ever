@@ -9,7 +9,7 @@ import { ChevronRightIcon, CommentIcon, EyeIcon, PlayIcon, ThumbsUpIcon, XIcon }
 import { Avatar } from "@/components/people";
 import { formatCount, timeAgo } from "@/lib/format";
 import { rarityClass } from "@/lib/rarity";
-import { embedUrl } from "@/lib/video";
+import { embedUrl, isAppleTouch } from "@/lib/video";
 
 export type FeedClip = {
   id: string;
@@ -40,13 +40,6 @@ function subscribeCoarse(onChange: () => void) {
   const query = window.matchMedia("(pointer: coarse)");
   query.addEventListener("change", onChange);
   return () => query.removeEventListener("change", onChange);
-}
-
-// iPhones and iPads never let a video start with sound on its own, so there clips always start muted.
-function isAppleTouch(): boolean {
-  return (
-    /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-  );
 }
 
 // One clip at a time, full screen, like Shorts. Swipe up for the next clip, down for the one before;

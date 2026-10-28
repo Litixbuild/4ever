@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { embedUrl } from "@/lib/video";
+import { pressedEmbedUrl } from "@/lib/video";
 
 const PLAY_EVENT = "4ever:play";
 
@@ -44,7 +44,7 @@ export function InlinePlayer({
     return (
       <div className={`${className} is-playing`}>
         <iframe
-          src={`${embedUrl(sourceType, sourceId, host)}${platform === "youtube" ? "&playsinline=1" : ""}`}
+          src={`${pressedEmbedUrl(sourceType, sourceId, host)}${platform === "youtube" ? "&playsinline=1" : ""}`}
           title={title}
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           allowFullScreen
