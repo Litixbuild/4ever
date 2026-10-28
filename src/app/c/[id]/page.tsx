@@ -164,6 +164,15 @@ export default async function ClipPage({
             </div>
           </div>
 
+          {canDelete ? (
+            <div className="owner-bar">
+              <span className="small">
+                {viewer?.userId === clip.creator_id ? "This is your video." : "You shared this video."}
+              </span>
+              <DeleteClip clipId={clip.id} />
+            </div>
+          ) : null}
+
           <section aria-label="Credits" className="credits">
             <div className="credits-main">
               {clip.creator ? (
@@ -245,7 +254,6 @@ export default async function ClipPage({
                     Report or request removal
                   </Link>
                 )}
-                {canDelete ? <DeleteClip clipId={clip.id} /> : null}
               </span>
             </div>
           </section>

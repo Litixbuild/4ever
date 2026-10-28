@@ -3,13 +3,13 @@ import { ClipFeed, type FeedClip } from "@/components/clip-feed";
 import { getViewer } from "@/lib/auth";
 import { categoryLabel, isKind } from "@/lib/categories";
 import { formatDuration } from "@/lib/format";
-import { getClipByShortId, listClips } from "@/lib/queries";
+import { getClipByShortId, getCurrentFeature, listClips } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { Clip } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Clips",
-  description: "Swipe through the newest World of Warcraft: Forever clips.",
+  description: "Swipe through the most watched World of Warcraft: Forever clips.",
 };
 
 function toFeedClip(clip: Clip, voted: boolean): FeedClip {
@@ -50,9 +50,15 @@ export default async function WatchPage({
 }) {
   const params = await searchParams;
   const kind = isKind(params.kind) ? params.kind : "clip";
-  const [viewer, { clips }] = await Promise.all([getViewer(), listClips({ kind, sort: "new", perPage: 60 })]);
+  const [viewer, { clips }, feature] = await Promise.all([
+    getViewer(),
+    listClips({ kind, sort: "views", perPage: 60 }),
+    getCurrentFeature(),
+  ]);
 
-  let list = clips;
+  // The featured video plays first, then the most watched in order.
+  const featured = feature?.clip && feature.clip.kind === kind ? feature.clip : null;
+  let list = featured ? [featured, ...clips.filter((c) => c.id !== featured.id)] : clips;
   if (params.start && !list.some((c) => c.short_id === params.start)) {
     const startClip = await getClipByShortId(params.start);
     if (startClip && startClip.status === "approved") list = [startClip, ...list];
