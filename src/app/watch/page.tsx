@@ -59,7 +59,12 @@ export default async function WatchPage({
 }) {
   const params = await searchParams;
   const kind = isKind(params.kind) ? params.kind : "clip";
-  const [viewer, { clips }] = await Promise.all([getViewer(), listClips({ kind, sort: "views", perPage: 60 })]);
+  // Up to the 180 most watched, three pages of 60.
+  const [viewer, ...pages] = await Promise.all([
+    getViewer(),
+    ...[1, 2, 3].map((page) => listClips({ kind, sort: "views", perPage: 60, page })),
+  ]);
+  const clips = pages.flatMap((p) => p.clips);
 
   // A fresh random order every visit, so the same clips aren't always up front.
   // A clip someone tapped to get here (?start=) still plays first.
