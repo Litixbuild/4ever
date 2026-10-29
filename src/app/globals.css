@@ -3215,35 +3215,6 @@ a.plaque:hover {
 .feed-action.is-on {
   color: var(--gold-hi);
 }
-/* Computers get a bare arrow on each side of the video; phones just swipe. */
-.feed-arrow {
-  display: none;
-  position: absolute;
-  top: 50%;
-  z-index: 3;
-  padding: 12px;
-  border: 0;
-  background: none;
-  color: var(--text-3);
-  transform: translateY(-50%);
-  cursor: pointer;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8));
-  transition: color 0.15s ease;
-}
-.feed-arrow:hover {
-  color: var(--gold-hi);
-}
-.feed-arrow-prev {
-  left: max(8px, calc(50% - 600px));
-}
-.feed-arrow-next {
-  right: max(8px, calc(50% - 600px));
-}
-@media (hover: hover) and (pointer: fine) {
-  .feed-arrow {
-    display: block;
-  }
-}
 /* A new clip slides in from the side it came from. */
 .feed-in-next {
   animation: feed-from-left 0.28s ease-out;
@@ -3362,7 +3333,8 @@ a.plaque:hover {
   border-top: 1px solid var(--line);
 }
 
-/* Touch screens: a clear layer over the video reads swipes (next and previous) and taps (sound, pause). */
+/* A clear layer over the video reads swipes and the scroll wheel (next and previous) and clicks or taps
+   (sound, pause). On a computer it stops above the player's control bar so volume and fullscreen still work. */
 .feed-touch {
   position: absolute;
   inset: 0;
@@ -3377,6 +3349,12 @@ a.plaque:hover {
   color: #fff;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  .feed-touch {
+    bottom: 56px;
+    height: auto;
+  }
 }
 .feed-touch-icon {
   display: inline-flex;

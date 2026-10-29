@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useCallback, useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { postComment, toggleVote, type CommentState } from "@/app/actions/clip";
 import type { FeedComment } from "@/app/api/clips/[id]/comments/route";
-import { ChevronRightIcon, CommentIcon, EyeIcon, PlayIcon, ThumbsUpIcon, XIcon } from "@/components/icons";
+import { CommentIcon, EyeIcon, PlayIcon, ThumbsUpIcon, XIcon } from "@/components/icons";
 import { Avatar } from "@/components/people";
 import { formatCount, timeAgo } from "@/lib/format";
 import { rarityClass } from "@/lib/rarity";
@@ -35,7 +35,7 @@ const SWIPE_PX = 50;
 
 const noopSubscribe = () => () => {};
 
-// Phones and tablets: the video fills the screen and a clear layer over it reads swipes and taps.
+// Touch screens (phones and tablets) get their own player setup; see feedEmbed.
 function subscribeCoarse(onChange: () => void) {
   const query = window.matchMedia("(pointer: coarse)");
   query.addEventListener("change", onChange);
@@ -102,6 +102,7 @@ export function ClipFeed({
   const [, startTransition] = useTransition();
   const counted = useRef(new Set<string>());
   const touch = useRef<{ x: number; y: number } | null>(null);
+  const wheel = useRef({ total: 0, lastEvent: 0, lockedFrom: 0, lockedUntil: 0 });
   const clip = clips[index];
   const keepPlayer = Boolean(host && apple && clip?.platform === "youtube");
   // Open the shared player for the first YouTube clip, and let it go when a Twitch clip comes up.
@@ -172,6 +173,27 @@ export function ClipFeed({
     if (Math.abs(dy) < SWIPE_PX || Math.abs(dy) < Math.abs(dx) * 1.2) return;
     // Finger moving up brings the next clip, like Shorts.
     go(dy < 0 ? 1 : -1);
+  }
+
+  // A computer's scroll wheel moves between clips, like Shorts: down for the next, up for the one before.
+  // One flick moves one clip. A trackpad keeps sending scroll events for a moment after the fingers lift,
+  // so after each move the wheel rests until those stop (at most a little over a second).
+  function onWheel(event: React.WheelEvent) {
+    if (sheetOpen || event.ctrlKey) return;
+    const w = wheel.current;
+    const now = event.timeStamp;
+    if (now < w.lockedUntil) {
+      w.lockedUntil = Math.min(now + 250, w.lockedFrom + 1200);
+      return;
+    }
+    if (now - w.lastEvent > 250) w.total = 0;
+    w.lastEvent = now;
+    w.total += event.deltaY;
+    if (Math.abs(w.total) < 40) return;
+    go(w.total > 0 ? 1 : -1);
+    w.total = 0;
+    w.lockedFrom = now;
+    w.lockedUntil = now + 500;
   }
 
   // YouTube's player takes commands from this page (the link asks for that with enablejsapi=1).
@@ -289,7 +311,7 @@ export function ClipFeed({
   const person = clip.person;
 
   return (
-    <div className="feed" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <div className="feed" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onWheel={onWheel}>
       <div className="feed-top">
         <Link href="/" className="feed-icon-btn" aria-label="Close clips">
           <XIcon size={20} />
@@ -304,17 +326,6 @@ export function ClipFeed({
           </span>
         )}
       </div>
-
-      {index > 0 ? (
-        <button type="button" className="feed-arrow feed-arrow-prev" onClick={() => go(-1)} aria-label="Previous clip">
-          <ChevronRightIcon size={44} style={{ transform: "rotate(180deg)" }} />
-        </button>
-      ) : null}
-      {index < clips.length - 1 ? (
-        <button type="button" className="feed-arrow feed-arrow-next" onClick={() => go(1)} aria-label="Next clip">
-          <ChevronRightIcon size={44} />
-        </button>
-      ) : null}
 
       <div
         className={`feed-stage ${direction && !keepPlayer ? `feed-in-${direction}` : ""}`}
@@ -335,7 +346,7 @@ export function ClipFeed({
               referrerPolicy="strict-origin-when-cross-origin"
             />
           ) : null}
-          {host && touchScreen ? (
+          {host ? (
             <button
               type="button"
               className="feed-touch"
@@ -403,14 +414,15 @@ export function ClipFeed({
 }
 
 // The player link: plays on its own, inline on phones, muted when the browser requires it.
-// On touch screens YouTube's own controls sit under the tap layer, so they're hidden and the clip loops, like Shorts.
+// Clips loop, like Shorts. On touch screens YouTube's own controls sit under the tap layer, so they're hidden;
+// on a computer the layer stops above YouTube's control bar, so it stays usable.
 // The shared iPhone player can't use YouTube's loop setting (it would replay the first clip), so it restarts clips itself.
 function feedEmbed(clip: FeedClip, host: string, muted: boolean, touchScreen: boolean, loop: boolean): string {
   const base = embedUrl(clip.sourceType, clip.sourceId, host);
   if (clip.platform === "youtube") {
     const repeat = loop ? `&loop=1&playlist=${encodeURIComponent(clip.sourceId)}` : "";
-    const touch = touchScreen ? `&controls=0${repeat}` : "";
-    return `${base}&playsinline=1&enablejsapi=1${touch}${muted ? "&mute=1" : ""}`;
+    const touch = touchScreen ? "&controls=0" : "";
+    return `${base}&playsinline=1&enablejsapi=1${repeat}${touch}${muted ? "&mute=1" : ""}`;
   }
   return `${base}&muted=${muted ? "true" : "false"}`;
 }
