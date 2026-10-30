@@ -15,6 +15,7 @@ type Stage = "class" | "spec" | "done";
 export function ClassPicker({ name, autoOpen }: { name: string; autoOpen: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(autoOpen);
+  const [returning, setReturning] = useState(false);
   const [stage, setStage] = useState<Stage>("class");
   const [picked, setPicked] = useState<string | null>(null);
   const [spec, setSpec] = useState<string | null>(null);
@@ -31,6 +32,7 @@ export function ClassPicker({ name, autoOpen }: { name: string; autoOpen: boolea
       setSpec(null);
       setError(null);
       setLeaving(false);
+      setReturning(true);
       setOpen(true);
     }
     window.addEventListener(OPEN_CLASS_PICKER, onOpen);
@@ -130,9 +132,9 @@ export function ClassPicker({ name, autoOpen }: { name: string; autoOpen: boolea
         {stage === "class" ? (
           <section className="roll-stage" key="class">
             <header className="roll-head">
-              <p className="roll-eyebrow">Welcome to 4Ever, {firstName}</p>
+              <p className="roll-eyebrow">{returning ? firstName : `Welcome to 4Ever, ${firstName}`}</p>
               <h2 id="roll-title" className="roll-title">
-                Choose your class
+                {returning ? "Change your class" : "Choose your class"}
               </h2>
               <p className="roll-sub">It goes on your profile next to your name. You can change it any time.</p>
             </header>
