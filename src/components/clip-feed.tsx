@@ -254,11 +254,7 @@ export function ClipFeed({
 
   function onTap() {
     if (!clip) return;
-    if (clip.platform !== "youtube") {
-      // Twitch's player can't be told to unmute from here, so it reloads with sound instead.
-      if (muted && !isAppleTouch()) setMuted(false);
-      return;
-    }
+    if (clip.platform !== "youtube") return;
     const silent = muted && !soundOn;
     if (silent) {
       command("unMute");
@@ -331,7 +327,7 @@ export function ClipFeed({
         className={`feed-stage ${direction && !keepPlayer ? `feed-in-${direction}` : ""}`}
         key={keepPlayer ? "player" : clip.id}
       >
-        <div className="feed-media">
+        <div className={`feed-media ${clip.platform === "twitch" ? "is-twitch" : ""}`}>
           {clip.thumbnailUrl ? (
             <img className="feed-poster" src={clip.thumbnailUrl} alt="" referrerPolicy="no-referrer" />
           ) : null}
@@ -346,7 +342,9 @@ export function ClipFeed({
               referrerPolicy="strict-origin-when-cross-origin"
             />
           ) : null}
-          {host ? (
+          {/* Twitch's player can't be controlled from this page, so its own buttons stay uncovered;
+              swipes and the scroll wheel work on the space around it. */}
+          {host && clip.platform === "youtube" ? (
             <button
               type="button"
               className="feed-touch"

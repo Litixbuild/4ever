@@ -3388,6 +3388,13 @@ a.plaque:hover {
     border-radius: 0;
     box-shadow: none;
   }
+  /* Twitch clips are widescreen and their player takes every touch, so it only covers the video itself
+     and the space above and below still takes swipes. */
+  .feed-media.is-twitch iframe {
+    top: 50%;
+    height: calc(100vw * 9 / 16);
+    transform: translateY(-50%);
+  }
   .feed-top,
   .feed-bottom {
     position: absolute;
