@@ -13,7 +13,7 @@ export type Viewer = {
 };
 
 const PROFILE_COLUMNS =
-  "id, username, display_name, avatar_url, bio, main_character, main_level, main_race, main_class, main_spec, realm, guild, faction, active_title, role, created_at";
+  "id, username, display_name, avatar_url, bio, main_character, main_level, main_race, main_class, main_spec, class_prompted_at, realm, guild, faction, active_title, role, created_at";
 
 // Who is looking at the page? Cached for the length of one request.
 export const getViewer = cache(async (): Promise<Viewer | null> => {

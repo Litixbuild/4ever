@@ -3,6 +3,7 @@ import "@fontsource/metamorphous/400.css";
 import "@fontsource/marcellus/400.css";
 import "@fontsource-variable/manrope";
 import "./globals.css";
+import { RollPrompt } from "@/components/roll-prompt";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           )}
         </main>
         <SiteFooter />
+        {configured ? <RollPrompt /> : null}
       </body>
     </html>
   );

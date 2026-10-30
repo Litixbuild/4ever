@@ -13,6 +13,7 @@ export type Profile = {
   main_race: string | null;
   main_class: string | null;
   main_spec: string | null;
+  class_prompted_at?: string | null;
   realm: string | null;
   guild: string | null;
   faction: "horde" | "alliance" | null;

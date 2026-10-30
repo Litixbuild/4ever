@@ -86,3 +86,57 @@ export function bannerFor(faction: string | null | undefined): string {
       ? "/backdrop/banner-alliance.webp"
       : "/backdrop/banner-neutral.webp";
 }
+
+// What each spec does, for the class picker: its job in a group and one line on how it plays.
+export const SPEC_INFO: Record<string, Record<string, { role: string; line: string }>> = {
+  Druid: {
+    Balance: { role: "Caster DPS", line: "Moonfire and Starfire, with buffs the party keeps." },
+    Feral: { role: "Tank / Melee", line: "Cat and bear forms. One tree for both jobs." },
+    Restoration: { role: "Healer", line: "Heals over time, Innervate, and raid-wide utility." },
+  },
+  Hunter: {
+    "Beast Mastery": { role: "Ranged DPS", line: "The pet does the work. You keep it alive and angry." },
+    Marksmanship: { role: "Ranged DPS", line: "Aimed Shot, Trueshot Aura, burst from range." },
+    Survival: { role: "Ranged DPS", line: "Traps, control, and tools for when they close in." },
+  },
+  Mage: {
+    Arcane: { role: "Caster DPS", line: "Mana-hungry burst and the best utility tree." },
+    Fire: { role: "Caster DPS", line: "Scorch, Fireball, and everything that scales off crit." },
+    Frost: { role: "Caster DPS", line: "Control, kiting and survival. The PvP tree." },
+  },
+  Paladin: {
+    Holy: { role: "Healer", line: "Big single-target heals, blessings and auras." },
+    Protection: { role: "Tank", line: "Righteous Fury threat and shield-based mitigation." },
+    Retribution: { role: "Melee DPS", line: "Seals, judgements and a two-handed weapon." },
+  },
+  Priest: {
+    Discipline: { role: "Healer", line: "Shields and damage prevention over raw healing." },
+    Holy: { role: "Healer", line: "The most healing in the game, and group tools with it." },
+    Shadow: { role: "Caster DPS", line: "Damage over time, self-sustain, and PvP pressure." },
+  },
+  Rogue: {
+    Assassination: { role: "Melee DPS", line: "Poisons and finishers from the dagger tree." },
+    Combat: { role: "Melee DPS", line: "Sustained damage and weapon flexibility." },
+    Subtlety: { role: "Melee DPS", line: "Stealth, openers and the pressure tree for duels." },
+  },
+  Shaman: {
+    Elemental: { role: "Caster DPS", line: "Lightning damage and the totems that come with it." },
+    Enhancement: { role: "Melee DPS", line: "Windfury bursts and close-range weapon work." },
+    Restoration: { role: "Healer", line: "Chain Heal and the totem kit nobody else brings." },
+  },
+  Warlock: {
+    Affliction: { role: "Caster DPS", line: "Curses and drains. Damage that builds over a fight." },
+    Demonology: { role: "Caster DPS", line: "Stronger demons and the staying power to use them." },
+    Destruction: { role: "Caster DPS", line: "Shadow Bolt and direct damage, front-loaded." },
+  },
+  Warrior: {
+    Arms: { role: "Melee DPS", line: "Two-handed burst built around Mortal Strike." },
+    Fury: { role: "Melee DPS", line: "Dual wielding and rage. The highest ceiling." },
+    Protection: { role: "Tank", line: "Shield tanking and threat. The raid's main tank." },
+  },
+};
+
+// The class's emblem, shown in the class picker.
+export function classIcon(className: string): string {
+  return `/classes/${className.toLowerCase()}.webp`;
+}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CharacterTip, hasCharacter } from "@/components/character-tip";
 import { ClipGrid } from "@/components/clip-card";
+import { OpenClassPicker } from "@/components/open-class-picker";
 import { DotIcon, LockIcon, StarIcon, StreamIcon, VideoIcon } from "@/components/icons";
 import { Avatar, VerifiedMark } from "@/components/people";
 import { getViewer } from "@/lib/auth";
@@ -138,9 +139,12 @@ export default async function ProfilePage({
                 </a>
               ))}
               {isOwn ? (
-                <Link href="/settings" className="btn btn-gold">
-                  Edit profile
-                </Link>
+                <>
+                  <Link href="/settings" className="btn btn-gold">
+                    Edit profile
+                  </Link>
+                  <OpenClassPicker label={profile.main_class ? "Change class" : "Choose your class"} />
+                </>
               ) : null}
             </div>
           </div>
