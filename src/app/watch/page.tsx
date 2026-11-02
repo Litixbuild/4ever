@@ -42,15 +42,6 @@ function toFeedClip(clip: Clip, voted: boolean): FeedClip {
   };
 }
 
-function shuffle<T>(items: T[]): T[] {
-  const out = [...items];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
-
 // The swipe feed: one clip at a time, full screen, like Shorts.
 export default async function WatchPage({
   searchParams,
@@ -59,19 +50,22 @@ export default async function WatchPage({
 }) {
   const params = await searchParams;
   const kind = isKind(params.kind) ? params.kind : "clip";
-  // Up to the 180 most watched, three pages of 60.
+  // Up to 300 clips, five pages of 60. The browser shuffles them and leaves out ones already watched.
   const [viewer, ...pages] = await Promise.all([
     getViewer(),
-    ...[1, 2, 3].map((page) => listClips({ kind, sort: "views", perPage: 60, page })),
+    ...[1, 2, 3, 4, 5].map((page) => listClips({ kind, sort: "views", perPage: 60, page })),
   ]);
   const clips = pages.flatMap((p) => p.clips);
 
-  // A fresh random order every visit, so the same clips aren't always up front.
-  // A clip someone tapped to get here (?start=) still plays first.
-  let list = shuffle(clips);
+  // A clip someone tapped to get here (?start=) is always included, and plays first.
+  let list = clips;
+  let start: string | null = null;
   if (params.start) {
     const startClip = list.find((c) => c.short_id === params.start) ?? (await getClipByShortId(params.start));
-    if (startClip && startClip.status === "approved") list = [startClip, ...list.filter((c) => c.id !== startClip.id)];
+    if (startClip && startClip.status === "approved") {
+      start = startClip.short_id;
+      if (!list.some((c) => c.id === startClip.id)) list = [startClip, ...list];
+    }
   }
 
   let votedIds = new Set<string>();
@@ -88,15 +82,10 @@ export default async function WatchPage({
     votedIds = new Set((data ?? []).map((v: { clip_id: string }) => v.clip_id));
   }
 
-  const startIndex = Math.max(
-    0,
-    list.findIndex((c) => c.short_id === params.start),
-  );
-
   return (
     <ClipFeed
       clips={list.map((c) => toFeedClip(c, votedIds.has(c.id)))}
-      startIndex={startIndex}
+      startShortId={start}
       kind={kind}
       loggedIn={Boolean(viewer)}
     />

@@ -3048,6 +3048,11 @@ a.plaque:hover {
   user-select: none;
   -webkit-user-select: none;
 }
+.feed-end-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+}
 .feed-empty {
   display: flex;
   flex-direction: column;

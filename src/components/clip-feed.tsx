@@ -54,17 +54,27 @@ function isAppleTouch(): boolean {
 // browser allows it.
 export function ClipFeed({
   clips,
-  startIndex,
+  startShortId,
   kind,
   loggedIn,
 }: {
   clips: FeedClip[];
-  startIndex: number;
+  startShortId: string | null;
   kind: string;
   loggedIn: boolean;
 }) {
   const router = useRouter();
-  const [index, setIndex] = useState(startIndex);
+  // The order is made in the browser, which knows what this visitor has already watched. The page renders
+  // nothing clip-specific until then (`mounted`), so the server's HTML and the browser's first render agree.
+  const mounted = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+  const [list, setList] = useState<FeedClip[] | null>(() =>
+    typeof window === "undefined" ? null : feedOrder(clips, startShortId),
+  );
+  const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<"next" | "prev" | null>(null);
   // Twitch needs this site's hostname; it only exists in the browser, so the player mounts after hydration.
   const host = useSyncExternalStore(
@@ -103,7 +113,8 @@ export function ClipFeed({
   const counted = useRef(new Set<string>());
   const touch = useRef<{ x: number; y: number } | null>(null);
   const wheel = useRef({ total: 0, lastEvent: 0, lockedFrom: 0, lockedUntil: 0 });
-  const clip = clips[index];
+  const clip = mounted && list ? list[index] : undefined;
+  const atEnd = Boolean(mounted && list && index >= list.length);
   const keepPlayer = Boolean(host && apple && clip?.platform === "youtube");
   // Open the shared player for the first YouTube clip, and let it go when a Twitch clip comes up.
   if (keepPlayer && !player && clip && host) {
@@ -115,18 +126,20 @@ export function ClipFeed({
 
   const go = useCallback(
     (delta: 1 | -1) => {
+      if (!list) return;
       const next = index + delta;
-      if (next < 0 || next >= clips.length) return;
+      // One step past the last clip is the "you've seen them all" card.
+      if (next < 0 || next > list.length) return;
       setDirection(delta === 1 ? "next" : "prev");
       setIndex(next);
       // Moving on is a tap or swipe, which lets the next clip play with sound (except on Apple phones).
       if (!isAppleTouch()) setMuted(false);
       setSheetOpen(false);
       setPaused(false);
-      window.history.replaceState(null, "", feedPath(clips[next].shortId));
+      if (list[next]) window.history.replaceState(null, "", feedPath(list[next].shortId));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [index, clips],
+    [index, list],
   );
 
   // The page behind the feed shouldn't scroll (or pull to refresh) while it's open.
@@ -155,6 +168,7 @@ export function ClipFeed({
   useEffect(() => {
     if (!host || !clip || counted.current.has(clip.id)) return;
     counted.current.add(clip.id);
+    markSeen(clip.id);
     fetch(`/api/clips/${clip.id}/view`, { method: "POST", keepalive: true }).catch(() => undefined);
   }, [host, clip]);
 
@@ -280,6 +294,40 @@ export function ClipFeed({
         if (result.error === "login") router.push(`/login?next=${encodeURIComponent(feedPath(clip.shortId))}`);
       }
     });
+  }
+
+  if (!mounted || !list) return <div className="feed" aria-busy="true" />;
+
+  if (atEnd || (list.length === 0 && clips.length > 0)) {
+    return (
+      <div className="feed feed-empty" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onWheel={onWheel}>
+        <div className="slot feed-end">
+          <span className="slot-icon">
+            <PlayIcon size={26} />
+          </span>
+          <span className="stack-sm" style={{ gap: 6 }}>
+            <strong className="feed-end-title">You&apos;ve seen every clip</strong>
+            <span className="muted">New ones land every day. Check back soon.</span>
+          </span>
+        </div>
+        <div className="row" style={{ justifyContent: "center", gap: 10 }}>
+          <Link href="/" className="btn btn-gold">
+            Back to the front page
+          </Link>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => {
+              clearSeen();
+              setList(feedOrder(clips, null));
+              setIndex(0);
+            }}
+          >
+            Watch them again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!clip) {
@@ -409,6 +457,48 @@ export function ClipFeed({
       ) : null}
     </div>
   );
+}
+
+// Clips this browser has already watched in the feed, so nobody sees the same one twice.
+const SEEN_KEY = "4ever:seen-clips";
+
+function readSeen(): string[] {
+  try {
+    const value = JSON.parse(window.localStorage.getItem(SEEN_KEY) ?? "[]");
+    return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function markSeen(id: string) {
+  try {
+    const seen = readSeen().filter((v) => v !== id);
+    seen.push(id);
+    window.localStorage.setItem(SEEN_KEY, JSON.stringify(seen.slice(-3000)));
+  } catch {
+    // Private browsing or storage turned off: the feed still works, it just can't remember.
+  }
+}
+
+function clearSeen() {
+  try {
+    window.localStorage.removeItem(SEEN_KEY);
+  } catch {
+    // Nothing to clear.
+  }
+}
+
+// Clips not watched yet, in a fresh random order. A clip someone tapped to get here plays first either way.
+function feedOrder(clips: FeedClip[], startShortId: string | null): FeedClip[] {
+  const seen = new Set(readSeen());
+  const start = startShortId ? clips.find((c) => c.shortId === startShortId) : undefined;
+  const rest = clips.filter((c) => c !== start && !seen.has(c.id));
+  for (let i = rest.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [rest[i], rest[j]] = [rest[j], rest[i]];
+  }
+  return start ? [start, ...rest] : rest;
 }
 
 // The player link: plays on its own, inline on phones, muted when the browser requires it.
