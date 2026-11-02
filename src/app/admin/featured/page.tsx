@@ -76,7 +76,13 @@ export default async function FeaturedAdminPage({ searchParams }: { searchParams
           <label htmlFor="feature-clip" className="label">
             Video
           </label>
-          <input id="feature-clip" name="clip" className="input" required placeholder="https://4everclips.com/c/k3J9xP2a or k3J9xP2a" />
+          <input
+            id="feature-clip"
+            name="clip"
+            className="input"
+            required
+            placeholder="https://4everclips.com/c/k3J9xP2a or k3J9xP2a"
+          />
           <p className="help">
             Popular right now:{" "}
             {popular.slice(0, 5).map((c, i) => (
@@ -92,13 +98,25 @@ export default async function FeaturedAdminPage({ searchParams }: { searchParams
             <label htmlFor="use_text" className="label">
               &ldquo;Use:&rdquo; line <span className="optional">(optional)</span>
             </label>
-            <input id="use_text" name="use_text" className="input" maxLength={120} placeholder="Relive the Southshore wars, one ambush at a time." />
+            <input
+              id="use_text"
+              name="use_text"
+              className="input"
+              maxLength={120}
+              placeholder="Relive the Southshore wars, one ambush at a time."
+            />
           </div>
           <div className="field">
             <label htmlFor="flavor_text" className="label">
               Flavor text <span className="optional">(optional)</span>
             </label>
-            <input id="flavor_text" name="flavor_text" className="input" maxLength={120} placeholder="Every ganker has a story." />
+            <input
+              id="flavor_text"
+              name="flavor_text"
+              className="input"
+              maxLength={120}
+              placeholder="Every ganker has a story."
+            />
           </div>
           <div className="field">
             <label htmlFor="days" className="label">

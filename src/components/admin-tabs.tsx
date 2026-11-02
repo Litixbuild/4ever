@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function AdminTabs({ pending }: { pending: number }) {
+export function AdminTabs({ pending, suggestions }: { pending: number; suggestions: number }) {
   const pathname = usePathname();
   const tabs = [
     { href: "/admin", label: pending > 0 ? `Review queue (${pending})` : "Review queue" },
     { href: "/admin/reports", label: "Reports" },
+    { href: "/admin/suggestions", label: suggestions > 0 ? `Suggestions (${suggestions})` : "Suggestions" },
     { href: "/admin/featured", label: "Movie of the Week" },
     { href: "/admin/contests", label: "Contests" },
     { href: "/admin/videos", label: "Videos" },

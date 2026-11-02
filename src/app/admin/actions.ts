@@ -71,13 +71,20 @@ export async function rejectClip(formData: FormData) {
   const clipId = id(formData, "clipId");
   if (!clipId) back(formData, "That video wasn't found.");
   const reason = String(formData.get("reason") ?? "").slice(0, 120);
-  const note = String(formData.get("note") ?? "").trim().slice(0, 400);
+  const note = String(formData.get("note") ?? "")
+    .trim()
+    .slice(0, 400);
   const message = [reason, note].filter(Boolean).join(" ") || "It didn't fit the site's rules.";
 
   const admin = createAdminClient();
   await admin
     .from("clips")
-    .update({ status: "rejected", review_note: message, reviewed_by: viewer.userId, reviewed_at: new Date().toISOString() })
+    .update({
+      status: "rejected",
+      review_note: message,
+      reviewed_by: viewer.userId,
+      reviewed_at: new Date().toISOString(),
+    })
     .eq("id", clipId);
   back(formData, "Rejected. The submitter will see your note.");
 }
@@ -89,7 +96,10 @@ export async function setClipStatus(formData: FormData) {
   const clipId = id(formData, "clipId");
   const status = String(formData.get("status") ?? "");
   if (!clipId || !["approved", "removed", "pending"].includes(status)) back(formData, "Nothing changed.");
-  const note = String(formData.get("note") ?? "").trim().slice(0, 400) || null;
+  const note =
+    String(formData.get("note") ?? "")
+      .trim()
+      .slice(0, 400) || null;
 
   const admin = createAdminClient();
   const { data: clip } = await admin
@@ -118,7 +128,9 @@ export async function updateClip(formData: FormData) {
   await curator();
   const clipId = id(formData, "clipId");
   if (!clipId) back(formData, "That video wasn't found.");
-  const title = String(formData.get("title") ?? "").trim().slice(0, 140);
+  const title = String(formData.get("title") ?? "")
+    .trim()
+    .slice(0, 140);
   const kind = String(formData.get("kind") ?? "");
   const category = String(formData.get("category") ?? "");
   const tags = parseTags(String(formData.get("tags") ?? ""));
@@ -156,7 +168,8 @@ export async function resolveReport(formData: FormData) {
         .from("clips")
         .update({
           status: "removed",
-          review_note: report.reason === "my_video_remove" ? "Removed at the creator's request." : "Removed after a report.",
+          review_note:
+            report.reason === "my_video_remove" ? "Removed at the creator's request." : "Removed after a report.",
           reviewed_by: viewer.userId,
           reviewed_at: now,
         })
@@ -169,9 +182,51 @@ export async function resolveReport(formData: FormData) {
   }
   await admin
     .from("reports")
-    .update({ status: outcome === "dismissed" ? "dismissed" : "resolved", resolved_by: viewer.userId, resolved_at: now })
+    .update({
+      status: outcome === "dismissed" ? "dismissed" : "resolved",
+      resolved_by: viewer.userId,
+      resolved_at: now,
+    })
     .eq("id", reportId);
   back(formData, outcome === "removed" ? "Video removed and report closed." : "Report closed.");
+}
+
+// ---------- Suggestions ----------
+
+export async function replyToSuggestion(formData: FormData) {
+  const viewer = await curator();
+  const suggestionId = id(formData, "suggestionId");
+  if (!suggestionId) back(formData, "That suggestion wasn't found.");
+  const reply = String(formData.get("reply") ?? "")
+    .trim()
+    .slice(0, 1500);
+  if (!reply) back(formData, "Write a reply first.");
+  await createAdminClient()
+    .from("suggestions")
+    .update({
+      reply,
+      status: "answered",
+      replied_by: viewer.userId,
+      replied_at: new Date().toISOString(),
+      // A new or edited reply shows as new again.
+      reply_seen_at: null,
+    })
+    .eq("id", suggestionId);
+  revalidatePath("/admin", "layout");
+  back(formData, "Reply sent. They'll see it on their suggestions page.");
+}
+
+export async function closeSuggestion(formData: FormData) {
+  await curator();
+  const suggestionId = id(formData, "suggestionId");
+  if (!suggestionId) back(formData, "That suggestion wasn't found.");
+  const reopen = formData.get("reopen") === "1";
+  await createAdminClient()
+    .from("suggestions")
+    .update({ status: reopen ? "open" : "closed" })
+    .eq("id", suggestionId);
+  revalidatePath("/admin", "layout");
+  back(formData, reopen ? "Moved back to open." : "Closed without a reply.");
 }
 
 // ---------- Movie of the Week ----------
@@ -182,8 +237,14 @@ export async function setFeature(formData: FormData) {
   const shortId = (input.match(/\/c\/([A-Za-z0-9]{6,12})/)?.[1] ?? input).trim();
   if (!/^[A-Za-z0-9]{6,12}$/.test(shortId)) back(formData, "Paste the video's 4Ever link or its short id.");
   const days = Math.min(Math.max(Number.parseInt(String(formData.get("days") ?? "7"), 10) || 7, 1), 30);
-  const useText = String(formData.get("use_text") ?? "").trim().slice(0, 120) || null;
-  const flavorText = String(formData.get("flavor_text") ?? "").trim().slice(0, 120) || null;
+  const useText =
+    String(formData.get("use_text") ?? "")
+      .trim()
+      .slice(0, 120) || null;
+  const flavorText =
+    String(formData.get("flavor_text") ?? "")
+      .trim()
+      .slice(0, 120) || null;
 
   const admin = createAdminClient();
   const { data: clip } = await admin
@@ -194,7 +255,10 @@ export async function setFeature(formData: FormData) {
   if (!clip || clip.status !== "approved") back(formData, "That video isn't live on 4Ever.");
 
   const now = new Date();
-  await admin.from("features").update({ ends_at: now.toISOString() }).or(`ends_at.is.null,ends_at.gt."${now.toISOString()}"`);
+  await admin
+    .from("features")
+    .update({ ends_at: now.toISOString() })
+    .or(`ends_at.is.null,ends_at.gt."${now.toISOString()}"`);
   await admin.from("features").insert({
     clip_id: clip.id,
     use_text: useText,
@@ -224,8 +288,12 @@ export async function endFeature(formData: FormData) {
 export async function saveContest(formData: FormData) {
   await curator();
   const contestId = id(formData, "contestId");
-  const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
-  const title = String(formData.get("title") ?? "").trim().slice(0, 80);
+  const slug = String(formData.get("slug") ?? "")
+    .trim()
+    .toLowerCase();
+  const title = String(formData.get("title") ?? "")
+    .trim()
+    .slice(0, 80);
   const opens = localInputToIso(String(formData.get("opens_at") ?? ""));
   const closes = localInputToIso(String(formData.get("closes_at") ?? ""));
   const ends = localInputToIso(String(formData.get("ends_at") ?? ""));
@@ -233,14 +301,24 @@ export async function saveContest(formData: FormData) {
   if (!/^[a-z0-9-]{3,60}$/.test(slug)) back(formData, "The link name can use lowercase letters, numbers and dashes.");
   if (!title) back(formData, "Give the contest a title.");
   if (!opens || !closes || !ends) back(formData, "Fill in all three dates.");
-  if (!(opens < closes && closes <= ends)) back(formData, "Dates must go: opens, then entries close, then voting ends.");
+  if (!(opens < closes && closes <= ends))
+    back(formData, "Dates must go: opens, then entries close, then voting ends.");
 
   const row = {
     slug,
     title,
-    tagline: String(formData.get("tagline") ?? "").trim().slice(0, 160) || null,
-    description: String(formData.get("description") ?? "").trim().slice(0, 4000) || null,
-    rules: String(formData.get("rules") ?? "").trim().slice(0, 4000) || null,
+    tagline:
+      String(formData.get("tagline") ?? "")
+        .trim()
+        .slice(0, 160) || null,
+    description:
+      String(formData.get("description") ?? "")
+        .trim()
+        .slice(0, 4000) || null,
+    rules:
+      String(formData.get("rules") ?? "")
+        .trim()
+        .slice(0, 4000) || null,
     prizes: String(formData.get("prizes") ?? "")
       .split("\n")
       .map((p) => p.trim())
@@ -280,7 +358,11 @@ export async function setPlacement(formData: FormData) {
       .maybeSingle<{ creator_id: string | null }>();
     if (clip?.creator_id) await awardBadge(clip.creator_id, "contest_winner");
   }
-  const { data: contest } = await admin.from("contests").select("slug").eq("id", contestId).maybeSingle<{ slug: string }>();
+  const { data: contest } = await admin
+    .from("contests")
+    .select("slug")
+    .eq("id", contestId)
+    .maybeSingle<{ slug: string }>();
   if (contest) revalidatePath(`/contests/${contest.slug}`);
   revalidatePath("/hall-of-fame");
   back(formData, "Placement saved.");

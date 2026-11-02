@@ -63,7 +63,11 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
               <div className="stack-sm" style={{ gap: 4 }}>
                 <span className="tiny faint">
                   Submitted {timeAgo(clip.created_at)} by{" "}
-                  {clip.submitter ? <Link href={`/u/${clip.submitter.username}`}>{clip.submitter.display_name}</Link> : "someone"}
+                  {clip.submitter ? (
+                    <Link href={`/u/${clip.submitter.username}`}>{clip.submitter.display_name}</Link>
+                  ) : (
+                    "someone"
+                  )}
                 </span>
                 <h2 className="h3" style={{ fontSize: 18 }}>
                   <Link href={`/c/${clip.short_id}`} style={{ color: "var(--text)" }}>
@@ -73,12 +77,20 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
                 <span className="small row" style={{ gap: 6 }}>
                   {clip.channel_name} on {platformLabel(clip.platform)}
                   {clip.creator ? <VerifiedMark size={14} label="Verified creator on 4Ever" /> : null}
-                  <a href={clip.source_url} target="_blank" rel="noopener noreferrer nofollow" className="row" style={{ gap: 4, display: "inline-flex" }}>
+                  <a
+                    href={clip.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="row"
+                    style={{ gap: 4, display: "inline-flex" }}
+                  >
                     source <ExternalIcon size={12} />
                   </a>
                 </span>
               </div>
-              <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 14px", fontSize: 14 }}>
+              <dl
+                style={{ margin: 0, display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 14px", fontSize: 14 }}
+              >
                 <dt className="muted">Music</dt>
                 <dd style={{ margin: 0 }}>{musicLabel(clip.music_source, clip.music_credit)}</dd>
                 {clip.tags.length > 0 ? (
@@ -90,7 +102,9 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
                 {clip.description ? (
                   <>
                     <dt className="muted">Notes</dt>
-                    <dd className="pre-line" style={{ margin: 0 }}>{clip.description}</dd>
+                    <dd className="pre-line" style={{ margin: 0 }}>
+                      {clip.description}
+                    </dd>
                   </>
                 ) : null}
               </dl>
@@ -102,14 +116,26 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
                   <label className="sr-only" htmlFor={`kind-${clip.id}`}>
                     Type
                   </label>
-                  <select id={`kind-${clip.id}`} name="kind" className="select" defaultValue={clip.kind} style={{ flex: "1 1 120px", width: "auto" }}>
+                  <select
+                    id={`kind-${clip.id}`}
+                    name="kind"
+                    className="select"
+                    defaultValue={clip.kind}
+                    style={{ flex: "1 1 120px", width: "auto" }}
+                  >
                     <option value="movie">Movie</option>
                     <option value="clip">Clip</option>
                   </select>
                   <label className="sr-only" htmlFor={`cat-${clip.id}`}>
                     Category
                   </label>
-                  <select id={`cat-${clip.id}`} name="category" className="select" defaultValue={clip.category} style={{ flex: "1 1 160px", width: "auto" }}>
+                  <select
+                    id={`cat-${clip.id}`}
+                    name="category"
+                    className="select"
+                    defaultValue={clip.category}
+                    style={{ flex: "1 1 160px", width: "auto" }}
+                  >
                     {CATEGORIES.map((c) => (
                       <option key={c.value} value={c.value}>
                         {c.label}
@@ -142,7 +168,13 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
                   <label className="sr-only" htmlFor={`note-${clip.id}`}>
                     Note for the submitter
                   </label>
-                  <input id={`note-${clip.id}`} name="note" className="input" placeholder="Optional note for the submitter" maxLength={400} />
+                  <input
+                    id={`note-${clip.id}`}
+                    name="note"
+                    className="input"
+                    placeholder="Optional note for the submitter"
+                    maxLength={400}
+                  />
                   <button type="submit" className="btn btn-danger">
                     Reject
                   </button>

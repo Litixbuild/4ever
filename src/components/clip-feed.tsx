@@ -308,7 +308,10 @@ export function ClipFeed({
           </span>
           <span className="stack-sm" style={{ gap: 6 }}>
             <strong className="feed-end-title">You&apos;ve seen every clip</strong>
-            <span className="muted">New ones land every day. Check back soon.</span>
+            <span className="muted">
+              New ones land every day. Know a creator we&apos;re missing?{" "}
+              <Link href="/suggest?topic=content">Tell us</Link>.
+            </span>
           </span>
         </div>
         <div className="row" style={{ justifyContent: "center", gap: 10 }}>

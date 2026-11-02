@@ -54,7 +54,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           {reports.map((report) => (
             <article key={report.id} className="card stack" style={{ gap: 12 }}>
               <div className="row-between" style={{ alignItems: "center" }}>
-                <span className={`pill ${report.reason === "my_video_remove" || report.reason === "copyright" ? "pill-red" : "pill-muted"}`}>
+                <span
+                  className={`pill ${report.reason === "my_video_remove" || report.reason === "copyright" ? "pill-red" : "pill-muted"}`}
+                >
                   {REASON_LABELS[report.reason] ?? report.reason}
                 </span>
                 <span className="tiny faint">{timeAgo(report.created_at)}</span>
@@ -79,7 +81,12 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                 </p>
               ) : null}
               <p className="small muted" style={{ margin: 0 }}>
-                From {report.reporter ? <Link href={`/u/${report.reporter.username}`}>{report.reporter.display_name}</Link> : "a visitor"}
+                From{" "}
+                {report.reporter ? (
+                  <Link href={`/u/${report.reporter.username}`}>{report.reporter.display_name}</Link>
+                ) : (
+                  "a visitor"
+                )}
                 {report.contact_email ? (
                   <>
                     {" "}
@@ -120,8 +127,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         </div>
       )}
       <p className="small muted" style={{ margin: 0 }}>
-        Creator removal requests and copyright reports should be handled quickly. Removing a video takes it off 4Ever; it
-        stays on YouTube or Twitch, which is the creator&apos;s call.
+        Creator removal requests and copyright reports should be handled quickly. Removing a video takes it off 4Ever;
+        it stays on YouTube or Twitch, which is the creator&apos;s call.
       </p>
     </div>
   );

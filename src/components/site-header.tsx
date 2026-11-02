@@ -1,15 +1,22 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Logo } from "@/components/brand";
-import { GearIcon, LogOutIcon, PlusIcon, SearchIcon, ShieldIcon, UserIcon } from "@/components/icons";
+import { CommentIcon, GearIcon, LogOutIcon, PlusIcon, SearchIcon, ShieldIcon, UserIcon } from "@/components/icons";
 import { MainNav } from "@/components/main-nav";
 import { Avatar } from "@/components/people";
 import { UserMenu } from "@/components/user-menu";
 import { getViewer } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { unreadReplies } from "@/lib/suggestions";
 
 export async function SiteHeader() {
   const viewer = await getViewer();
   const profile = viewer?.profile;
+  // A dot on your name when the admin has replied to you, or (for curators) when suggestions are waiting.
+  const [replies, openSuggestions] = await Promise.all([
+    viewer ? unreadReplies(viewer.userId) : 0,
+    viewer?.isCurator ? openSuggestionCount() : 0,
+  ]);
 
   return (
     <header className="site-header">
@@ -34,7 +41,10 @@ export async function SiteHeader() {
             <UserMenu
               summary={
                 <>
-                  <Avatar name={profile.display_name} src={profile.avatar_url} size={36} />
+                  <span className="user-avatar-wrap">
+                    <Avatar name={profile.display_name} src={profile.avatar_url} size={36} />
+                    {replies + openSuggestions > 0 ? <span className="menu-dot" aria-label="New messages" /> : null}
+                  </span>
                   <span className="user-name">{profile.display_name}</span>
                 </>
               }
@@ -46,9 +56,14 @@ export async function SiteHeader() {
               <Link href="/settings">
                 <GearIcon /> Settings
               </Link>
+              <Link href="/suggest">
+                <CommentIcon /> Suggestions
+                {replies > 0 ? <span className="menu-count">{replies} new</span> : null}
+              </Link>
               {viewer?.isCurator ? (
-                <Link href="/admin">
+                <Link href={openSuggestions > 0 ? "/admin/suggestions" : "/admin"}>
                   <ShieldIcon /> Admin
+                  {openSuggestions > 0 ? <span className="menu-count">{openSuggestions} to answer</span> : null}
                 </Link>
               ) : null}
               <form action="/auth/signout" method="post">
@@ -73,4 +88,16 @@ export async function SiteHeader() {
       </div>
     </header>
   );
+}
+
+async function openSuggestionCount(): Promise<number> {
+  try {
+    const { count } = await createAdminClient()
+      .from("suggestions")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "open");
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
 }

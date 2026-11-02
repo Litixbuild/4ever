@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AdminTabs } from "@/components/admin-tabs";
 import { requireCurator } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Admin", robots: { index: false, follow: false } };
@@ -8,7 +9,10 @@ export const metadata: Metadata = { title: "Admin", robots: { index: false, foll
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const viewer = await requireCurator();
   const supabase = await createClient();
-  const { count } = await supabase.from("clips").select("id", { count: "exact", head: true }).eq("status", "pending");
+  const [{ count }, { count: suggestions }] = await Promise.all([
+    supabase.from("clips").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    createAdminClient().from("suggestions").select("id", { count: "exact", head: true }).eq("status", "open"),
+  ]);
 
   return (
     <div className="container page" style={{ gap: 28 }}>
@@ -21,7 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
           <span className="pill pill-muted">{viewer.isAdmin ? "Admin" : "Curator"}</span>
         </div>
-        <AdminTabs pending={count ?? 0} />
+        <AdminTabs pending={count ?? 0} suggestions={suggestions ?? 0} />
       </div>
       {children}
     </div>
