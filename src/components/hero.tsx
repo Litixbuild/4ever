@@ -26,7 +26,7 @@ export function Hero({ clip, feature }: { clip: Clip; feature: Feature | null })
         title={clip.title}
         className="showcase-media"
       >
-        <ClipThumbImage clip={clip} />
+        <ClipThumbImage clip={clip} large />
         <span className="player-play">
           <PlayIcon size={32} style={{ marginLeft: 4 }} />
         </span>

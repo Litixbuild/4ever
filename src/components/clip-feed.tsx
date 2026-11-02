@@ -9,7 +9,7 @@ import { CommentIcon, EyeIcon, PlayIcon, ThumbsUpIcon, XIcon } from "@/component
 import { Avatar } from "@/components/people";
 import { formatCount, timeAgo } from "@/lib/format";
 import { rarityClass } from "@/lib/rarity";
-import { embedUrl } from "@/lib/video";
+import { embedUrl, smallThumbnail } from "@/lib/video";
 
 export type FeedClip = {
   id: string;
@@ -377,7 +377,7 @@ export function ClipFeed({
       >
         <div className={`feed-media ${clip.platform === "twitch" ? "is-twitch" : ""}`}>
           {clip.thumbnailUrl ? (
-            <img className="feed-poster" src={clip.thumbnailUrl} alt="" referrerPolicy="no-referrer" />
+            <img className="feed-poster" src={smallThumbnail(clip.thumbnailUrl)} alt="" referrerPolicy="no-referrer" />
           ) : null}
           {host ? (
             <iframe

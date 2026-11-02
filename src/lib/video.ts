@@ -121,3 +121,17 @@ export function embedUrl(sourceType: string, id: string, parentHost: string): st
       return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0&modestbranding=1`;
   }
 }
+
+// YouTube makes every thumbnail in several sizes. The stored one is the largest (1280 wide, ~100KB);
+// small cards use the 320-wide version (~15KB) and only phones and sharp screens get the big one.
+const YT_THUMB = /^(https:\/\/i\.ytimg\.com\/vi(?:_webp)?\/[\w-]{11}\/)[a-z0-9]+(\.jpg|\.webp)$/;
+
+export function smallThumbnail(url: string): string {
+  const m = url.match(YT_THUMB);
+  return m ? `${m[1]}mqdefault${m[2]}` : url;
+}
+
+export function thumbnailSrcSet(url: string): string | undefined {
+  const small = smallThumbnail(url);
+  return small === url ? undefined : `${small} 320w, ${url} 1280w`;
+}

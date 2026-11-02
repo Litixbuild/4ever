@@ -8,11 +8,27 @@ import { categoryLabel } from "@/lib/categories";
 import { formatCount, formatDuration } from "@/lib/format";
 import { rarityClass, rarityFor } from "@/lib/rarity";
 import type { Clip } from "@/lib/types";
-import { platformLabel } from "@/lib/video";
+import { platformLabel, smallThumbnail, thumbnailSrcSet } from "@/lib/video";
 
-export function ClipThumbImage({ clip }: { clip: Pick<Clip, "thumbnail_url" | "short_id"> }) {
+export function ClipThumbImage({
+  clip,
+  small = false,
+  large = false,
+}: {
+  clip: Pick<Clip, "thumbnail_url" | "short_id">;
+  small?: boolean;
+  large?: boolean;
+}) {
   return clip.thumbnail_url ? (
-    <img src={clip.thumbnail_url} alt="" loading="lazy" referrerPolicy="no-referrer" />
+    <img
+      src={small ? smallThumbnail(clip.thumbnail_url) : clip.thumbnail_url}
+      srcSet={small || large ? undefined : thumbnailSrcSet(clip.thumbnail_url)}
+      sizes="(max-width: 640px) 92vw, 340px"
+      alt=""
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+    />
   ) : (
     <Vista seed={clip.short_id} />
   );
@@ -96,7 +112,7 @@ export function MiniClip({ clip }: { clip: Clip }) {
   return (
     <Link href={`/c/${clip.short_id}`} className="mini-clip">
       <span className="mini-thumb">
-        <ClipThumbImage clip={clip} />
+        <ClipThumbImage clip={clip} small />
         {duration ? (
           <span className="overlay-chip" style={{ right: 6, bottom: 6, height: 20, fontSize: 11 }}>
             {duration}
