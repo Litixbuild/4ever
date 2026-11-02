@@ -1142,6 +1142,9 @@ textarea::placeholder {
     flex-wrap: nowrap;
     margin-left: auto;
   }
+  .header-actions .search {
+    flex: 0 0 260px;
+  }
 }
 
 .search {
