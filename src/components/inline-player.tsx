@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { markSeen } from "@/lib/seen";
 import { embedUrl } from "@/lib/video";
 
 const PLAY_EVENT = "4ever:play";
@@ -37,6 +38,7 @@ export function InlinePlayer({
   function play() {
     window.dispatchEvent(new CustomEvent(PLAY_EVENT, { detail: clipId }));
     setHost(window.location.hostname);
+    markSeen(clipId);
     fetch(`/api/clips/${clipId}/view`, { method: "POST", keepalive: true }).catch(() => undefined);
   }
 

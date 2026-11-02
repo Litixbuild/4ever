@@ -9,6 +9,7 @@ import { CommentIcon, EyeIcon, PlayIcon, ThumbsUpIcon, XIcon } from "@/component
 import { Avatar } from "@/components/people";
 import { formatCount, timeAgo } from "@/lib/format";
 import { rarityClass } from "@/lib/rarity";
+import { clearSeen, markSeen, readSeen } from "@/lib/seen";
 import { embedUrl, smallThumbnail } from "@/lib/video";
 
 export type FeedClip = {
@@ -457,36 +458,6 @@ export function ClipFeed({
       ) : null}
     </div>
   );
-}
-
-// Clips this browser has already watched in the feed, so nobody sees the same one twice.
-const SEEN_KEY = "4ever:seen-clips";
-
-function readSeen(): string[] {
-  try {
-    const value = JSON.parse(window.localStorage.getItem(SEEN_KEY) ?? "[]");
-    return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
-function markSeen(id: string) {
-  try {
-    const seen = readSeen().filter((v) => v !== id);
-    seen.push(id);
-    window.localStorage.setItem(SEEN_KEY, JSON.stringify(seen.slice(-3000)));
-  } catch {
-    // Private browsing or storage turned off: the feed still works, it just can't remember.
-  }
-}
-
-function clearSeen() {
-  try {
-    window.localStorage.removeItem(SEEN_KEY);
-  } catch {
-    // Nothing to clear.
-  }
 }
 
 // Clips not watched yet, in a fresh random order. A clip someone tapped to get here plays first either way.

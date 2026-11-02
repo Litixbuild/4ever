@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ClipGrid } from "@/components/clip-card";
-import { ChevronRightIcon, PlayIcon } from "@/components/icons";
+import { PlayIcon } from "@/components/icons";
 import { EmptyHero, Hero } from "@/components/hero";
 import { ActivityFeed, ContestsSoon, CreatorsBand, LaunchBar, TopCreatorsCard } from "@/components/widgets";
 import { CATEGORIES, isCategory, isKind } from "@/lib/categories";
@@ -14,14 +14,20 @@ function homeHref(kind: string | null, cat: string | null) {
   return `/${query ? `?${query}` : ""}#fresh`;
 }
 
-export default async function HomePage({ searchParams }: { searchParams: Promise<{ kind?: string; cat?: string }> }) {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ kind?: string; cat?: string; show?: string }>;
+}) {
   const params = await searchParams;
   const kind = isKind(params.kind) ? params.kind : null;
   const cat = isCategory(params.cat) ? params.cat : null;
+  // Nine videos to start; "Load more" adds nine at a time.
+  const show = Math.min(Math.max(Number.parseInt(params.show ?? "", 10) || 9, 9), 300);
 
   const [feature, fresh, creators, activity] = await Promise.all([
     getCurrentFeature(),
-    listClips({ kind, category: cat, perPage: 9, sort: "new" }),
+    listClips({ kind, category: cat, perPage: show, sort: "new" }),
     getTopCreators(7, 5),
     getActivity(6),
   ]);
@@ -32,7 +38,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const browseParams = new URLSearchParams();
   if (kind) browseParams.set("kind", kind);
   if (cat) browseParams.set("cat", cat);
-  const seeAll = `/browse${browseParams.toString() ? `?${browseParams}` : ""}`;
+  browseParams.set("show", String(show + 9));
+  const moreHref = `/?${browseParams}`;
 
   return (
     <div className="container page">
@@ -96,8 +103,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <>
               <ClipGrid clips={fresh.clips} />
               {fresh.total > fresh.clips.length ? (
-                <Link href={seeAll} className="btn btn-ghost btn-lg" style={{ alignSelf: "center" }}>
-                  See all {fresh.total} <ChevronRightIcon />
+                <Link href={moreHref} scroll={false} className="btn btn-ghost btn-lg" style={{ alignSelf: "center" }}>
+                  Load more
                 </Link>
               ) : null}
             </>

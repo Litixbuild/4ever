@@ -6,7 +6,7 @@ import { CATEGORIES, categoryLabel, isCategory, isKind } from "@/lib/categories"
 import { cleanSearch } from "@/lib/format";
 import { isClipSort, listClips, type ClipSort } from "@/lib/queries";
 
-type Search = { kind?: string; cat?: string; sort?: string; q?: string; tag?: string; page?: string };
+type Search = { kind?: string; cat?: string; sort?: string; q?: string; tag?: string; show?: string };
 
 const SORTS: { value: ClipSort; label: string }[] = [
   { value: "new", label: "Newest" },
@@ -15,7 +15,8 @@ const SORTS: { value: ClipSort; label: string }[] = [
   { value: "votes", label: "Most voted" },
 ];
 
-const PER_PAGE = 24;
+// Nine videos to start; "Load more" adds nine at a time.
+const STEP = 9;
 
 function heading(kind: string | null, cat: string | null, q: string, tag: string) {
   if (q) return `Results for “${q}”`;
@@ -41,10 +42,9 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, "")
     .slice(0, 24);
-  const page = Math.max(1, Math.min(500, Number.parseInt(p.page ?? "1", 10) || 1));
+  const show = Math.min(Math.max(Number.parseInt(p.show ?? "", 10) || STEP, STEP), 300);
 
-  const { clips, total } = await listClips({ kind, category: cat, sort, q, tag, page, perPage: PER_PAGE });
-  const pages = Math.max(1, Math.ceil(total / PER_PAGE));
+  const { clips, total } = await listClips({ kind, category: cat, sort, q, tag, perPage: show });
 
   function href(overrides: Partial<Record<keyof Search, string | null>>) {
     const next = new URLSearchParams();
@@ -54,7 +54,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
       sort: sort === "new" ? null : sort,
       q: q || null,
       tag: tag || null,
-      page: null,
+      show: null,
       ...overrides,
     };
     for (const [key, value] of Object.entries(merged)) if (value) next.set(key, value);
@@ -174,22 +174,15 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
         </div>
       )}
 
-      {pages > 1 ? (
-        <nav aria-label="Pages" className="row" style={{ justifyContent: "center" }}>
-          {page > 1 ? (
-            <Link href={href({ page: String(page - 1) })} className="btn btn-ghost">
-              Previous
-            </Link>
-          ) : null}
-          <span className="small muted">
-            Page {page} of {pages}
-          </span>
-          {page < pages ? (
-            <Link href={href({ page: String(page + 1) })} className="btn btn-ghost">
-              Next
-            </Link>
-          ) : null}
-        </nav>
+      {total > clips.length ? (
+        <Link
+          href={href({ show: String(show + STEP) })}
+          scroll={false}
+          className="btn btn-ghost btn-lg"
+          style={{ alignSelf: "center" }}
+        >
+          Load more
+        </Link>
       ) : null}
     </div>
   );

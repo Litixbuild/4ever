@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EyeIcon, PlayIcon } from "@/components/icons";
 import { DeleteClip } from "@/components/delete-clip";
 import { InlinePlayer } from "@/components/inline-player";
+import { SeenMark } from "@/components/seen-mark";
 import { Avatar, VerifiedMark } from "@/components/people";
 import { Vista } from "@/components/vista";
 import { categoryLabel } from "@/lib/categories";
@@ -69,6 +70,7 @@ export function ClipCard({ clip, deletable = false, tab }: { clip: Clip; deletab
       >
         <ClipThumbImage clip={clip} />
         <span className="overlay-chip overlay-tl">{platformLabel(clip.platform)}</span>
+        <SeenMark clipId={clip.id} />
         <span className="play-dot">
           <PlayIcon size={18} style={{ marginLeft: 3 }} />
         </span>

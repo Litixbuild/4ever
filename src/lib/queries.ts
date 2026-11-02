@@ -33,7 +33,7 @@ export type ClipFilters = {
 
 export async function listClips(filters: ClipFilters = {}): Promise<{ clips: Clip[]; total: number }> {
   const supabase = await createClient();
-  const perPage = Math.min(Math.max(filters.perPage ?? 24, 1), 60);
+  const perPage = Math.min(Math.max(filters.perPage ?? 24, 1), 300);
   const page = Math.max(filters.page ?? 1, 1);
 
   let query = supabase.from("clips").select(CLIP_COLUMNS, { count: "exact" }).eq("status", "approved");
@@ -199,7 +199,13 @@ export async function getContestStandings(contestId: string): Promise<ContestSta
     .filter((r): r is ContestStanding => Boolean(r.clip));
 }
 
-export type TopCreator = { id: string; username: string; display_name: string; avatar_url: string | null; votes: number };
+export type TopCreator = {
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+  votes: number;
+};
 
 export async function getTopCreators(days = 7, limit = 5): Promise<TopCreator[]> {
   const supabase = await createClient();
@@ -256,15 +262,25 @@ export async function getActivity(limit = 6): Promise<ActivityItem[]> {
   ]);
 
   const items: ActivityItem[] = [
-    ...((clips.data ?? []) as unknown as Clip[]).map(
-      (clip): ActivityItem => ({ type: "clip", at: clip.published_at ?? clip.created_at, clip }),
-    ),
-    ...((badges.data ?? []) as unknown as { badge: string; awarded_at: string; person: { username: string; display_name: string } | null }[])
+    ...((clips.data ?? []) as unknown as Clip[]).map((clip): ActivityItem => ({
+      type: "clip",
+      at: clip.published_at ?? clip.created_at,
+      clip,
+    })),
+    ...(
+      (badges.data ?? []) as unknown as {
+        badge: string;
+        awarded_at: string;
+        person: { username: string; display_name: string } | null;
+      }[]
+    )
       .filter((b) => b.person)
       .map((b): ActivityItem => ({ type: "badge", at: b.awarded_at, badge: b.badge, person: b.person! })),
-    ...((contests.data ?? []) as Contest[]).map(
-      (contest): ActivityItem => ({ type: "contest", at: contest.opens_at, contest }),
-    ),
+    ...((contests.data ?? []) as Contest[]).map((contest): ActivityItem => ({
+      type: "contest",
+      at: contest.opens_at,
+      contest,
+    })),
   ];
   return items.sort((a, b) => b.at.localeCompare(a.at)).slice(0, limit);
 }

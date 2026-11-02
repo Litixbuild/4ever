@@ -1386,6 +1386,16 @@ button.thumb {
   font-weight: 700;
   color: var(--text);
 }
+.overlay-tr {
+  top: 10px;
+  right: 10px;
+}
+.seen-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--green);
+}
 .overlay-tl {
   left: 10px;
   top: 10px;

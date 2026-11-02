@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PlayIcon } from "@/components/icons";
 import { Vista } from "@/components/vista";
+import { markSeen } from "@/lib/seen";
 import { embedUrl, platformLabel } from "@/lib/video";
 
 // Shows the thumbnail first and only loads YouTube or Twitch after a click.
@@ -33,6 +34,7 @@ export function VideoPlayer({
 
   function play() {
     setHost(window.location.hostname);
+    if (clipId) markSeen(clipId);
     if (countView) {
       fetch(`/api/clips/${clipId}/view`, { method: "POST", keepalive: true }).catch(() => undefined);
     }
@@ -50,11 +52,7 @@ export function VideoPlayer({
         />
       ) : (
         <button type="button" className="player-facade" onClick={play} aria-label={`Play ${title}`}>
-          {thumbnailUrl ? (
-            <img src={thumbnailUrl} alt="" referrerPolicy="no-referrer" />
-          ) : (
-            <Vista seed={shortId} />
-          )}
+          {thumbnailUrl ? <img src={thumbnailUrl} alt="" referrerPolicy="no-referrer" /> : <Vista seed={shortId} />}
           <span className="player-play">
             <PlayIcon size={34} style={{ marginLeft: 4 }} />
           </span>
