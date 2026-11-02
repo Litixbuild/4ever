@@ -3479,6 +3479,21 @@ a.plaque:hover {
     height: auto;
   }
 }
+/* Only phones crop Twitch clips, so the layer that uncrops them only shows there. */
+.feed-twitch-cover {
+  display: none;
+  align-items: flex-end;
+  padding-bottom: 200px;
+}
+.feed-twitch-hint {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
 .feed-touch-icon {
   display: inline-flex;
   align-items: center;
@@ -3511,9 +3526,21 @@ a.plaque:hover {
     border-radius: 0;
     box-shadow: none;
   }
-  /* Twitch clips are widescreen and their player takes every touch, so it only covers the video itself
-     and the space above and below still takes swipes. */
-  .feed-media.is-twitch iframe {
+  /* Twitch clips are widescreen. At first they're cropped to fill the screen like Shorts, with a clear
+     layer on top that takes swipes; a tap ("Tap for sound") switches to the whole player. */
+  .feed-media.is-twitch.is-cover iframe {
+    left: 50%;
+    width: calc(100dvh * 16 / 9);
+    max-width: none;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .feed-media.is-twitch.is-cover .feed-twitch-cover {
+    display: flex;
+  }
+  /* The whole player: its own buttons work, so it only covers the video itself and the space above
+     and below still takes swipes. */
+  .feed-media.is-twitch.is-fit iframe {
     top: 50%;
     height: calc(100vw * 9 / 16);
     transform: translateY(-50%);

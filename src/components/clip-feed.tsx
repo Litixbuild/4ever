@@ -97,6 +97,9 @@ export function ClipFeed({
   // Taps on a touch screen: the first one turns the sound on, then each tap pauses or plays.
   const [soundOn, setSoundOn] = useState(false);
   const [paused, setPaused] = useState(false);
+  // Phones show Twitch clips cropped to fill the screen like Shorts. Twitch's own buttons sit at the
+  // edges and get cropped off, so a tap switches that clip to the full player with its controls.
+  const [twitchFit, setTwitchFit] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
   // iPhones only allow sound after a tap on the player itself, and a new player starts silent again. So there one
   // YouTube player stays open and each new clip is loaded into it: tap once and the sound stays on while you swipe.
@@ -137,6 +140,7 @@ export function ClipFeed({
       if (!isAppleTouch()) setMuted(false);
       setSheetOpen(false);
       setPaused(false);
+      setTwitchFit(false);
       if (list[next]) window.history.replaceState(null, "", feedPath(list[next].shortId));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -379,7 +383,9 @@ export function ClipFeed({
         className={`feed-stage ${direction && !keepPlayer ? `feed-in-${direction}` : ""}`}
         key={keepPlayer ? "player" : clip.id}
       >
-        <div className={`feed-media ${clip.platform === "twitch" ? "is-twitch" : ""}`}>
+        <div
+          className={`feed-media ${clip.platform === "twitch" ? `is-twitch ${twitchFit ? "is-fit" : "is-cover"}` : ""}`}
+        >
           {clip.thumbnailUrl ? (
             <img className="feed-poster" src={smallThumbnail(clip.thumbnailUrl)} alt="" referrerPolicy="no-referrer" />
           ) : null}
@@ -396,6 +402,16 @@ export function ClipFeed({
           ) : null}
           {/* Twitch's player can't be controlled from this page, so its own buttons stay uncovered;
               swipes and the scroll wheel work on the space around it. */}
+          {host && clip.platform === "twitch" && !twitchFit ? (
+            <button
+              type="button"
+              className="feed-touch feed-twitch-cover"
+              onClick={() => setTwitchFit(true)}
+              aria-label="Show the Twitch player with sound and controls"
+            >
+              <span className="feed-twitch-hint">Tap for sound</span>
+            </button>
+          ) : null}
           {host && clip.platform === "youtube" ? (
             <button
               type="button"
