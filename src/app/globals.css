@@ -1027,6 +1027,9 @@ textarea::placeholder {
 }
 
 .main-nav {
+  /* Three tabs spread evenly across the space between the logo and the search box. */
+  flex: 1 1 auto;
+  justify-content: space-evenly;
   display: flex;
   flex-wrap: wrap;
   gap: 2px 26px;
@@ -1057,6 +1060,15 @@ textarea::placeholder {
 }
 .main-nav a:hover {
   color: var(--flavor);
+}
+.main-nav .nav-soon {
+  padding: 10px 0;
+  color: var(--faint);
+  opacity: 0.55;
+  cursor: not-allowed;
+  user-select: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
 }
 .main-nav a[aria-current="page"] {
   color: var(--flavor);
@@ -2163,6 +2175,17 @@ a.credits-name:hover {
 }
 .choice-row input {
   margin: 0;
+}
+.rename-clip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.rename-clip .input {
+  flex: 1 1 260px;
+  width: auto;
 }
 .check {
   display: flex;

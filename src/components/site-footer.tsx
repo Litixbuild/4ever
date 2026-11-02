@@ -20,9 +20,6 @@ export function SiteFooter() {
           <div className="stack-sm" style={{ gap: 10 }}>
             <span className="footer-head">Community</span>
             <Link href="/browse">Browse</Link>
-            <Link href="/contests">Contests</Link>
-            <Link href="/creators">Creators</Link>
-            <Link href="/hall-of-fame">Hall of Fame</Link>
           </div>
           <div className="stack-sm" style={{ gap: 10 }}>
             <span className="footer-head">Creators</span>

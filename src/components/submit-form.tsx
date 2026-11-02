@@ -20,7 +20,13 @@ function sourceLabel(sourceType: string): string {
   return "YouTube video";
 }
 
-export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedChannel[] }) {
+export function SubmitForm({
+  verifiedChannels,
+  isCurator = false,
+}: {
+  verifiedChannels: VerifiedChannel[];
+  isCurator?: boolean;
+}) {
   const [state, action, submitting] = useActionState(submitClip, initial);
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -177,6 +183,15 @@ export function SubmitForm({ verifiedChannels }: { verifiedChannels: VerifiedCha
             </span>
           </label>
         </div>
+        {owner === "shared" && isCurator ? (
+          <label className="check">
+            <input type="checkbox" name="asSite" defaultChecked />
+            <span>
+              <strong>Post as 4Ever.</strong> It shows &ldquo;Shared by 4Ever&rdquo; instead of your name. It still
+              shows on your own profile, so you can delete it.
+            </span>
+          </label>
+        ) : null}
         <p className="help" style={{ color: "var(--text-3)" }}>
           {owner === "shared" ? (
             "Thanks for spreading good work. The creator can claim it or ask for it to be removed at any time."

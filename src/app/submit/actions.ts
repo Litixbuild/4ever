@@ -1,5 +1,6 @@
 "use server";
 
+import { titleNeedsReview } from "@/lib/moderation";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { maybeAwardFoundingCreator, verifiedOwnerOf } from "@/lib/awards";
@@ -21,10 +22,13 @@ export async function submitClip(_prev: SubmitState, formData: FormData): Promis
   const kind = String(formData.get("kind") ?? "");
   const category = String(formData.get("category") ?? "");
   const music = String(formData.get("music") ?? "");
-  const musicCredit = String(formData.get("musicCredit") ?? "").trim().slice(0, 200);
+  const musicCredit = String(formData.get("musicCredit") ?? "")
+    .trim()
+    .slice(0, 200);
   const notes = String(formData.get("notes") ?? "").trim();
   const tags = parseTags(String(formData.get("tags") ?? ""));
   const agreed = formData.get("agree") === "on";
+  const asSite = formData.get("asSite") === "on";
 
   if (!agreed) return { error: "Tick the box at the bottom to confirm this video is fine to share." };
   if (!isKind(kind)) return { error: "Choose whether this is a movie or a clip." };
@@ -38,7 +42,11 @@ export async function submitClip(_prev: SubmitState, formData: FormData): Promis
   // Keep the review queue manageable.
   if (!viewer.isCurator) {
     const [{ count: pending }, { count: today }] = await Promise.all([
-      admin.from("clips").select("id", { count: "exact", head: true }).eq("submitted_by", viewer.userId).eq("status", "pending"),
+      admin
+        .from("clips")
+        .select("id", { count: "exact", head: true })
+        .eq("submitted_by", viewer.userId)
+        .eq("status", "pending"),
       admin
         .from("clips")
         .select("id", { count: "exact", head: true })
@@ -46,7 +54,9 @@ export async function submitClip(_prev: SubmitState, formData: FormData): Promis
         .gte("created_at", new Date(Date.now() - 86400_000).toISOString()),
     ]);
     if ((pending ?? 0) >= site.maxPendingSubmissions) {
-      return { error: `You have ${site.maxPendingSubmissions} videos waiting for review. Hang tight until those are checked.` };
+      return {
+        error: `You have ${site.maxPendingSubmissions} videos waiting for review. Hang tight until those are checked.`,
+      };
     }
     if ((today ?? 0) >= site.maxSubmissionsPerDay) {
       return { error: "That's the limit for today. Come back tomorrow with more." };
@@ -65,7 +75,9 @@ export async function submitClip(_prev: SubmitState, formData: FormData): Promis
   if (existing) return { error: duplicateMessage(existing) };
 
   const creatorId = await verifiedOwnerOf(meta.ref.platform, meta.channelId);
-  const autoApprove = viewer.isCurator;
+  // Curators' posts go live at once, unless the title trips the word check: then a curator looks first.
+  const flagged = titleNeedsReview(meta.title);
+  const autoApprove = viewer.isCurator && !flagged;
   const now = new Date().toISOString();
 
   let shortId: string | null = null;
@@ -87,12 +99,14 @@ export async function submitClip(_prev: SubmitState, formData: FormData): Promis
         channel_avatar_url: meta.channelAvatarUrl,
         creator_id: creatorId,
         submitted_by: viewer.userId,
+        shared_as_site: viewer.isCurator && asSite && creatorId !== viewer.userId,
         kind,
         category,
         tags,
         music_source: music,
         music_credit: music === "licensed" ? musicCredit : null,
         status: autoApprove ? "approved" : "pending",
+        review_note: flagged ? "Held for a look: the title may need cleaning up." : null,
         reviewed_by: autoApprove ? viewer.userId : null,
         reviewed_at: autoApprove ? now : null,
         published_at: autoApprove ? now : null,

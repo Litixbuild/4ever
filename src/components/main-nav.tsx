@@ -16,9 +16,6 @@ const LINKS = [
     label: "Clips",
     match: (p: string, k: string | null) => (p === "/browse" && k === "clip") || p === "/watch",
   },
-  { href: "/contests", label: "Contests", match: (p: string) => p.startsWith("/contests") },
-  { href: "/creators", label: "Creators", match: (p: string) => p.startsWith("/creators") || p.startsWith("/u/") },
-  { href: "/hall-of-fame", label: "Hall of Fame", match: (p: string) => p.startsWith("/hall-of-fame") },
 ];
 
 export function MainNav() {
@@ -43,6 +40,10 @@ export function MainNav() {
           </Link>
         );
       })}
+      {/* Contests aren't open yet: shown, greyed out, and not a link. */}
+      <span className="nav-soon" aria-disabled="true" title="Contests are coming soon">
+        Contests
+      </span>
     </nav>
   );
 }

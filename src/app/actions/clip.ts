@@ -109,3 +109,28 @@ export async function deleteClip(_prev: DeleteClipState, formData: FormData): Pr
   const tab = formData.get("tab") === "shared" ? "&tab=shared" : "";
   redirect(`/u/${viewer.profile?.username ?? ""}?deleted=1${tab}`);
 }
+
+export type RenameState = { ok: boolean; message: string | null; savedAt?: number };
+
+// Curators can fix a clip's title (Twitch titles are written by whoever made the clip). The fixed title
+// stays put when the daily refresh re-reads the video's details.
+export async function renameClip(_prev: RenameState, formData: FormData): Promise<RenameState> {
+  const viewer = await getViewer();
+  if (!viewer?.isCurator) return { ok: false, message: "Only curators can change titles." };
+  const clipId = String(formData.get("clipId") ?? "");
+  const shortId = String(formData.get("shortId") ?? "");
+  const title = String(formData.get("title") ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 140);
+  if (!UUID.test(clipId)) return { ok: false, message: "That video wasn't found." };
+  if (title.length < 2) return { ok: false, message: "Give it a title." };
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("clips").update({ title, title_locked: true }).eq("id", clipId);
+  if (error) return { ok: false, message: "That didn't save. Try again in a moment." };
+
+  revalidatePath(`/c/${shortId}`);
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Title saved.", savedAt: Date.now() };
+}

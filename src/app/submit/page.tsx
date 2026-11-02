@@ -25,7 +25,10 @@ export default async function SubmitPage() {
 
       <div className="split" style={{ gap: 32 }}>
         <div className="split-main">
-          <SubmitForm verifiedChannels={verified.map((c) => ({ platform: c.platform, channel_id: c.channel_id }))} />
+          <SubmitForm
+            verifiedChannels={verified.map((c) => ({ platform: c.platform, channel_id: c.channel_id }))}
+            isCurator={viewer.isCurator}
+          />
         </div>
 
         <aside className="split-aside" style={{ gap: 18 }}>

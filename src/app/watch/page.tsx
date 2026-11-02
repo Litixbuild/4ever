@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 function toFeedClip(clip: Clip, voted: boolean): FeedClip {
   // The face of a video is its verified creator; if the channel isn't claimed yet, the person who shared it.
-  const person = clip.creator ?? clip.submitter;
+  const person = clip.creator ?? (clip.shared_as_site ? null : clip.submitter);
   return {
     id: clip.id,
     shortId: clip.short_id,

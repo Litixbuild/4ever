@@ -58,7 +58,7 @@ export default async function ProfilePage({
     getChannels(profile.id),
     // Your own profile lists everything, so you can find and delete any video you shared.
     tab === "shared"
-      ? getClipsSharedBy(profile.id, isOwn ? 1000 : 48)
+      ? getClipsSharedBy(profile.id, isOwn ? 1000 : 48, isOwn)
       : tab === "favorites"
         ? getFavoriteClips(profile.id)
         : getClipsByCreator(profile.id, isOwn ? 1000 : 48),

@@ -340,16 +340,17 @@ export async function getClipsByCreator(userId: string, limit = 48): Promise<Cli
   return (data ?? []) as unknown as Clip[];
 }
 
-export async function getClipsSharedBy(userId: string, limit = 48): Promise<Clip[]> {
+// Clips someone shared from other people's channels. Ones posted as "4Ever" only show to their owner.
+export async function getClipsSharedBy(userId: string, limit = 48, includeSiteShares = false): Promise<Clip[]> {
   const supabase = await createClient();
-  const { data } = await supabase
+  let query = supabase
     .from("clips")
     .select(CLIP_COLUMNS)
     .eq("status", "approved")
     .eq("submitted_by", userId)
-    .or(`creator_id.is.null,creator_id.neq.${userId}`)
-    .order("published_at", { ascending: false })
-    .limit(limit);
+    .or(`creator_id.is.null,creator_id.neq.${userId}`);
+  if (!includeSiteShares) query = query.eq("shared_as_site", false);
+  const { data } = await query.order("published_at", { ascending: false }).limit(limit);
   return (data ?? []) as unknown as Clip[];
 }
 

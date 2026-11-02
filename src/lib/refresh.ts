@@ -9,7 +9,14 @@ import { helix } from "@/lib/twitch";
 const STALE_DAYS = 25;
 const PER_RUN = 500;
 
-type Row = { id: string; platform: string; source_type: string; source_id: string; channel_id: string | null };
+type Row = {
+  id: string;
+  platform: string;
+  source_type: string;
+  source_id: string;
+  channel_id: string | null;
+  title_locked: boolean;
+};
 type Update = {
   title?: string;
   thumbnail_url?: string | null;
@@ -155,7 +162,7 @@ export async function refreshStaleClips(): Promise<RefreshResult> {
   const cutoff = new Date(Date.now() - STALE_DAYS * 86400_000).toISOString();
   const { data } = await admin
     .from("clips")
-    .select("id, platform, source_type, source_id, channel_id")
+    .select("id, platform, source_type, source_id, channel_id, title_locked")
     .neq("status", "removed")
     .lt("details_refreshed_at", cutoff)
     .order("details_refreshed_at", { ascending: true })
@@ -180,6 +187,8 @@ export async function refreshStaleClips(): Promise<RefreshResult> {
     for (const row of list) {
       const update = found.get(row.source_id);
       if (update) {
+        // A curator fixed this title by hand: keep theirs.
+        if (row.title_locked) delete update.title;
         await admin
           .from("clips")
           .update({ ...update, details_refreshed_at: now })

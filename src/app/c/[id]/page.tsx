@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { deleteComment } from "@/app/actions/clip";
 import { MiniClip } from "@/components/clip-card";
 import { ClipActions } from "@/components/clip-actions";
+import { RenameClip } from "@/components/rename-clip";
 import { CommentForm } from "@/components/comment-form";
 import { ChevronRightIcon, ClockIcon, ExternalIcon, EyeIcon, TrashIcon } from "@/components/icons";
 import { Avatar, VerifiedMark } from "@/components/people";
@@ -74,7 +75,8 @@ export default async function ClipPage({
   ]);
 
   const duration = formatDuration(clip.duration_seconds);
-  const sharedBy = clip.submitter && clip.submitter.id !== clip.creator?.id ? clip.submitter : null;
+  const sharedBy =
+    clip.submitter && clip.submitter.id !== clip.creator?.id && !clip.shared_as_site ? clip.submitter : null;
   const sourceName = platformLabel(clip.platform);
 
   return (
@@ -210,6 +212,12 @@ export default async function ClipPage({
               )}
             </div>
             <dl className="credits-facts">
+              {clip.shared_as_site ? (
+                <>
+                  <dt>Shared by</dt>
+                  <dd style={{ fontWeight: 700 }}>4Ever</dd>
+                </>
+              ) : null}
               {sharedBy ? (
                 <>
                   <dt>Shared by</dt>
@@ -238,6 +246,7 @@ export default async function ClipPage({
             <div className="credits-foot">
               <span>Credit always goes to the channel that uploaded the video.</span>
               <span className="row" style={{ gap: "6px 18px" }}>
+                {viewer?.isCurator ? <RenameClip clipId={clip.id} shortId={clip.short_id} title={clip.title} /> : null}
                 {clip.creator ? null : <Link href={`/claim?clip=${clip.short_id}`}>This is my video</Link>}
                 {canDelete ? null : (
                   <Link href={`/report?clip=${clip.short_id}`} className="quiet-link">
