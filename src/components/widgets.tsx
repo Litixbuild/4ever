@@ -258,38 +258,43 @@ export function CreatorsBand() {
     <section aria-labelledby="creators-band" className="band">
       <div className="stack" style={{ flex: "1 1 380px", gap: 14 }}>
         <h2 id="creators-band" className="h2">
-          Made a movie? Bring it home.
+          Every clip is credited to the person who made it.
         </h2>
-        <p className="lead" style={{ maxWidth: 480 }}>
-          Your video stays on your channel. 4Ever gives it a front page, a crowd that cares about the craft, and credit
-          that always points back to you.
+        <p className="lead" style={{ maxWidth: 500 }}>
+          Videos on 4Ever play straight from the creator&apos;s own YouTube or Twitch channel. Their name is on it and
+          the views count for them, no matter who shared it here.
         </p>
         <div className="row" style={{ marginTop: 6 }}>
           <Link href="/submit" className="btn btn-gold btn-lg">
             Submit a Clip
           </Link>
-          <Link href="/music-guide" className="btn btn-ghost btn-lg">
-            Read the music guide
+          <Link href="/claim" className="btn btn-ghost btn-lg">
+            Claim your clips
           </Link>
         </div>
       </div>
       <ol className="steps band-steps">
         <li>
           <span className="numeral">I</span>
-          <strong>Paste a link</strong>
-          <span className="small muted">YouTube or Twitch. Nothing to upload.</span>
+          <strong>It stays on their channel</strong>
+          <span className="small muted">
+            Nothing is reuploaded. Every clip plays from YouTube or Twitch, so every view goes to the creator.
+          </span>
         </li>
         <li>
           <span className="numeral">II</span>
-          <strong>Get the credit</strong>
+          <strong>Their name goes on it</strong>
           <span className="small muted">
-            We read the real channel from YouTube or Twitch, so credit can&apos;t be faked.
+            We read the channel from YouTube or Twitch ourselves. Whoever shares a clip, the person who made it gets the
+            credit.
           </span>
         </li>
         <li>
           <span className="numeral">III</span>
-          <strong>Get featured</strong>
-          <span className="small muted">Earn titles and a spot in the Hall of Fame.</span>
+          <strong>Creators claim their clips</strong>
+          <span className="small muted">
+            Verify your channel once and every clip of yours gets a verified check and a place on your profile.
+          </span>
         </li>
       </ol>
     </section>
