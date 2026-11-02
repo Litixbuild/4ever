@@ -99,9 +99,20 @@ export function ClipCard({ clip, deletable = false, tab }: { clip: Clip; deletab
   );
 }
 
-export function ClipGrid({ clips, deletable = false, tab }: { clips: Clip[]; deletable?: boolean; tab?: string }) {
+export function ClipGrid({
+  clips,
+  deletable = false,
+  tab,
+  threeUp = false,
+}: {
+  clips: Clip[];
+  deletable?: boolean;
+  tab?: string;
+  // Exactly three across on desktop, so a page of nine is a 3×3 grid.
+  threeUp?: boolean;
+}) {
   return (
-    <div className="clip-grid">
+    <div className={threeUp ? "clip-grid clip-grid-3" : "clip-grid"}>
       {clips.map((clip) => (
         <ClipCard key={clip.id} clip={clip} deletable={deletable} tab={tab} />
       ))}

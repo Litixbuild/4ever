@@ -845,46 +845,13 @@ textarea::placeholder {
   color: var(--gold-hi);
 }
 
-/* Page links under a grid: Previous, 1 … 4 5 6 …, Next page. */
+/* Previous / Next page under a grid. */
 .pager {
   align-self: center;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: center;
-  gap: 6px;
-}
-.pager > a,
-.pager > span[aria-current] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 42px;
-  min-height: 42px;
-  padding: 0 12px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: var(--surface);
-  color: var(--text-3);
-  font-size: 14px;
-  font-weight: 800;
-  text-decoration: none;
-}
-.pager > a:hover {
-  color: var(--text);
-  border-color: rgba(242, 207, 126, 0.35);
-}
-.pager > span[aria-current] {
-  background: #2a2217;
-  border-color: rgba(242, 207, 126, 0.35);
-  color: var(--gold-hi);
-}
-.pager > .pager-step {
-  padding: 0 18px;
-}
-.pager-gap {
-  padding: 0 4px;
-  color: var(--faint);
+  gap: 10px;
 }
 
 /* ---------- Header ---------- */
@@ -1499,6 +1466,19 @@ button.thumb {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
   gap: 22px;
+}
+.clip-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 900px) {
+  .clip-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .clip-grid-3 {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Quality color as a variable, for borders and glows (the title color comes from .rarity-*). */

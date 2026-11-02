@@ -16,18 +16,8 @@ const SORTS: { value: ClipSort; label: string }[] = [
   { value: "votes", label: "Most voted" },
 ];
 
-// Nine videos a page.
+// Nine videos a page: a 3×3 grid.
 const PER_PAGE = 9;
-
-// Page links: the pages around the current one and "Next page". The last page number is never
-// shown, so the list reads as open-ended rather than counting down to the end.
-function pageWindow(page: number, last: number) {
-  const end = Math.min(last, Math.max(page + 1, 3));
-  const start = Math.max(1, Math.min(page - 1, end - 2));
-  const pages: number[] = [];
-  for (let n = start; n <= end; n++) pages.push(n);
-  return pages;
-}
 
 function heading(kind: string | null, cat: string | null, q: string, tag: string) {
   if (q) return `Results for “${q}”`;
@@ -57,7 +47,6 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
 
   const { clips, total } = await listClips({ kind, category: cat, sort, q, tag, perPage: PER_PAGE, page });
   const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
-  const pages = pageWindow(page, lastPage);
 
   function href(overrides: Partial<Record<keyof Search, string | null>>) {
     const next = new URLSearchParams();
@@ -164,7 +153,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
       </nav>
 
       {clips.length > 0 ? (
-        <ClipGrid clips={clips} />
+        <ClipGrid clips={clips} threeUp />
       ) : (
         <div className="empty">
           <h2 className="h-gold">{q ? `Nothing matches “${q}”` : "Nothing here yet"}</h2>
@@ -189,36 +178,12 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
       {lastPage > 1 ? (
         <nav aria-label="Pages" className="pager">
           {page > 1 ? (
-            <Link href={href({ page: page === 2 ? null : String(page - 1) })} className="pager-step">
+            <Link href={href({ page: page === 2 ? null : String(page - 1) })} className="btn btn-ghost btn-lg">
               Previous
             </Link>
           ) : null}
-          {pages[0] > 1 ? (
-            <>
-              <Link href={href({ page: null })}>1</Link>
-              <span className="pager-gap" aria-hidden="true">
-                …
-              </span>
-            </>
-          ) : null}
-          {pages.map((n) =>
-            n === page ? (
-              <span key={n} aria-current="page">
-                {n}
-              </span>
-            ) : (
-              <Link key={n} href={href({ page: n === 1 ? null : String(n) })}>
-                {n}
-              </Link>
-            ),
-          )}
-          {pages[pages.length - 1] < lastPage ? (
-            <span className="pager-gap" aria-hidden="true">
-              …
-            </span>
-          ) : null}
           {page < lastPage ? (
-            <Link href={href({ page: String(page + 1) })} className="pager-step">
+            <Link href={href({ page: String(page + 1) })} className="btn btn-gold btn-lg">
               Next page
             </Link>
           ) : null}
