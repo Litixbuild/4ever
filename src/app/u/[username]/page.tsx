@@ -56,11 +56,12 @@ export default async function ProfilePage({
     getCreatorStats(profile.id),
     getBadges(profile.id),
     getChannels(profile.id),
+    // Your own profile lists everything, so you can find and delete any video you shared.
     tab === "shared"
-      ? getClipsSharedBy(profile.id)
+      ? getClipsSharedBy(profile.id, isOwn ? 1000 : 48)
       : tab === "favorites"
         ? getFavoriteClips(profile.id)
-        : getClipsByCreator(profile.id),
+        : getClipsByCreator(profile.id, isOwn ? 1000 : 48),
   ]);
 
   const verifiedChannels = channels.filter((c) => c.verified_at);
