@@ -24,7 +24,7 @@ export async function SiteHeader() {
               Search clips
             </label>
             <SearchIcon size={17} />
-            <input id="site-search" name="q" type="search" placeholder="Search clips, creators, zones" />
+            <input id="site-search" name="q" type="search" placeholder="Search clips and creators" />
           </form>
           <Link href="/browse#search" className="btn btn-ghost btn-icon search-link" aria-label="Search">
             <SearchIcon size={18} />

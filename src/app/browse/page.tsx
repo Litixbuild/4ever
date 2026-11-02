@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ClipGrid } from "@/components/clip-card";
 import { PlayIcon, SearchIcon } from "@/components/icons";
 import { CATEGORIES, categoryLabel, isCategory, isKind } from "@/lib/categories";
 import { cleanSearch } from "@/lib/format";
 import { isClipSort, listClips, type ClipSort } from "@/lib/queries";
 
-type Search = { kind?: string; cat?: string; sort?: string; q?: string; tag?: string; show?: string };
+type Search = { kind?: string; cat?: string; sort?: string; q?: string; tag?: string; page?: string };
 
 const SORTS: { value: ClipSort; label: string }[] = [
   { value: "new", label: "Newest" },
@@ -15,8 +16,18 @@ const SORTS: { value: ClipSort; label: string }[] = [
   { value: "votes", label: "Most voted" },
 ];
 
-// Nine videos to start; "Load more" adds nine at a time.
-const STEP = 9;
+// Nine videos a page.
+const PER_PAGE = 9;
+
+// Page links: the pages around the current one and "Next page". The last page number is never
+// shown, so the list reads as open-ended rather than counting down to the end.
+function pageWindow(page: number, last: number) {
+  const end = Math.min(last, Math.max(page + 1, 3));
+  const start = Math.max(1, Math.min(page - 1, end - 2));
+  const pages: number[] = [];
+  for (let n = start; n <= end; n++) pages.push(n);
+  return pages;
+}
 
 function heading(kind: string | null, cat: string | null, q: string, tag: string) {
   if (q) return `Results for “${q}”`;
@@ -42,9 +53,11 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, "")
     .slice(0, 24);
-  const show = Math.min(Math.max(Number.parseInt(p.show ?? "", 10) || STEP, STEP), 300);
+  const page = Math.min(Math.max(Number.parseInt(p.page ?? "", 10) || 1, 1), 500);
 
-  const { clips, total } = await listClips({ kind, category: cat, sort, q, tag, perPage: show });
+  const { clips, total } = await listClips({ kind, category: cat, sort, q, tag, perPage: PER_PAGE, page });
+  const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
+  const pages = pageWindow(page, lastPage);
 
   function href(overrides: Partial<Record<keyof Search, string | null>>) {
     const next = new URLSearchParams();
@@ -54,7 +67,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
       sort: sort === "new" ? null : sort,
       q: q || null,
       tag: tag || null,
-      show: null,
+      page: null,
       ...overrides,
     };
     for (const [key, value] of Object.entries(merged)) if (value) next.set(key, value);
@@ -62,20 +75,19 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
     return `/browse${query ? `?${query}` : ""}`;
   }
 
+  // A page past the end (an old link, a typed URL) goes to the last page that has videos.
+  if (page > lastPage) redirect(href({ page: lastPage > 1 ? String(lastPage) : null }));
+
   return (
     <div className="container page" style={{ gap: 28 }}>
       <div className="browse-head">
         <div className="stack" style={{ gap: 10, flex: "1 1 360px", minWidth: 0 }}>
           <h1 className="h1">{heading(kind, cat, q, tag)}</h1>
-          <p className="muted" style={{ margin: 0 }}>
-            {total === 1 ? "1 video" : `${total.toLocaleString("en-US")} videos`}
-            {q || tag ? (
-              <>
-                {". "}
-                <Link href={href({ q: null, tag: null })}>Clear search</Link>
-              </>
-            ) : null}
-          </p>
+          {q || tag ? (
+            <p className="muted" style={{ margin: 0 }}>
+              <Link href={href({ q: null, tag: null })}>Clear search</Link>
+            </p>
+          ) : null}
           {total > 0 && !q && !tag ? (
             <Link
               href={kind === "movie" ? "/watch?kind=movie" : "/watch"}
@@ -174,15 +186,43 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
         </div>
       )}
 
-      {total > clips.length ? (
-        <Link
-          href={href({ show: String(show + STEP) })}
-          scroll={false}
-          className="btn btn-ghost btn-lg"
-          style={{ alignSelf: "center" }}
-        >
-          Load more
-        </Link>
+      {lastPage > 1 ? (
+        <nav aria-label="Pages" className="pager">
+          {page > 1 ? (
+            <Link href={href({ page: page === 2 ? null : String(page - 1) })} className="pager-step">
+              Previous
+            </Link>
+          ) : null}
+          {pages[0] > 1 ? (
+            <>
+              <Link href={href({ page: null })}>1</Link>
+              <span className="pager-gap" aria-hidden="true">
+                …
+              </span>
+            </>
+          ) : null}
+          {pages.map((n) =>
+            n === page ? (
+              <span key={n} aria-current="page">
+                {n}
+              </span>
+            ) : (
+              <Link key={n} href={href({ page: n === 1 ? null : String(n) })}>
+                {n}
+              </Link>
+            ),
+          )}
+          {pages[pages.length - 1] < lastPage ? (
+            <span className="pager-gap" aria-hidden="true">
+              …
+            </span>
+          ) : null}
+          {page < lastPage ? (
+            <Link href={href({ page: String(page + 1) })} className="pager-step">
+              Next page
+            </Link>
+          ) : null}
+        </nav>
       ) : null}
     </div>
   );

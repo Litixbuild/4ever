@@ -845,6 +845,48 @@ textarea::placeholder {
   color: var(--gold-hi);
 }
 
+/* Page links under a grid: Previous, 1 … 4 5 6 …, Next page. */
+.pager {
+  align-self: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+.pager > a,
+.pager > span[aria-current] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.pager > a:hover {
+  color: var(--text);
+  border-color: rgba(242, 207, 126, 0.35);
+}
+.pager > span[aria-current] {
+  background: #2a2217;
+  border-color: rgba(242, 207, 126, 0.35);
+  color: var(--gold-hi);
+}
+.pager > .pager-step {
+  padding: 0 18px;
+}
+.pager-gap {
+  padding: 0 4px;
+  color: var(--faint);
+}
+
 /* ---------- Header ---------- */
 
 .site-header {
@@ -1027,8 +1069,10 @@ textarea::placeholder {
 }
 
 .main-nav {
-  /* Three tabs spread evenly across the space between the logo and the search box. */
+  /* Three tabs spread evenly between the logo and the search box, capped so they never
+     crowd the search and buttons onto a second line. */
   flex: 1 1 auto;
+  max-width: 440px;
   justify-content: space-evenly;
   display: flex;
   flex-wrap: wrap;
@@ -1090,6 +1134,14 @@ textarea::placeholder {
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
+}
+/* On desktop the search and buttons stay together on one line at the right. */
+@media (min-width: 980px) {
+  .header-actions {
+    flex: 0 1 auto;
+    flex-wrap: nowrap;
+    margin-left: auto;
+  }
 }
 
 .search {
