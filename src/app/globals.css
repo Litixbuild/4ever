@@ -5732,3 +5732,33 @@ a.plaque:hover {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Phones: Community, Creators and Legal side by side (left, middle, right), each list running down. */
+@media (max-width: 760px) {
+  .footer-row {
+    gap: 22px;
+    padding-top: 28px;
+    padding-bottom: 32px;
+  }
+  .footer-cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    width: 100%;
+    font-size: 13px;
+  }
+  .footer-cols > div {
+    gap: 9px !important;
+  }
+  .footer-cols > :nth-child(2) {
+    text-align: center;
+    align-items: center;
+  }
+  .footer-cols > :nth-child(3) {
+    text-align: right;
+    align-items: flex-end;
+  }
+  .footer-head {
+    font-size: 15px;
+  }
+}
