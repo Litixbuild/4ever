@@ -60,6 +60,8 @@ export function HomeStage({
   const [index, setIndex] = useState(0);
   const [host, setHost] = useState<string | null>(null);
   const frame = useRef<HTMLIFrameElement>(null);
+  // The YouTube player's last reported state (1 = playing, 3 = buffering).
+  const ytState = useRef<number | null>(null);
   const rail = useRef<HTMLOListElement>(null);
   const clip = queue[index];
   const next = queue[index + 1];
@@ -157,11 +159,32 @@ export function HomeStage({
       }
       const state =
         data.event === "onStateChange" ? data.info : typeof data.info === "object" ? data.info?.playerState : undefined;
+      if (typeof state === "number") ytState.current = state;
       if (state === 0) playNext();
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, [host, clip?.platform, playNext]);
+
+  // Tell the YouTube player to report its state, then make sure it starts: if the browser held back
+  // autoplay with sound, ask again, and as a last resort start it muted (always allowed).
+  function onFrameLoad() {
+    const target = frame.current?.contentWindow;
+    if (!target) return;
+    const send = (message: object) => target.postMessage(JSON.stringify(message), "*");
+    send({ event: "listening", id: "4ever-home", channel: "widget" });
+    if (clip?.platform !== "youtube") return;
+    ytState.current = null;
+    const started = () => ytState.current === 1 || ytState.current === 3;
+    window.setTimeout(() => {
+      if (!started()) send({ event: "command", func: "playVideo", args: [] });
+    }, 1200);
+    window.setTimeout(() => {
+      if (started()) return;
+      send({ event: "command", func: "mute", args: [] });
+      send({ event: "command", func: "playVideo", args: [] });
+    }, 2600);
+  }
 
   if (!clip) return null;
 
@@ -316,12 +339,7 @@ export function HomeStage({
               ref={frame}
               src={src}
               title={clip.title}
-              onLoad={() =>
-                frame.current?.contentWindow?.postMessage(
-                  JSON.stringify({ event: "listening", id: "4ever-home", channel: "widget" }),
-                  "*",
-                )
-              }
+              onLoad={onFrameLoad}
               allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen
               referrerPolicy="strict-origin-when-cross-origin"
