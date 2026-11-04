@@ -133,7 +133,39 @@ export async function listFeatures(limit = 24): Promise<Feature[]> {
 }
 
 // When nothing is featured, show the most watched video of the past week.
+// Trending movies for the front page: recent movies ranked by how fast they're being watched and voted
+// on, newest first among equals, with Player-made ones lifted ahead of the rest.
+export function trendingScore(
+  clip: Pick<Clip, "view_count" | "vote_count" | "published_at" | "player_made">,
+  now = Date.now(),
+) {
+  const hours = Math.max(0, (now - new Date(clip.published_at ?? now).getTime()) / 3_600_000);
+  const heat = ((clip.view_count ?? 0) + 3 * (clip.vote_count ?? 0) + 2) / (hours + 6) ** 1.2;
+  return heat * (clip.player_made ? 1.75 : 1);
+}
+
+export async function getTrendingMovies(limit = 6): Promise<Clip[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("clips")
+    .select(CLIP_COLUMNS)
+    .eq("status", "approved")
+    .eq("kind", "movie")
+    .order("published_at", { ascending: false })
+    .limit(60);
+  const movies = (data ?? []) as unknown as Clip[];
+  const now = Date.now();
+  return movies
+    .map((clip) => ({ clip, score: trendingScore(clip, now) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((m) => m.clip);
+}
+
 export async function getHeroFallback(): Promise<Clip | null> {
+  // Movies come first on the front page: the top trending one leads when there's no Movie of the Week.
+  const [topMovie] = await getTrendingMovies(1);
+  if (topMovie) return topMovie;
   const supabase = await createClient();
   const weekAgo = new Date(Date.now() - 7 * 86400_000).toISOString();
   const { data: recent } = await supabase

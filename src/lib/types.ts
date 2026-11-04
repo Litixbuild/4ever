@@ -51,6 +51,8 @@ export type Clip = {
   creator_id: string | null;
   submitted_by: string | null;
   shared_as_site: boolean;
+  // The gold "Player-made" mark: a video the player made and edited themselves.
+  player_made: boolean;
   title_locked: boolean;
   kind: "movie" | "clip";
   category: string;
@@ -136,7 +138,7 @@ export type Report = {
 export const CLIP_COLUMNS = `
   id, short_id, platform, source_type, source_id, source_url, title, description,
   thumbnail_url, duration_seconds, channel_id, channel_name, channel_url, channel_avatar_url,
-  creator_id, submitted_by, shared_as_site, title_locked, kind, category, tags, music_source, music_credit,
+  creator_id, submitted_by, shared_as_site, player_made, title_locked, kind, category, tags, music_source, music_credit,
   status, review_note, published_at, view_count, vote_count, comment_count, created_at,
   creator:profiles!clips_creator_id_fkey ( id, username, display_name, avatar_url ),
   submitter:profiles!clips_submitted_by_fkey ( id, username, display_name, avatar_url )

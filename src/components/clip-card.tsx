@@ -1,3 +1,4 @@
+import { PlayerMadeMark } from "@/components/player-made";
 import Link from "next/link";
 import { EyeIcon, PlayIcon } from "@/components/icons";
 import { DeleteClip } from "@/components/delete-clip";
@@ -75,6 +76,7 @@ export function ClipCard({ clip, deletable = false, tab }: { clip: Clip; deletab
         <span className="play-dot">
           <PlayIcon size={18} style={{ marginLeft: 3 }} />
         </span>
+        {clip.player_made ? <PlayerMadeMark className="overlay-bl" /> : null}
         {duration ? <span className="overlay-chip overlay-br">{duration}</span> : null}
       </InlinePlayer>
       <div className="clip-body">

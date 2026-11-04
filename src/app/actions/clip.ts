@@ -134,3 +134,16 @@ export async function renameClip(_prev: RenameState, formData: FormData): Promis
   revalidatePath("/", "layout");
   return { ok: true, message: "Title saved.", savedAt: Date.now() };
 }
+
+// Curators add or remove the gold "Player-made" mark on any video.
+export async function setPlayerMade(formData: FormData): Promise<void> {
+  const viewer = await getViewer();
+  if (!viewer?.isCurator) return;
+  const clipId = String(formData.get("clipId") ?? "");
+  const shortId = String(formData.get("shortId") ?? "");
+  if (!UUID.test(clipId) || !SHORT_ID.test(shortId)) return;
+  const on = formData.get("on") === "1";
+  await createAdminClient().from("clips").update({ player_made: on }).eq("id", clipId);
+  revalidatePath(`/c/${shortId}`);
+  revalidatePath("/", "layout");
+}

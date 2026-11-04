@@ -4658,3 +4658,60 @@ a.plaque:hover {
     transition: none;
   }
 }
+
+/* ---------- Player-made mark and Trending movies ---------- */
+.player-made {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 6px;
+  background: linear-gradient(#f2cf7e, #d9a647);
+  border: 1px solid #ffe3a3;
+  color: #2a1d08;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(226, 182, 92, 0.45);
+}
+.player-made.overlay-bl {
+  position: absolute;
+  z-index: 1;
+}
+.inline-form {
+  display: inline;
+}
+.trending-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 18px;
+  padding: 18px 20px;
+  border: 1px dashed rgba(242, 207, 126, 0.4);
+  border-radius: 14px;
+  background: rgba(226, 182, 92, 0.05);
+}
+/* Phones: Trending movies swipe sideways instead of stacking six tall cards. */
+@media (max-width: 640px) {
+  .trending-movies .clip-grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin: 0 -16px;
+    padding: 0 16px 6px;
+    scrollbar-width: none;
+  }
+  .trending-movies .clip-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .trending-movies .clip-card {
+    scroll-snap-align: start;
+  }
+}

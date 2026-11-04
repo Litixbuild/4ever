@@ -14,6 +14,7 @@ import { embedUrl, smallThumbnail } from "@/lib/video";
 import { budgetFor, setWatching } from "@/lib/watch-xp";
 import { warmPlatform } from "@/lib/warm";
 import { XpBar } from "@/components/xp-bar";
+import { PlayerMadeMark } from "@/components/player-made";
 
 export type FeedClip = {
   id: string;
@@ -25,6 +26,7 @@ export type FeedClip = {
   thumbnailUrl: string | null;
   duration: string;
   durationSeconds: number | null;
+  playerMade: boolean;
   category: string;
   channelName: string;
   channelAvatar: string | null;
@@ -452,6 +454,7 @@ export function ClipFeed({
             {clip.title}
           </Link>
           <span className="feed-meta">
+            {clip.playerMade ? <PlayerMadeMark /> : null}
             <span>{person?.isCreator ? person.name : clip.channelName}</span>
             <span>{clip.category}</span>
             <span className="row" style={{ gap: 5 }}>

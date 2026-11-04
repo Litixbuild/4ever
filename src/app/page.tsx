@@ -4,7 +4,8 @@ import { PlayIcon } from "@/components/icons";
 import { EmptyHero, Hero } from "@/components/hero";
 import { ActivityFeed, ContestsSoon, LaunchBar } from "@/components/widgets";
 import { CATEGORIES, isCategory, isKind } from "@/lib/categories";
-import { getActivity, getCurrentFeature, getHeroFallback, listClips } from "@/lib/queries";
+import { getActivity, getCurrentFeature, getHeroFallback, getTrendingMovies, listClips } from "@/lib/queries";
+import { PlayerMadeMark } from "@/components/player-made";
 
 function homeHref(kind: string | null, cat: string | null) {
   const params = new URLSearchParams();
@@ -25,12 +26,15 @@ export default async function HomePage({
   // Nine videos to start; "Load more" adds nine at a time.
   const show = Math.min(Math.max(Number.parseInt(params.show ?? "", 10) || 9, 9), 300);
 
-  const [feature, fresh, activity] = await Promise.all([
+  const [feature, fresh, activity, trending] = await Promise.all([
     getCurrentFeature(),
     listClips({ kind, category: cat, perPage: show, sort: "new" }),
     getActivity(6),
+    getTrendingMovies(7),
   ]);
   const heroClip = feature?.clip ?? (await getHeroFallback());
+  // The movie already in the big spot up top isn't repeated in the row below it.
+  const trendingRow = trending.filter((c) => c.id !== heroClip?.id).slice(0, 6);
   // Filters only make sense once there is something to filter.
   const hasAny = fresh.total > 0 || Boolean(kind || cat);
 
@@ -46,6 +50,39 @@ export default async function HomePage({
         <LaunchBar />
         {heroClip ? <Hero clip={heroClip} feature={feature} /> : <EmptyHero />}
       </div>
+
+      <section aria-labelledby="trending-movies" className="stack trending-movies" style={{ gap: 18 }}>
+        <div className="row-between">
+          <div className="stack-sm" style={{ gap: 4 }}>
+            <h2 id="trending-movies" className="h2">
+              Trending movies
+            </h2>
+            <span className="small muted">Edited by players, not cut from a stream.</span>
+          </div>
+          {trendingRow.length > 0 ? (
+            <Link href="/browse?kind=movie" className="btn btn-ghost">
+              All movies
+            </Link>
+          ) : null}
+        </div>
+        {trendingRow.length > 0 ? (
+          <ClipGrid clips={trendingRow} threeUp />
+        ) : (
+          <div className="trending-empty">
+            <PlayerMadeMark />
+            <div className="stack-sm" style={{ gap: 4, flex: "1 1 260px" }}>
+              <strong>Made a Forever movie? It goes here first.</strong>
+              <span className="small muted">
+                Edits, PvP movies, machinima, anything you cut together yourself. Share it as a movie and pick &ldquo;I
+                made this&rdquo; to get the gold Player-made mark.
+              </span>
+            </div>
+            <Link href="/submit" className="btn btn-gold">
+              Submit a movie
+            </Link>
+          </div>
+        )}
+      </section>
 
       <div className="split">
         <section aria-labelledby="fresh-title" className="split-main stack" style={{ gap: 22 }} id="fresh">

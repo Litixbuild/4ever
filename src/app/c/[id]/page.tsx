@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { deleteComment } from "@/app/actions/clip";
 import { MiniClip } from "@/components/clip-card";
 import { ClipActions } from "@/components/clip-actions";
+import { PlayerMadeMark, PlayerMadeToggle } from "@/components/player-made";
 import { RenameClip } from "@/components/rename-clip";
 import { CommentForm } from "@/components/comment-form";
 import { ChevronRightIcon, ClockIcon, ExternalIcon, EyeIcon, TrashIcon } from "@/components/icons";
@@ -137,6 +138,7 @@ export default async function ClipPage({
             <h1 className={`h1 clip-h1 ${rarityClass(clip.view_count)}`}>{clip.title}</h1>
             <div className="row-between" style={{ alignItems: "center", gap: "14px 24px" }}>
               <span className="meta-row">
+                {clip.player_made ? <PlayerMadeMark /> : null}
                 <Link href={`/browse?kind=${clip.kind}`} className="meta-pill">
                   {clip.kind === "movie" ? "Movie" : "Clip"}
                 </Link>
@@ -248,6 +250,9 @@ export default async function ClipPage({
               <span>Credit always goes to the channel that uploaded the video.</span>
               <span className="row" style={{ gap: "6px 18px" }}>
                 {viewer?.isCurator ? <RenameClip clipId={clip.id} shortId={clip.short_id} title={clip.title} /> : null}
+                {viewer?.isCurator ? (
+                  <PlayerMadeToggle clipId={clip.id} shortId={clip.short_id} on={clip.player_made} />
+                ) : null}
                 {clip.creator ? null : <Link href={`/claim?clip=${clip.short_id}`}>This is my video</Link>}
                 {canDelete ? null : (
                   <Link href={`/report?clip=${clip.short_id}`} className="quiet-link">

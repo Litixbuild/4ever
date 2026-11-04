@@ -29,6 +29,7 @@ export async function submitClip(_prev: SubmitState, formData: FormData): Promis
   const tags = parseTags(String(formData.get("tags") ?? ""));
   const agreed = formData.get("agree") === "on";
   const asSite = formData.get("asSite") === "on";
+  const madeIt = formData.get("owner") === "made";
 
   if (!agreed) return { error: "Tick the box at the bottom to confirm this video is fine to share." };
   if (!isKind(kind)) return { error: "Choose whether this is a movie or a clip." };
@@ -100,6 +101,8 @@ export async function submitClip(_prev: SubmitState, formData: FormData): Promis
         creator_id: creatorId,
         submitted_by: viewer.userId,
         shared_as_site: viewer.isCurator && asSite && creatorId !== viewer.userId,
+        // Movies the submitter says they made get the gold Player-made mark. Curators check it in review.
+        player_made: kind === "movie" && madeIt,
         kind,
         category,
         tags,

@@ -131,6 +131,13 @@ export default function HelpPage() {
         <Link href="/submit" className="btn btn-gold" style={{ alignSelf: "flex-start" }}>
           Submit a clip
         </Link>
+        <Q q="What's the gold Player-made mark?">
+          <p>
+            It marks videos a player actually made and edited themselves, not raw clips cut from a stream. Share a movie
+            and pick &ldquo;I made this&rdquo; and it gets the mark; curators can add it to other handmade work too.
+            Player-made movies are lifted ahead of the rest in Trending movies on the front page.
+          </p>
+        </Q>
         <Q q="How long does review take?">
           <p>
             Usually not long. You can have up to {site.maxPendingSubmissions} videos waiting at once and share up to{" "}
