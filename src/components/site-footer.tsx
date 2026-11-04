@@ -34,7 +34,6 @@ export function SiteFooter() {
             <span className="footer-head">Legal</span>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
-            <Link href="/dmca">DMCA</Link>
             <Link href="/report">Report a video</Link>
           </div>
         </nav>

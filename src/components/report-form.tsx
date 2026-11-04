@@ -15,7 +15,15 @@ const REASONS = [
 
 const initial: ReportState = { ok: false, message: null };
 
-export function ReportForm({ clip, defaultReason, loggedIn }: { clip: string; defaultReason: string; loggedIn: boolean }) {
+export function ReportForm({
+  clip,
+  defaultReason,
+  loggedIn,
+}: {
+  clip: string;
+  defaultReason: string;
+  loggedIn: boolean;
+}) {
   const [state, action, pending] = useActionState(submitReport, initial);
 
   if (state.ok) {
@@ -48,7 +56,14 @@ export function ReportForm({ clip, defaultReason, loggedIn }: { clip: string; de
         <label htmlFor="details" className="label">
           Details <span className="optional">(helps us act faster)</span>
         </label>
-        <textarea id="details" name="details" className="textarea" maxLength={2000} rows={4} placeholder="Anything we should know" />
+        <textarea
+          id="details"
+          name="details"
+          className="textarea"
+          maxLength={2000}
+          rows={4}
+          placeholder="Anything we should know"
+        />
       </div>
 
       <div className="field">
@@ -69,9 +84,6 @@ export function ReportForm({ clip, defaultReason, loggedIn }: { clip: string; de
         <button type="submit" className="btn btn-gold btn-lg" disabled={pending}>
           {pending ? "Sending…" : "Send report"}
         </button>
-        <span className="small muted">
-          Formal copyright notice? See the <Link href="/dmca">DMCA page</Link>.
-        </span>
       </div>
     </form>
   );

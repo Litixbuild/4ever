@@ -106,7 +106,6 @@ Every push to `main` deploys automatically.
 | `ADMIN_EMAILS` | the email on the Discord/Twitch/Google account you'll log in with |
 | `VIEW_HASH_SALT` | any long random string (mash the keyboard for 40 characters) |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | where people can reach you |
-| `NEXT_PUBLIC_DMCA_AGENT_NAME` / `_ADDRESS` / `NEXT_PUBLIC_DMCA_EMAIL` | see step 5 |
 
    Tick **Contains secret values** for `SUPABASE_SECRET_KEY`, `TWITCH_CLIENT_SECRET` and `YOUTUBE_API_KEY`. Leave it
    unticked for anything starting with `NEXT_PUBLIC_`: those are meant to be public, and Netlify's secret scanner
@@ -131,10 +130,6 @@ update public.profiles set role = 'admin' where username = 'your_username';
 
 ## 5. Before you announce it
 
-- [ ] **Register a DMCA agent** with the U.S. Copyright Office at
-      [copyright.gov/dmca-directory](https://www.copyright.gov/dmca-directory/). It costs $6 and must be renewed every
-      three years. Put the same name, address and email into the `NEXT_PUBLIC_DMCA_*` variables and redeploy. This
-      is what gives the site "safe harbor" protection if someone submits something they shouldn't.
 - [ ] **Have a lawyer skim the Terms and Privacy pages.** They're written in plain English as a solid starting
       point, not legal advice. A one-hour IP consult is worth it before contests with real prizes.
 - [ ] **Keep contest prizes under $500 in total value** per contest, or get a license from Blizzard first (their
@@ -184,8 +179,7 @@ Nothing in this setup needs a credit card.
 - **Google Cloud**: don't add a billing account. The YouTube Data API and Google login work without one, and the
   free YouTube quota (10,000 units a day, about one per link lookup) goes a long way.
 - **Discord, Twitch, GitHub**: free.
-- **Real costs, only when you choose**: the domain (about $10 to $15 a year), the $6 DMCA agent registration, and
-  any contest prizes.
+- **Real costs, only when you choose**: the domain (about $10 to $15 a year) and any contest prizes.
 
 ## Working on it locally
 

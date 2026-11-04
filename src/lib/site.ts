@@ -8,10 +8,6 @@ export const site = {
     "A fan-made home for World of Warcraft: Forever movies, PvP edits and clips. Share your best work and vote on the community's.",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
   contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@4everclips.com",
-  // Your DMCA designated agent (see SETUP.md, "Before launch")
-  dmcaAgentName: process.env.NEXT_PUBLIC_DMCA_AGENT_NAME ?? "",
-  dmcaAgentAddress: process.env.NEXT_PUBLIC_DMCA_AGENT_ADDRESS ?? "",
-  dmcaEmail: process.env.NEXT_PUBLIC_DMCA_EMAIL ?? process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@4everclips.com",
 
   // World of Warcraft: Forever launch (6:00 PM Eastern, Nov 4 2026)
   launchAt: "2026-11-04T23:00:00Z",

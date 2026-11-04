@@ -347,8 +347,7 @@ export default function HelpPage() {
         <Q q="What do you keep about me?">
           <p>
             Your name, avatar and email from the login, plus what you add yourself. The full details are in the{" "}
-            <Link href="/privacy">privacy notes</Link>. Copyright notices go through the{" "}
-            <Link href="/dmca">DMCA page</Link>.
+            <Link href="/privacy">privacy notes</Link>.
           </p>
         </Q>
       </section>

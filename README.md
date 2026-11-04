@@ -24,7 +24,7 @@ creator.
 - **Contests** with entry windows, votes counted during the contest, and champion placements.
 - **Hall of Fame** for past Movies of the Week, contest champions, and the most watched videos.
 - **Admin tools**: review queue, reports, Movie of the Week, contests, videos, and people.
-- **Legal basics**: terms, privacy, DMCA page, report form, music guide, and submission rules.
+- **Legal basics**: terms, privacy, report form, music guide, and submission rules.
 
 ## Built with
 

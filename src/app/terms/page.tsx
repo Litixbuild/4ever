@@ -64,8 +64,9 @@ export default function TermsPage() {
 
           <h2>Copyright</h2>
           <p>
-            We respect copyright and respond to valid notices. See the <Link href="/dmca">DMCA page</Link> for how to
-            send one. Accounts that repeatedly share infringing material will be closed.
+            We respect copyright. If something here uses your work without permission, send it through the{" "}
+            <Link href="/report">report form</Link> and we&apos;ll take it down. Accounts that repeatedly share
+            infringing material will be closed.
           </p>
 
           <h2>Taking things down</h2>

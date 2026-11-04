@@ -29,12 +29,16 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
   async redirects() {
-    return OLD_HOSTS.map((host) => ({
-      source: "/:path*",
-      has: [{ type: "host" as const, value: host }],
-      destination: "https://4ever.watch/:path*",
-      permanent: true,
-    }));
+    return [
+      // The DMCA page was removed; old links go to the report form.
+      { source: "/dmca", destination: "/report", permanent: true },
+      ...OLD_HOSTS.map((host) => ({
+        source: "/:path*",
+        has: [{ type: "host" as const, value: host }],
+        destination: "https://4ever.watch/:path*",
+        permanent: true,
+      })),
+    ];
   },
 };
 
