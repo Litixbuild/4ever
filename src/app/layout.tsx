@@ -3,6 +3,8 @@ import "@fontsource/metamorphous/400.css";
 import "@fontsource/marcellus/400.css";
 import "@fontsource-variable/manrope";
 import "./globals.css";
+import { Suspense } from "react";
+import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { RollPrompt } from "@/components/roll-prompt";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -28,6 +30,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: "#0c0a09",
   colorScheme: "dark",
+  // Lets the phone tab bar sit above the iPhone home indicator (env(safe-area-inset-bottom)).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -57,6 +61,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           )}
         </main>
         <SiteFooter />
+        {configured ? (
+          <Suspense fallback={null}>
+            <MobileTabBar />
+          </Suspense>
+        ) : null}
         {configured ? <RollPrompt /> : null}
       </body>
     </html>

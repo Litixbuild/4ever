@@ -40,10 +40,6 @@ export function MainNav() {
           </Link>
         );
       })}
-      {/* Contests aren't open yet: shown, greyed out, and not a link. */}
-      <span className="nav-soon" aria-disabled="true" title="Contests are coming soon">
-        Contests
-      </span>
     </nav>
   );
 }

@@ -91,6 +91,12 @@ export const SearchIcon = (p: IconProps) => (
     <path d="M20 20l-4-4" />
   </Base>
 );
+export const FilmIcon = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" />
+  </Base>
+);
 export const PlusIcon = (p: IconProps) => (
   <Base strokeWidth={2.6} {...p}>
     <path d="M12 5v14M5 12h14" />
