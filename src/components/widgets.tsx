@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { DiamondIcon, DotIcon, TrophyIcon } from "@/components/icons";
 import { LaunchCountdown } from "@/components/launch-countdown";
-import { Avatar } from "@/components/people";
 import { badgeInfo } from "@/lib/badges";
 import { contestPhase, contestStatusLine, contestTileDate, type ContestPhase } from "@/lib/contests";
-import { dateTile, formatCount, formatDate, formatDateTime } from "@/lib/format";
-import type { ActivityItem, TopCreator } from "@/lib/queries";
+import { dateTile, formatDate, formatDateTime } from "@/lib/format";
+import type { ActivityItem } from "@/lib/queries";
 import { rarityClass } from "@/lib/rarity";
 import { site } from "@/lib/site";
 import type { Contest } from "@/lib/types";
@@ -139,39 +138,6 @@ export function ContestCard({ contest, compact = false }: { contest: Contest; co
   );
 }
 
-export function TopCreatorsCard({ creators }: { creators: TopCreator[] }) {
-  return (
-    <section aria-labelledby="top-creators" className="card stack-sm" style={{ gap: 6 }}>
-      <div className="row-between" style={{ alignItems: "baseline" }}>
-        <h2 id="top-creators" className="h-gold">
-          Top creators
-        </h2>
-        <span className="tiny muted">Votes this week</span>
-      </div>
-      {creators.length === 0 ? (
-        <p className="small muted" style={{ margin: "6px 0 0" }}>
-          Nobody yet. Votes on verified creators&apos; videos put them here.
-        </p>
-      ) : (
-        <ol className="list-plain ranked">
-          {creators.map((creator, i) => (
-            <li key={creator.id}>
-              <span className={`rank ${i === 0 ? "rank-first" : ""}`}>{i + 1}</span>
-              <Avatar name={creator.display_name} src={creator.avatar_url} size={34} />
-              <Link href={`/u/${creator.username}`} className="ranked-name">
-                {creator.display_name}
-              </Link>
-              <span className="small muted" style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-                {formatCount(creator.votes)}
-              </span>
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
-  );
-}
-
 // Recent community activity: new videos (titles in their view color) and achievements.
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
   const lines = items.filter((item) => item.type !== "contest");
@@ -249,54 +215,6 @@ export function ContestsSoon() {
       <p className="small" style={{ margin: 0, color: "var(--text-3)" }}>
         Contests are coming shortly. We&apos;ll announce the first one here.
       </p>
-    </section>
-  );
-}
-
-export function CreatorsBand() {
-  return (
-    <section aria-labelledby="creators-band" className="band">
-      <div className="stack" style={{ flex: "1 1 380px", gap: 14 }}>
-        <h2 id="creators-band" className="h2">
-          Every clip is credited to the person who made it.
-        </h2>
-        <p className="lead" style={{ maxWidth: 500 }}>
-          Videos on 4Ever play straight from the creator&apos;s own YouTube or Twitch channel. Their name is on it and
-          the views count for them, no matter who shared it here.
-        </p>
-        <div className="row" style={{ marginTop: 6 }}>
-          <Link href="/submit" className="btn btn-gold btn-lg">
-            Submit a Clip
-          </Link>
-          <Link href="/claim" className="btn btn-ghost btn-lg">
-            Claim your clips
-          </Link>
-        </div>
-      </div>
-      <ol className="steps band-steps">
-        <li>
-          <span className="numeral">I</span>
-          <strong>It stays on their channel</strong>
-          <span className="small muted">
-            Nothing is reuploaded. Every clip plays from YouTube or Twitch, so every view goes to the creator.
-          </span>
-        </li>
-        <li>
-          <span className="numeral">II</span>
-          <strong>Their name goes on it</strong>
-          <span className="small muted">
-            We read the channel from YouTube or Twitch ourselves. Whoever shares a clip, the person who made it gets the
-            credit.
-          </span>
-        </li>
-        <li>
-          <span className="numeral">III</span>
-          <strong>Creators claim their clips</strong>
-          <span className="small muted">
-            Verify your channel once and every clip of yours gets a verified check and a place on your profile.
-          </span>
-        </li>
-      </ol>
     </section>
   );
 }

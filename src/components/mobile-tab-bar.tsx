@@ -18,13 +18,13 @@ export function MobileTabBar({ meter }: { meter?: ReactNode }) {
       <div className="tabbar-buttons">
         <Link href="/browse?kind=movie" className="tab" aria-current={at(pathname === "/browse" && kind === "movie")}>
           <span className="tab-slot">
-            <FilmIcon size={22} />
+            <FilmIcon size={19} />
           </span>
           <span className="tab-label">Movies</span>
         </Link>
         <Link href="/submit" className="tab tab-submit" aria-current={at(pathname === "/submit")}>
           <span className="tab-slot">
-            <PlusIcon size={26} />
+            <PlusIcon size={22} />
           </span>
           <span className="tab-label">Submit</span>
         </Link>
@@ -34,7 +34,7 @@ export function MobileTabBar({ meter }: { meter?: ReactNode }) {
           aria-current={at(pathname === "/watch" || (pathname === "/browse" && kind === "clip"))}
         >
           <span className="tab-slot">
-            <PlayIcon size={20} style={{ marginLeft: 2 }} />
+            <PlayIcon size={17} style={{ marginLeft: 2 }} />
           </span>
           <span className="tab-label">Clips</span>
         </Link>

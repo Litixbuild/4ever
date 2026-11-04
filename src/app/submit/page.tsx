@@ -19,7 +19,7 @@ export default async function SubmitPage() {
         <h1 className="h1">Share a movie or clip</h1>
         <p className="lead">
           Paste a link from YouTube or Twitch. We pull in the real creator automatically, so credit always lands in the
-          right place.
+          right place. <Link href="/help#sharing">How sharing and credit work</Link>.
         </p>
       </div>
 

@@ -2,9 +2,9 @@ import Link from "next/link";
 import { ClipGrid } from "@/components/clip-card";
 import { PlayIcon } from "@/components/icons";
 import { EmptyHero, Hero } from "@/components/hero";
-import { ActivityFeed, ContestsSoon, CreatorsBand, LaunchBar, TopCreatorsCard } from "@/components/widgets";
+import { ActivityFeed, ContestsSoon, LaunchBar } from "@/components/widgets";
 import { CATEGORIES, isCategory, isKind } from "@/lib/categories";
-import { getActivity, getCurrentFeature, getHeroFallback, getTopCreators, listClips } from "@/lib/queries";
+import { getActivity, getCurrentFeature, getHeroFallback, listClips } from "@/lib/queries";
 
 function homeHref(kind: string | null, cat: string | null) {
   const params = new URLSearchParams();
@@ -25,10 +25,9 @@ export default async function HomePage({
   // Nine videos to start; "Load more" adds nine at a time.
   const show = Math.min(Math.max(Number.parseInt(params.show ?? "", 10) || 9, 9), 300);
 
-  const [feature, fresh, creators, activity] = await Promise.all([
+  const [feature, fresh, activity] = await Promise.all([
     getCurrentFeature(),
     listClips({ kind, category: cat, perPage: show, sort: "new" }),
-    getTopCreators(7, 5),
     getActivity(6),
   ]);
   const heroClip = feature?.clip ?? (await getHeroFallback());
@@ -132,12 +131,16 @@ export default async function HomePage({
 
         <aside className="split-aside">
           <ContestsSoon />
-          <TopCreatorsCard creators={creators} />
           <ActivityFeed items={activity} />
         </aside>
       </div>
 
-      <CreatorsBand />
+      <Link href="/help" className="help-strip">
+        <span>
+          <strong>New here?</strong> How credit, ranks and sharing clips work on 4Ever.
+        </span>
+        <span className="help-strip-go">Read how it works</span>
+      </Link>
     </div>
   );
 }

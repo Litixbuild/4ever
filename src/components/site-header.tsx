@@ -1,7 +1,16 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Logo } from "@/components/brand";
-import { CommentIcon, GearIcon, LogOutIcon, PlusIcon, SearchIcon, ShieldIcon, UserIcon } from "@/components/icons";
+import {
+  CommentIcon,
+  GearIcon,
+  InfoIcon,
+  LogOutIcon,
+  PlusIcon,
+  SearchIcon,
+  ShieldIcon,
+  UserIcon,
+} from "@/components/icons";
 import { MainNav } from "@/components/main-nav";
 import { Avatar } from "@/components/people";
 import { UserMenu } from "@/components/user-menu";
@@ -57,6 +66,9 @@ export async function SiteHeader() {
               </Link>
               <Link href="/settings">
                 <GearIcon /> Settings
+              </Link>
+              <Link href="/help">
+                <InfoIcon /> How 4Ever works
               </Link>
               <Link href="/suggest">
                 <CommentIcon /> Suggestions
