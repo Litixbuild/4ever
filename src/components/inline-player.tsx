@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { budgetFor, setWatching } from "@/lib/watch-xp";
+import { warmPlatform } from "@/lib/warm";
 import { markSeen } from "@/lib/seen";
 import { embedUrl } from "@/lib/video";
 
@@ -45,6 +46,10 @@ export function InlinePlayer({
     return () => setWatching(false);
   }, [host, durationSeconds]);
 
+  const src = (h: string) => `${embedUrl(sourceType, sourceId, h)}${platform === "youtube" ? "&playsinline=1" : ""}`;
+  // Hovering or touching a video starts connecting to its player, so pressing play is quicker.
+  const warm = () => warmPlatform(platform);
+
   function play() {
     window.dispatchEvent(new CustomEvent(PLAY_EVENT, { detail: clipId }));
     setHost(window.location.hostname);
@@ -56,7 +61,7 @@ export function InlinePlayer({
     return (
       <div className={`${className} is-playing`}>
         <iframe
-          src={`${embedUrl(sourceType, sourceId, host)}${platform === "youtube" ? "&playsinline=1" : ""}`}
+          src={src(host)}
           title={title}
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           allowFullScreen
@@ -67,7 +72,15 @@ export function InlinePlayer({
   }
 
   return (
-    <button type="button" className={className} onClick={play} aria-label={`Play ${title}`}>
+    <button
+      type="button"
+      className={className}
+      onClick={play}
+      onPointerEnter={warm}
+      onTouchStart={warm}
+      onFocus={warm}
+      aria-label={`Play ${title}`}
+    >
       {children}
     </button>
   );

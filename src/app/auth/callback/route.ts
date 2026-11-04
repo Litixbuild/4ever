@@ -32,6 +32,9 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error || !data.user) {
+    // A stale or repeated link: if this browser is already logged in, just carry on.
+    const { data: existing } = await supabase.auth.getClaims();
+    if (existing?.claims?.sub) return NextResponse.redirect(`${origin}${next}`);
     return NextResponse.redirect(`${origin}/login?error=expired&next=${encodeURIComponent(next)}`);
   }
 

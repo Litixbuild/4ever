@@ -19,7 +19,9 @@ const securityHeaders = [
 
 // The site lives at 4ever.watch. Anyone who opens the old Netlify address (or www.) is sent there,
 // keeping the rest of the link, so old shares and bookmarks still work.
-const OLD_HOSTS = ["wc4ever.netlify.app", "www.4ever.watch"];
+// That includes every Netlify address for the project: wc4ever.netlify.app plus the per-deploy and
+// branch ones like main--wc4ever.netlify.app, where logins can't work (each address keeps its own login).
+const OLD_HOSTS = ["(?:.+--)?wc4ever\\.netlify\\.app", "www\\.4ever\\.watch"];
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,

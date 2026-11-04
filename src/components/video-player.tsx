@@ -6,6 +6,7 @@ import { Vista } from "@/components/vista";
 import { markSeen } from "@/lib/seen";
 import { embedUrl, platformLabel } from "@/lib/video";
 import { budgetFor, setWatching } from "@/lib/watch-xp";
+import { warmPlatform } from "@/lib/warm";
 
 // Shows the thumbnail first and only loads YouTube or Twitch after a click.
 // That keeps pages fast, keeps trackers away until someone actually watches,
@@ -35,6 +36,11 @@ export function VideoPlayer({
 }) {
   const [host, setHost] = useState<string | null>(null);
 
+  // Someone who opened a video's page is about to watch it: get its player ready right away.
+  useEffect(() => {
+    warmPlatform(platform);
+  }, [platform]);
+
   // Once playing, the video earns watch-time XP for about its own length (src/lib/watch-xp.ts).
   useEffect(() => {
     if (!host) return;
@@ -61,7 +67,14 @@ export function VideoPlayer({
           referrerPolicy="strict-origin-when-cross-origin"
         />
       ) : (
-        <button type="button" className="player-facade" onClick={play} aria-label={`Play ${title}`}>
+        <button
+          type="button"
+          className="player-facade"
+          onClick={play}
+          onPointerEnter={() => warmPlatform(platform)}
+          onTouchStart={() => warmPlatform(platform)}
+          aria-label={`Play ${title}`}
+        >
           {thumbnailUrl ? <img src={thumbnailUrl} alt="" referrerPolicy="no-referrer" /> : <Vista seed={shortId} />}
           <span className="player-play">
             <PlayIcon size={34} style={{ marginLeft: 4 }} />

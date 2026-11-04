@@ -12,6 +12,7 @@ import { rarityClass } from "@/lib/rarity";
 import { clearSeen, markSeen, readSeen } from "@/lib/seen";
 import { embedUrl, smallThumbnail } from "@/lib/video";
 import { budgetFor, setWatching } from "@/lib/watch-xp";
+import { warmPlatform } from "@/lib/warm";
 import { XpBar } from "@/components/xp-bar";
 
 export type FeedClip = {
@@ -136,6 +137,12 @@ export function ClipFeed({
     setWatching(watchingId !== null, budgetFor(watchingSeconds));
   }, [watchingId, watchingSeconds]);
   useEffect(() => () => setWatching(false), []);
+
+  // Keep connections to the next clips' player servers open, so swiping to them starts faster.
+  useEffect(() => {
+    if (!list) return;
+    for (const ahead of [list[index + 1], list[index + 2]]) if (ahead) warmPlatform(ahead.platform);
+  }, [list, index]);
 
   const feedPath = (shortId: string) => `/watch?start=${shortId}${kind === "clip" ? "" : `&kind=${kind}`}`;
 

@@ -46,7 +46,9 @@ export default function PrivacyPage() {
           <p>
             We use cookies only to keep you logged in. No advertising or analytics trackers. Video players from YouTube
             (in its privacy-enhanced mode) and Twitch only load after you press play, and they may set their own cookies
-            under their own privacy policies.
+            under their own privacy policies. To make videos start faster, your browser may open a connection to their
+            servers when you point at or tap a video, but nothing is loaded and no cookies are sent until you press
+            play.
           </p>
 
           <h2>Who helps us run the site</h2>
