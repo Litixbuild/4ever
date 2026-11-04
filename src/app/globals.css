@@ -1822,7 +1822,8 @@ button.thumb {
   grid-row: 1;
   position: relative;
   z-index: 2;
-  margin-left: -72px;
+  /* Beside the player, never over it: Twitch won't play a player that anything overlaps. */
+  margin-left: 20px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -1845,9 +1846,13 @@ button.thumb {
   .showcase {
     grid-template-columns: 1fr;
   }
+  .showcase .up-next {
+    grid-row: 2;
+    margin-top: 10px;
+  }
   .showcase-side {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 3;
     margin: 12px 0 0;
     gap: 12px;
   }
@@ -4726,5 +4731,130 @@ a.plaque:hover {
   .feed-arrows button:disabled {
     opacity: 0.35;
     cursor: default;
+  }
+}
+
+/* ---------- Play next video (front page) ----------
+   The next video in the big player's queue. On wide screens it's a small window in the lower right
+   corner; on phones and narrow windows it sits just under the player, so it never covers the video
+   (Twitch won't play a player that anything overlaps). */
+.up-next {
+  grid-column: 1 / -1;
+  padding: 10px;
+  border: 1px solid var(--tip-edge, #3a3026);
+  border-radius: 10px;
+  background: var(--tip-bg, #0f0c1a);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.75);
+  animation: up-next-in 0.3s ease-out;
+}
+.up-next-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--gold);
+}
+.up-next-close {
+  display: inline-flex;
+  padding: 4px;
+  border: 0;
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+}
+.up-next-close:hover {
+  color: var(--text);
+}
+.up-next-card {
+  display: grid;
+  grid-template-columns: 128px 1fr;
+  grid-template-rows: auto 1fr;
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: start;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.up-next-thumb {
+  position: relative;
+  grid-row: 1 / 3;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #000;
+}
+.up-next-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.up-next-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+.up-next-card:hover .up-next-play {
+  background: var(--gold);
+  color: #2a1d08;
+}
+.up-next-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.up-next-meta {
+  font-size: 12px;
+  color: var(--text-3);
+}
+@media (min-width: 1100px) {
+  .up-next {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 44;
+    width: 280px;
+    padding: 10px 10px 12px;
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.75),
+      0 18px 44px rgba(0, 0, 0, 0.6);
+  }
+  .up-next-card {
+    grid-template-columns: 1fr;
+  }
+  .up-next-thumb {
+    grid-row: auto;
+  }
+}
+@keyframes up-next-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .up-next {
+    animation: none;
   }
 }
