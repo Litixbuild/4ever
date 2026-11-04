@@ -1058,6 +1058,9 @@ textarea::placeholder {
 .nav-pair {
   display: contents;
 }
+.nav-icon {
+  display: none;
+}
 .nav-narrow {
   display: none;
 }
@@ -3980,13 +3983,42 @@ a.plaque:hover {
   .user-menu > summary {
     padding: 3px;
   }
-  /* Phones use the bottom tab bar (.tabbar) for Movies, Submit and Clips instead. */
-  .main-nav,
+  /* Phones: Clips and Movies run across under the logo as two tabs, Clips first. Submit moves to
+     the floating button in the dock (.dock-submit). */
   .header-actions .submit-btn {
     display: none;
   }
-  .header-row {
-    padding-bottom: 10px;
+  .main-nav {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    margin: 4px -16px 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .main-nav a {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 11px 0 9px;
+    border-bottom-width: 2px;
+    text-shadow: none;
+  }
+  .main-nav a.nav-narrow {
+    display: inline-flex;
+  }
+  .main-nav .nav-first {
+    order: -1;
+  }
+  .main-nav .nav-icon {
+    display: inline-flex;
   }
   .logo .four-mark {
     height: 38px;
@@ -4192,104 +4224,61 @@ a.plaque:hover {
   }
 }
 
-/* ---------- Phone tab bar ----------
-   A bottom bar styled like a WoW action bar: dark inset slots with a bronze rim. The current page's
-   slot is lit gold, and Submit sits raised in the middle as the gold button. Phones only. */
-.tabbar {
+/* ---------- Phone dock ----------
+   The experience bar pinned along the bottom, with a small gold rounded-square Submit button
+   floating just above it on the right. Phones only. */
+.dock {
   display: none;
 }
 @media (max-width: 760px) {
   body {
-    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+    padding-bottom: calc(40px + env(safe-area-inset-bottom));
   }
-  .tabbar-buttons {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-around;
-    padding: 0 14px;
-  }
-  .tabbar {
+  .dock {
+    display: block;
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 45;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    padding: 6px 14px max(8px, env(safe-area-inset-bottom));
+    pointer-events: none;
+  }
+  .dock-bar {
+    padding: 7px 12px max(8px, env(safe-area-inset-bottom));
     background: rgba(14, 11, 9, 0.96);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-top: 1px solid #3a2f23;
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
   }
-  .tab {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    color: #9b907e;
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .tab-slot {
+  .dock-submit {
+    position: absolute;
+    right: 14px;
+    bottom: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    background: #17130f;
-    border: 1px solid #4a3b2a;
-    box-shadow:
-      inset 0 0 0 1px rgba(0, 0, 0, 0.7),
-      inset 0 2px 8px rgba(0, 0, 0, 0.6);
-    color: #b9ad98;
-    transition:
-      border-color 0.15s,
-      box-shadow 0.15s,
-      transform 0.1s;
-  }
-  .tab-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-  }
-  .tab:active .tab-slot {
-    transform: scale(0.94);
-  }
-  .tab[aria-current="page"] {
-    color: var(--gold-hi);
-  }
-  .tab[aria-current="page"] .tab-slot {
-    border: 2px solid var(--gold);
-    background: #2a2217;
-    color: var(--gold-hi);
-    box-shadow:
-      inset 0 0 10px rgba(226, 182, 92, 0.25),
-      0 0 14px rgba(226, 182, 92, 0.35);
-  }
-  .tab-submit {
-    color: var(--gold);
-  }
-  .tab-submit .tab-slot,
-  .tab-submit[aria-current="page"] .tab-slot {
-    width: 48px;
-    height: 48px;
-    margin-top: -16px;
-    border-radius: 11px;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 12px;
+    border-radius: 12px;
     background: var(--gold);
     border: 1px solid #f2cf7e;
     color: #2a1d08;
     box-shadow:
-      0 0 0 3px #0e0b09,
-      0 0 18px rgba(226, 182, 92, 0.45);
+      0 0 0 3px rgba(14, 11, 9, 0.85),
+      0 6px 18px rgba(0, 0, 0, 0.55),
+      0 0 16px rgba(226, 182, 92, 0.35);
+    pointer-events: auto;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dock-submit:active {
+    transform: scale(0.94);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tab-slot {
+  .dock-submit {
     transition: none;
   }
 }

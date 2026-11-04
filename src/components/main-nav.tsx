@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { FilmIcon, PlayIcon } from "@/components/icons";
 
 const LINKS = [
   {
     href: "/browse?kind=movie",
     label: "Movies",
+    icon: <FilmIcon size={17} />,
     match: (p: string, k: string | null) => p === "/browse" && k === "movie",
   },
   {
@@ -14,6 +16,8 @@ const LINKS = [
     // On phones, Clips opens the swipe feed instead of the grid.
     mobileHref: "/watch",
     label: "Clips",
+    icon: <PlayIcon size={15} />,
+    first: true,
     match: (p: string, k: string | null) => (p === "/browse" && k === "clip") || p === "/watch",
   },
 ];
@@ -30,12 +34,18 @@ export function MainNav() {
             <Link href={link.href} className="nav-wide" aria-current={current}>
               {link.label}
             </Link>
-            <Link href={link.mobileHref} className="nav-narrow" aria-current={current}>
+            <Link
+              href={link.mobileHref}
+              className={`nav-narrow ${"first" in link ? "nav-first" : ""}`}
+              aria-current={current}
+            >
+              <span className="nav-icon">{link.icon}</span>
               {link.label}
             </Link>
           </span>
         ) : (
           <Link key={link.href} href={link.href} aria-current={current}>
+            <span className="nav-icon">{link.icon}</span>
             {link.label}
           </Link>
         );
