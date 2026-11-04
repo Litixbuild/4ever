@@ -1,13 +1,4 @@
 import Link from "next/link";
-import { ClipThumbImage } from "@/components/clip-card";
-import { PlayIcon } from "@/components/icons";
-import { InlinePlayer } from "@/components/inline-player";
-import { VerifiedMark } from "@/components/people";
-import { categoryLabel, musicLabel } from "@/lib/categories";
-import { formatCount, formatDuration } from "@/lib/format";
-import { rarityClass } from "@/lib/rarity";
-import type { Clip, Feature } from "@/lib/types";
-import { platformLabel } from "@/lib/video";
 
 // Before anything is shared, the front page invites the first legend.
 export function EmptyHero() {
