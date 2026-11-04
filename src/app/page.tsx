@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ClipGrid } from "@/components/clip-card";
 import { PlayIcon } from "@/components/icons";
 import { EmptyHero, Hero } from "@/components/hero";
@@ -7,10 +8,14 @@ import { CATEGORIES, isCategory, isKind } from "@/lib/categories";
 import { getActivity, getCurrentFeature, getHeroFallback, getTrendingMovies, listClips } from "@/lib/queries";
 import { PlayerMadeMark } from "@/components/player-made";
 
-function homeHref(kind: string | null, cat: string | null) {
+const PER_PAGE = 9;
+
+// Links back to the front page's video grid (#fresh), keeping the filters. Page 1 has no ?page.
+function homeHref(kind: string | null, cat: string | null, page = 1) {
   const params = new URLSearchParams();
   if (kind) params.set("kind", kind);
   if (cat) params.set("cat", cat);
+  if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return `/${query ? `?${query}` : ""}#fresh`;
 }
@@ -18,17 +23,17 @@ function homeHref(kind: string | null, cat: string | null) {
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ kind?: string; cat?: string; show?: string }>;
+  searchParams: Promise<{ kind?: string; cat?: string; page?: string }>;
 }) {
   const params = await searchParams;
   const kind = isKind(params.kind) ? params.kind : null;
   const cat = isCategory(params.cat) ? params.cat : null;
-  // Nine videos to start; "Load more" adds nine at a time.
-  const show = Math.min(Math.max(Number.parseInt(params.show ?? "", 10) || 9, 9), 300);
+  // Nine videos a page, with Previous / Next page like /browse, so it's easy to keep your place.
+  const page = Math.min(Math.max(Number.parseInt(params.page ?? "", 10) || 1, 1), 500);
 
   const [feature, fresh, activity, trending] = await Promise.all([
     getCurrentFeature(),
-    listClips({ kind, category: cat, perPage: show, sort: "new" }),
+    listClips({ kind, category: cat, perPage: PER_PAGE, page, sort: "new" }),
     getActivity(6),
     getTrendingMovies(7),
   ]);
@@ -38,11 +43,9 @@ export default async function HomePage({
   // Filters only make sense once there is something to filter.
   const hasAny = fresh.total > 0 || Boolean(kind || cat);
 
-  const browseParams = new URLSearchParams();
-  if (kind) browseParams.set("kind", kind);
-  if (cat) browseParams.set("cat", cat);
-  browseParams.set("show", String(show + 9));
-  const moreHref = `/?${browseParams}`;
+  const lastPage = Math.max(1, Math.ceil(fresh.total / PER_PAGE));
+  // A page past the end (an old link) goes to the last page that has videos.
+  if (page > lastPage && fresh.total > 0) redirect(homeHref(kind, cat, lastPage));
 
   return (
     <div className="container page">
@@ -138,10 +141,19 @@ export default async function HomePage({
           {fresh.clips.length > 0 ? (
             <>
               <ClipGrid clips={fresh.clips} />
-              {fresh.total > fresh.clips.length ? (
-                <Link href={moreHref} scroll={false} className="btn btn-ghost btn-lg" style={{ alignSelf: "center" }}>
-                  Load more
-                </Link>
+              {lastPage > 1 ? (
+                <nav aria-label="Pages" className="pager">
+                  {page > 1 ? (
+                    <Link href={homeHref(kind, cat, page - 1)} className="btn btn-ghost btn-lg">
+                      Previous
+                    </Link>
+                  ) : null}
+                  {page < lastPage ? (
+                    <Link href={homeHref(kind, cat, page + 1)} className="btn btn-gold btn-lg">
+                      Next page
+                    </Link>
+                  ) : null}
+                </nav>
               ) : null}
             </>
           ) : (
