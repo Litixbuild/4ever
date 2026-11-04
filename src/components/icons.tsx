@@ -117,6 +117,11 @@ export const ChevronRightIcon = (p: IconProps) => (
     <path d="M9 6l6 6-6 6" />
   </Base>
 );
+export const ChevronLeftIcon = (p: IconProps) => (
+  <Base strokeWidth={2.4} {...p}>
+    <path d="M15 6l-6 6 6 6" />
+  </Base>
+);
 export const BellIcon = (p: IconProps) => (
   <Base {...p}>
     <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />

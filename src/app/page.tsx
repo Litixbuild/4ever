@@ -2,12 +2,22 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ClipGrid } from "@/components/clip-card";
 import { EmptyHero } from "@/components/hero";
+import { CategoryTiles, FactionWarBar, HOME_CATEGORIES, PlayerMadeShelf } from "@/components/home-boards";
 import { HomeStage } from "@/components/home-stage";
 import { ActivityFeed, LaunchBar } from "@/components/widgets";
 import { isCategory, isKind } from "@/lib/categories";
-import { uploadedAgo, uploadedWithin } from "@/lib/format";
+import { uploadedAgo } from "@/lib/format";
 import type { Clip } from "@/lib/types";
-import { getActivity, getCurrentFeature, getHeroFallback, getTrendingMovies, listClips } from "@/lib/queries";
+import {
+  getActivity,
+  getCategoryCovers,
+  getCurrentFeature,
+  getFactionWar,
+  getHeroFallback,
+  getMostWatchedToday,
+  getPlayerMade,
+  listClips,
+} from "@/lib/queries";
 
 const PER_PAGE = 9;
 
@@ -32,22 +42,25 @@ export default async function HomePage({
   // Nine videos a page, with Previous / Next page like /browse, so it's easy to keep your place.
   const page = Math.min(Math.max(Number.parseInt(params.page ?? "", 10) || 1, 1), 500);
 
-  const [feature, fresh, activity, trending, latest] = await Promise.all([
+  const [feature, fresh, activity, latest, war, covers, made] = await Promise.all([
     getCurrentFeature(),
     listClips({ kind, category: cat, perPage: PER_PAGE, page, sort: "new" }),
     getActivity(6),
-    getTrendingMovies(8),
-    page === 1 && !kind && !cat ? null : listClips({ perPage: 12, sort: "new" }),
-  ]).then(([f, fr, a, t, l]) => [f, fr, a, t, l ?? fr] as const);
-  const heroClip = feature?.clip ?? (await getHeroFallback());
-  // The big player's queue, newest first: the feature (or top movie), this week's trending movies, then
-  // the newest videos.
-  const freshMovies = uploadedWithin(trending, 7);
+    listClips({ perPage: 24, sort: "new" }),
+    getFactionWar(),
+    getCategoryCovers(HOME_CATEGORIES),
+    getPlayerMade(8),
+  ]);
+  // The top three are the most watched videos today. On a quiet day the admin's pick, the top movie and
+  // the newest videos fill the gaps.
+  const top = await getMostWatchedToday(3, [feature?.clip ?? null, await getHeroFallback(), ...latest.clips]);
+  // The big player's queue: the top three, then the newest videos for the rail to slide through.
   const queue: Clip[] = [];
-  for (const c of [heroClip, ...freshMovies, ...latest.clips]) {
+  for (const c of [...top, ...latest.clips]) {
     if (c && !queue.some((q) => q.id === c.id)) queue.push(c);
   }
   const ages = Object.fromEntries(queue.map((c) => [c.id, uploadedAgo(c)]));
+  const featureNotes = feature && feature.clip?.id === queue[0]?.id ? feature : null;
 
   const lastPage = Math.max(1, Math.ceil(fresh.total / PER_PAGE));
   // A page past the end (an old link) goes to the last page that has videos.
@@ -57,7 +70,17 @@ export default async function HomePage({
     <div className="container page">
       <div className="stack" style={{ gap: 20 }}>
         <LaunchBar />
-        {queue.length > 0 ? <HomeStage queue={queue.slice(0, 20)} ages={ages} feature={feature} /> : <EmptyHero />}
+        {queue.length > 0 ? (
+          <HomeStage queue={queue.slice(0, 24)} ages={ages} feature={featureNotes} ranked={top.length} />
+        ) : (
+          <EmptyHero />
+        )}
+      </div>
+
+      <div className="home-boards">
+        <FactionWarBar war={war} />
+        <CategoryTiles covers={covers} />
+        <PlayerMadeShelf clips={made} />
       </div>
 
       <div className="split">

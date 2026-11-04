@@ -414,3 +414,83 @@ export async function getChampions(limit = 24): Promise<Champion[]> {
     .filter((row): row is Champion => Boolean(row.contest && row.clip && row.clip.status === "approved"))
     .sort((a, b) => b.contest.ends_at.localeCompare(a.contest.ends_at));
 }
+
+// The front page's top three: the most watched videos today, topped up from the last week, then the
+// fallbacks given (so there are always three when the site has three videos).
+export async function getMostWatchedToday(limit = 3, fallbacks: (Clip | null)[] = []): Promise<Clip[]> {
+  const supabase = await createClient();
+  const ids: string[] = [];
+  for (const days of [1, 7]) {
+    if (ids.length >= limit) break;
+    const { data } = await supabase.rpc("most_watched", { p_days: days, p_limit: limit });
+    for (const row of (data ?? []) as { clip_id: string }[]) if (!ids.includes(row.clip_id)) ids.push(row.clip_id);
+  }
+  const picked: Clip[] = [];
+  if (ids.length > 0) {
+    const { data } = await supabase.from("clips").select(CLIP_COLUMNS).in("id", ids.slice(0, limit));
+    const byId = new Map(((data ?? []) as unknown as Clip[]).map((c) => [c.id, c]));
+    for (const id of ids) {
+      const clip = byId.get(id);
+      if (clip && clip.status === "approved" && picked.length < limit) picked.push(clip);
+    }
+  }
+  for (const clip of fallbacks) {
+    if (picked.length >= limit) break;
+    if (clip && !picked.some((p) => p.id === clip.id)) picked.push(clip);
+  }
+  return picked;
+}
+
+export type FactionSide = {
+  minutes: number;
+  leaders: { username: string; name: string; minutes: number }[];
+};
+export type FactionWar = { horde: FactionSide; alliance: FactionSide };
+
+// Minutes watched this week by each faction, with the top watchers on each side.
+export async function getFactionWar(): Promise<FactionWar> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("faction_war");
+  const war: FactionWar = { horde: { minutes: 0, leaders: [] }, alliance: { minutes: 0, leaders: [] } };
+  for (const row of (data ?? []) as { faction: string; minutes: number; leaders: FactionSide["leaders"] }[]) {
+    if (row.faction === "horde" || row.faction === "alliance") {
+      war[row.faction] = { minutes: Number(row.minutes) || 0, leaders: row.leaders ?? [] };
+    }
+  }
+  return war;
+}
+
+// The newest thumbnail in each category, used as that category's tile art.
+export async function getCategoryCovers(categories: string[]): Promise<Record<string, string | null>> {
+  const supabase = await createClient();
+  const rows = await Promise.all(
+    categories.map(async (category) => {
+      const { data } = await supabase
+        .from("clips")
+        .select("thumbnail_url")
+        .eq("status", "approved")
+        .eq("category", category)
+        .not("thumbnail_url", "is", null)
+        .order("view_count", { ascending: false })
+        .order("published_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return [category, (data as { thumbnail_url: string | null } | null)?.thumbnail_url ?? null] as const;
+    }),
+  );
+  return Object.fromEntries(rows);
+}
+
+// Videos people edited themselves (the gold Player-made mark), newest first.
+export async function getPlayerMade(limit = 8): Promise<Clip[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("clips")
+    .select(CLIP_COLUMNS)
+    .eq("status", "approved")
+    .eq("player_made", true)
+    .order("uploaded_at", { ascending: false, nullsFirst: false })
+    .order("published_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []) as unknown as Clip[];
+}
