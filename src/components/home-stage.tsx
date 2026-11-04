@@ -39,9 +39,10 @@ function FeaturedLabel() {
 }
 
 // The front page's big player. The queue starts with the most watched videos today (the Featured Video,
-// then the 2nd and 3rd), followed by the newest. Every video in the queue sits in the rail under the
-// player, so people can watch them in any order; once one plays, a small "Play next video" window offers
-// the next. YouTube videos move on by themselves when they end; Twitch ones wait for a click.
+// then the 2nd and 3rd), followed by the newest; the rail under the poster holds everything after the
+// Featured Video, so people can pick in any order. Pressing play on any of them opens a full-screen player
+// that starts by itself, with an X to close and "Play next video" under it. YouTube moves on by itself when
+// a video ends; Twitch waits for a click (and on phones Twitch always needs one tap to start).
 export function HomeStage({
   queue,
   ages,
@@ -58,14 +59,16 @@ export function HomeStage({
 }) {
   const [index, setIndex] = useState(0);
   const [host, setHost] = useState<string | null>(null);
-  const [dismissed, setDismissed] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
-  const stage = useRef<HTMLElement>(null);
   const rail = useRef<HTMLOListElement>(null);
   const clip = queue[index];
   const next = queue[index + 1];
 
+  // Every video opens in the full-screen player and starts by itself; the X closes it.
   const start = useCallback((target: Clip) => {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen({ navigationUI: "hide" }).catch(() => undefined);
+    }
     window.dispatchEvent(new CustomEvent(PLAY_EVENT, { detail: target.id }));
     setHost(window.location.hostname);
     markSeen(target.id);
@@ -84,14 +87,25 @@ export function HomeStage({
 
   const playNext = useCallback(() => playAt(index + 1), [playAt, index]);
 
-  // Picking from the rail: play it, and bring the player into view if it has scrolled away.
-  function pick(position: number) {
-    playAt(position);
-    const top = stage.current?.getBoundingClientRect().top ?? 0;
-    if (top < 0 || top > window.innerHeight * 0.5) {
-      stage.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const close = useCallback(() => {
+    setHost(null);
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => undefined);
+  }, []);
+
+  // While the full-screen player is open: no page scrolling behind it, and Escape closes it.
+  useEffect(() => {
+    if (!host) return;
+    const root = document.documentElement;
+    root.classList.add("theater-open");
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") close();
     }
-  }
+    window.addEventListener("keydown", onKey);
+    return () => {
+      root.classList.remove("theater-open");
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [host, close]);
 
   function slide(direction: 1 | -1) {
     const list = rail.current;
@@ -166,49 +180,29 @@ export function HomeStage({
 
   return (
     <>
-      <section aria-labelledby="hero-title" className="showcase" ref={stage}>
-        {src ? (
-          <div className="showcase-media is-playing">
-            <iframe
-              key={clip.id}
-              ref={frame}
-              src={src}
-              title={clip.title}
-              onLoad={() =>
-                frame.current?.contentWindow?.postMessage(
-                  JSON.stringify({ event: "listening", id: "4ever-home", channel: "widget" }),
-                  "*",
-                )
-              }
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-            />
-          </div>
-        ) : (
-          <button
-            type="button"
-            className="showcase-media"
-            onClick={() => start(clip)}
-            onPointerEnter={() => warmPlatform(clip.platform)}
-            onTouchStart={() => warmPlatform(clip.platform)}
-            aria-label={`Play ${clip.title}`}
-          >
-            <ClipThumbImage clip={clip} large />
-            <span className="player-play">
-              <PlayIcon size={32} style={{ marginLeft: 4 }} />
-            </span>
-            <span className="overlay-chip overlay-tl" style={{ left: 16, top: 16, height: 28 }}>
-              {platformLabel(clip.platform)}
-            </span>
-          </button>
-        )}
+      <section aria-labelledby="hero-title" className="showcase">
+        <button
+          type="button"
+          className="showcase-media"
+          onClick={() => start(clip)}
+          onPointerEnter={() => warmPlatform(clip.platform)}
+          onTouchStart={() => warmPlatform(clip.platform)}
+          aria-label={`Play ${clip.title}`}
+        >
+          <ClipThumbImage clip={clip} large />
+          <span className="player-play">
+            <PlayIcon size={32} style={{ marginLeft: 4 }} />
+          </span>
+          <span className="overlay-chip overlay-tl" style={{ left: 16, top: 16, height: 28 }}>
+            {platformLabel(clip.platform)}
+          </span>
+        </button>
 
         <div className="showcase-side">
           {featured ? (
             <FeaturedLabel />
           ) : ranked > 0 && index > 0 ? (
-            <button type="button" className="back-featured" onClick={() => playAt(0)}>
+            <button type="button" className="back-featured" onClick={() => setIndex(0)}>
               <ChevronLeftIcon size={16} />
               Back to the Featured Video
             </button>
@@ -251,37 +245,6 @@ export function HomeStage({
             </span>
           </div>
         </div>
-
-        {host && next && !dismissed ? (
-          <aside className="up-next" aria-label="Play next video">
-            <div className="up-next-head">
-              <span>Play next video</span>
-              <button type="button" className="up-next-close" onClick={() => setDismissed(true)} aria-label="Close">
-                <XIcon size={14} />
-              </button>
-            </div>
-            <button
-              type="button"
-              className="up-next-card"
-              onClick={playNext}
-              onPointerEnter={() => warmPlatform(next.platform)}
-            >
-              <span className="up-next-thumb">
-                {next.thumbnail_url ? (
-                  <img src={smallThumbnail(next.thumbnail_url)} alt="" referrerPolicy="no-referrer" />
-                ) : null}
-                <span className="up-next-play">
-                  <PlayIcon size={16} style={{ marginLeft: 2 }} />
-                </span>
-              </span>
-              <span className={`up-next-title ${titleClass(index + 1, ranked, next.view_count)}`}>{next.title}</span>
-              <span className="up-next-meta">
-                {next.creator?.display_name ?? next.channel_name}
-                {ages[next.id] ? ` · ${ages[next.id]}` : ""}
-              </span>
-            </button>
-          </aside>
-        ) : null}
       </section>
 
       {queue.length > 1 ? (
@@ -296,7 +259,7 @@ export function HomeStage({
                   <button
                     type="button"
                     className={`rail-card${position === index ? " is-current" : ""}${position < ranked ? ` rail-rank-${position + 1}` : ""}`}
-                    onClick={() => pick(position)}
+                    onClick={() => playAt(position)}
                     onPointerEnter={() => warmPlatform(item.platform)}
                     aria-current={position === index ? "true" : undefined}
                   >
@@ -334,6 +297,58 @@ export function HomeStage({
             <ChevronRightIcon size={20} />
           </button>
         </section>
+      ) : null}
+
+      {src ? (
+        <div className="theater" role="dialog" aria-modal="true" aria-label={clip.title}>
+          <div className="theater-bar">
+            <span className={`theater-title ${titleClass(index, ranked, clip.view_count)}`}>
+              {featured ? <span className="theater-featured">Featured Video</span> : null}
+              {clip.title}
+            </span>
+            <button type="button" className="theater-close" onClick={close} aria-label="Close the player" autoFocus>
+              <XIcon size={22} />
+            </button>
+          </div>
+          <div className="theater-stage">
+            <iframe
+              key={clip.id}
+              ref={frame}
+              src={src}
+              title={clip.title}
+              onLoad={() =>
+                frame.current?.contentWindow?.postMessage(
+                  JSON.stringify({ event: "listening", id: "4ever-home", channel: "widget" }),
+                  "*",
+                )
+              }
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </div>
+          {next ? (
+            <button
+              type="button"
+              className="theater-next"
+              onClick={playNext}
+              onPointerEnter={() => warmPlatform(next.platform)}
+            >
+              <span className="theater-next-thumb">
+                {next.thumbnail_url ? (
+                  <img src={smallThumbnail(next.thumbnail_url)} alt="" referrerPolicy="no-referrer" />
+                ) : null}
+                <PlayIcon size={16} style={{ marginLeft: 2 }} />
+              </span>
+              <span className="theater-next-text">
+                <span className="theater-next-head">Play next video</span>
+                <span className={`theater-next-title ${titleClass(index + 1, ranked, next.view_count)}`}>
+                  {next.title}
+                </span>
+              </span>
+            </button>
+          ) : null}
+        </div>
       ) : null}
     </>
   );
