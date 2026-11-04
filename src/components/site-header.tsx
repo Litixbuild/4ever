@@ -7,7 +7,7 @@ import { Avatar } from "@/components/people";
 import { UserMenu } from "@/components/user-menu";
 import { getViewer } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { unreadReplies } from "@/lib/suggestions";
+import { unreadReplies } from "@/lib/suggestions-server";
 
 export async function SiteHeader() {
   const viewer = await getViewer();

@@ -21,24 +21,28 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!userAgent || BOTS.test(userAgent)) return new NextResponse(null, { status: 204 });
 
   const viewer = await getViewer();
+  // Netlify sets x-nf-client-connection-ip itself; x-forwarded-for can be typed in by the caller,
+  // so it's only a fallback for running the site somewhere else.
   const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+    request.headers.get("x-nf-client-connection-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "unknown";
   const day = new Date().toISOString().slice(0, 10);
-  const who = viewer ? `user:${viewer.userId}` : `anon:${ip}|${userAgent}`;
+  // Logged-out visitors count once per connection per day. The browser name isn't part of it,
+  // because anyone can change that on every request to rack up views.
+  const who = viewer ? `user:${viewer.userId}` : `anon:${ip}`;
   const viewerHash = createHash("sha256").update(`${viewHashSalt()}|${who}|${day}`).digest("hex");
 
   const admin = createAdminClient();
-  const { data: clip } = await admin
-    .from("clips")
-    .select("id")
-    .eq("id", id)
-    .eq("status", "approved")
-    .maybeSingle();
+  const { data: clip } = await admin.from("clips").select("id").eq("id", id).eq("status", "approved").maybeSingle();
   if (!clip) return new NextResponse(null, { status: 404 });
 
   await admin
     .from("clip_views")
-    .upsert({ clip_id: id, viewer_hash: viewerHash, day }, { onConflict: "clip_id,viewer_hash,day", ignoreDuplicates: true });
+    .upsert(
+      { clip_id: id, viewer_hash: viewerHash, day },
+      { onConflict: "clip_id,viewer_hash,day", ignoreDuplicates: true },
+    );
 
   return new NextResponse(null, { status: 204 });
 }

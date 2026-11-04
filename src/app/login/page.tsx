@@ -6,6 +6,7 @@ import { LoginButtons } from "@/components/login-buttons";
 import { getViewer } from "@/lib/auth";
 import { enabledProviders } from "@/lib/auth-providers";
 import { safeNextPath } from "@/lib/format";
+import { loginErrorMessage } from "@/lib/login-errors";
 
 export const metadata: Metadata = { title: "Log in" };
 
@@ -18,6 +19,7 @@ export default async function LoginPage({
   const next = safeNextPath(params.next, "/");
   const [viewer, providers] = await Promise.all([getViewer(), enabledProviders()]);
   if (viewer) redirect(next);
+  const error = loginErrorMessage(params.error);
 
   return (
     <div className="container page" style={{ alignItems: "center", paddingTop: 56 }}>
@@ -30,9 +32,9 @@ export default async function LoginPage({
           Submit clips, vote, comment, and get credit for your work. No passwords here, just the account you already
           use.
         </p>
-        {params.error ? (
+        {error ? (
           <p className="notice notice-error" role="alert" style={{ textAlign: "left" }}>
-            {params.error.slice(0, 200)}
+            {error}
           </p>
         ) : null}
         <div style={{ width: "100%", marginTop: 6 }}>

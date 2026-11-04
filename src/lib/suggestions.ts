@@ -1,5 +1,3 @@
-import { createAdminClient } from "@/lib/supabase/admin";
-
 export const SUGGESTION_TOPICS = [
   { value: "idea", label: "An idea for the site" },
   { value: "bug", label: "Something's broken" },
@@ -27,18 +25,3 @@ export type Suggestion = {
   reply_seen_at: string | null;
   created_at: string;
 };
-
-// How many admin replies this person hasn't read yet (drives the dot in the user menu).
-export async function unreadReplies(userId: string): Promise<number> {
-  try {
-    const { count } = await createAdminClient()
-      .from("suggestions")
-      .select("id", { count: "exact", head: true })
-      .eq("author_id", userId)
-      .not("replied_at", "is", null)
-      .is("reply_seen_at", null);
-    return count ?? 0;
-  } catch {
-    return 0;
-  }
-}
