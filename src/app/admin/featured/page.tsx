@@ -81,7 +81,7 @@ export default async function FeaturedAdminPage({ searchParams }: { searchParams
             name="clip"
             className="input"
             required
-            placeholder="https://4everclips.com/c/k3J9xP2a or k3J9xP2a"
+            placeholder="https://4ever.watch/c/k3J9xP2a or k3J9xP2a"
           />
           <p className="help">
             Popular right now:{" "}

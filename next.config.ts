@@ -17,10 +17,22 @@ const securityHeaders = [
   },
 ];
 
+// The site lives at 4ever.watch. Anyone who opens the old Netlify address (or www.) is sent there,
+// keeping the rest of the link, so old shares and bookmarks still work.
+const OLD_HOSTS = ["wc4ever.netlify.app", "www.4ever.watch"];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
+  },
+  async redirects() {
+    return OLD_HOSTS.map((host) => ({
+      source: "/:path*",
+      has: [{ type: "host" as const, value: host }],
+      destination: "https://4ever.watch/:path*",
+      permanent: true,
+    }));
   },
 };
 

@@ -63,10 +63,10 @@ describe("canonicalUrl", () => {
 
 describe("embedUrl", () => {
   it("uses YouTube privacy mode", () => {
-    expect(embedUrl("youtube_video", "dQw4w9WgXcQ", "4everclips.com")).toContain("youtube-nocookie.com/embed/dQw4w9WgXcQ");
+    expect(embedUrl("youtube_video", "dQw4w9WgXcQ", "4ever.watch")).toContain("youtube-nocookie.com/embed/dQw4w9WgXcQ");
   });
   it("passes the parent host to Twitch", () => {
-    expect(embedUrl("twitch_clip", "Abc", "4everclips.com")).toContain("parent=4everclips.com");
+    expect(embedUrl("twitch_clip", "Abc", "4ever.watch")).toContain("parent=4ever.watch");
     expect(embedUrl("twitch_video", "123456", "localhost")).toContain("video=123456&parent=localhost");
   });
 });

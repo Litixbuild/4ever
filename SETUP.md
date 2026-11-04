@@ -1,6 +1,6 @@
 # Going live with 4Everclips
 
-This walks through everything from zero to a live site at 4everclips.com. Plan on about an hour the first time.
+This walks through everything from zero to a live site at 4ever.watch. Plan on about an hour the first time.
 Everything here is free to start. See "Staying free" at the bottom.
 
 > **Already done for your project:** the database is set up in the Supabase project `afvyxicvaejxqgapbppy` ("4Ever"
@@ -77,11 +77,11 @@ https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback
 ### Supabase login settings
 
 1. **Authentication → URL Configuration**:
-   - Site URL: `https://wc4ever.netlify.app` for now. Change it to `https://4everclips.com` once the domain works.
+   - Site URL: `https://4ever.watch`
    - Redirect URLs:
-     - `https://wc4ever.netlify.app/**` (the free Netlify address)
+     - `https://www.4ever.watch/**`
      - `http://localhost:3000/**` (for running it on your computer)
-     - `https://4everclips.com/**`, added once the domain is connected and pointing at Netlify
+     - `https://4ever.watch/**`
 2. In the authentication settings, turn on **Allow manual linking**. That lets someone who signed up with Discord
    link Twitch later to verify their channel.
 3. Turn **off** the **Email** provider. 4Ever only uses Discord, Twitch and Google, and leaving email on lets
@@ -97,7 +97,7 @@ Every push to `main` deploys automatically.
 
 | Name | Value |
 | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | `https://wc4ever.netlify.app` for now, `https://4everclips.com` once the domain is connected |
+| `NEXT_PUBLIC_SITE_URL` | `https://4ever.watch` |
 | `NEXT_PUBLIC_SUPABASE_URL` | from step 1 |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | from step 1 |
 | `SUPABASE_SECRET_KEY` | from step 1 |
@@ -111,9 +111,10 @@ Every push to `main` deploys automatically.
    Tick **Contains secret values** for `SUPABASE_SECRET_KEY`, `TWITCH_CLIENT_SECRET` and `YOUTUBE_API_KEY`. Leave it
    unticked for anything starting with `NEXT_PUBLIC_`: those are meant to be public, and Netlify's secret scanner
    would stop the build if it found them in the site's files.
-2. Add your domain: **Domain management → Add a domain**, add `4everclips.com`. Netlify shows the exact DNS records
-   to add at your domain registrar. It usually goes live within an hour. Then update `NEXT_PUBLIC_SITE_URL` and the
-   Supabase Site URL to `https://4everclips.com`.
+2. The domain is `4ever.watch` (registered at Namecheap). In Netlify it's the primary domain, with `www.4ever.watch`
+   forwarding to it. Namecheap's Advanced DNS has two records: an ALIAS for `@` pointing at
+   `apex-loadbalancer.netlify.com`, and a CNAME for `www` pointing at `wc4ever.netlify.app`. Netlify issues the HTTPS
+   certificate. The old `wc4ever.netlify.app` address forwards to 4ever.watch (`redirects()` in `next.config.ts`).
 
 Whenever you change an environment variable, redeploy: **Deploys → Trigger deploy → Deploy project**.
 
@@ -201,7 +202,7 @@ npm run lint
 
 - **Logging in sends you to the wrong site**: check the Site URL and Redirect URLs in Supabase step 2.
 - **Twitch clips say they can't connect**: Twitch needs the site's real domain. Make sure you're visiting through
-  4everclips.com (or wc4ever.netlify.app), not an IP address.
+  4ever.watch, not an IP address.
 - **A YouTube video won't play**: the creator may have turned off embedding. The submit form catches this when the
   YouTube key is set.
 - **"4Everclips needs its database keys" page**: the Supabase variables are missing in Netlify. Add them and
