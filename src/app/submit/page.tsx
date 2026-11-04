@@ -61,17 +61,21 @@ export default async function SubmitPage() {
               Music that&apos;s safe to use
             </h2>
             <ul className="list-plain stack-sm" style={{ gap: 10, fontSize: 14 }}>
-              <li className="row" style={{ gap: 10, flexWrap: "nowrap" }}>
-                <CheckIcon size={16} style={{ color: "var(--green)" }} /> Music you made yourself
+              <li className="icon-line">
+                <CheckIcon size={16} style={{ color: "var(--green)" }} />
+                <span>Music you made yourself</span>
               </li>
-              <li className="row" style={{ gap: 10, flexWrap: "nowrap" }}>
-                <CheckIcon size={16} style={{ color: "var(--green)" }} /> The game&apos;s own soundtrack
+              <li className="icon-line">
+                <CheckIcon size={16} style={{ color: "var(--green)" }} />
+                <span>The game&apos;s own soundtrack</span>
               </li>
-              <li className="row" style={{ gap: 10, flexWrap: "nowrap" }}>
-                <CheckIcon size={16} style={{ color: "var(--green)" }} /> Royalty-free tracks, credited
+              <li className="icon-line">
+                <CheckIcon size={16} style={{ color: "var(--green)" }} />
+                <span>Royalty-free tracks, credited</span>
               </li>
-              <li className="row" style={{ gap: 10, flexWrap: "nowrap" }}>
-                <XIcon size={16} style={{ color: "var(--red)" }} /> Chart songs you don&apos;t have rights to
+              <li className="icon-line">
+                <XIcon size={16} style={{ color: "var(--red)" }} />
+                <span>Chart songs you don&apos;t have rights to</span>
               </li>
             </ul>
             <Link href="/music-guide" className="tip-flavor" style={{ fontWeight: 700, textDecoration: "none" }}>
@@ -84,23 +88,17 @@ export default async function SubmitPage() {
               What happens next
             </h2>
             <ol className="list-plain stack-sm small" style={{ gap: 12, color: "var(--text-3)" }}>
-              <li className="row" style={{ gap: 12, flexWrap: "nowrap", alignItems: "baseline" }}>
-                <span className="numeral" style={{ fontSize: 16, width: 22 }}>
-                  I
-                </span>{" "}
-                A curator checks it fits the site.
+              <li className="numbered-line">
+                <span className="numeral">I</span>
+                <span>A curator checks it fits the site.</span>
               </li>
-              <li className="row" style={{ gap: 12, flexWrap: "nowrap", alignItems: "baseline" }}>
-                <span className="numeral" style={{ fontSize: 16, width: 22 }}>
-                  II
-                </span>{" "}
-                It goes live in Fresh from Azeroth.
+              <li className="numbered-line">
+                <span className="numeral">II</span>
+                <span>It goes live in Fresh from Azeroth.</span>
               </li>
-              <li className="row" style={{ gap: 12, flexWrap: "nowrap", alignItems: "baseline" }}>
-                <span className="numeral" style={{ fontSize: 16, width: 22 }}>
-                  III
-                </span>{" "}
-                As people watch, its title color climbs from white to green, blue, purple and orange.
+              <li className="numbered-line">
+                <span className="numeral">III</span>
+                <span>As people watch, its title color climbs from white to green, blue, purple and orange.</span>
               </li>
             </ol>
           </section>

@@ -254,12 +254,10 @@ export function SubmitForm({
               checked={music === m.value}
               onChange={() => setMusic(m.value)}
             />
-            <strong>{m.label}</strong>
-            {m.note ? (
-              <span className="small muted" style={{ marginLeft: "auto" }}>
-                {m.note}
-              </span>
-            ) : null}
+            <span className="choice-text">
+              <strong>{m.label}</strong>
+              {m.note ? <span className="small muted">{m.note}</span> : null}
+            </span>
           </label>
         ))}
         {music === "licensed" ? (
@@ -319,7 +317,7 @@ export function SubmitForm({
             {state.error}
           </p>
         ) : null}
-        <div className="row" style={{ gap: "12px 20px" }}>
+        <div className="row form-submit-row" style={{ gap: "12px 20px" }}>
           <button type="submit" className="btn btn-gold btn-lg" disabled={!canSubmit}>
             {submitting ? "Sending…" : "Send for review"}
           </button>

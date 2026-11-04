@@ -2249,8 +2249,46 @@ a.credits-name:hover {
 .choice-row {
   align-items: center;
   min-height: 52px;
-  padding: 0 16px;
+  padding: 12px 16px;
+}
+/* Label and note side by side; on a narrow screen the note drops under the label, still lined up. */
+.choice-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 12px;
+}
+/* A small icon beside text that may wrap: the icon stays with the first line. */
+.icon-line {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+.icon-line svg {
+  margin-top: 2px;
+}
+/* Roman numeral steps with the text lined up in one column. */
+.numbered-line {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 8px;
+  align-items: baseline;
+}
+.numbered-line .numeral {
+  font-size: 16px;
+}
+@media (max-width: 640px) {
+  .form-submit-row .btn {
+    width: 100%;
+  }
+  .form-submit-row {
+    justify-content: center;
+    text-align: center;
+  }
 }
 .choice-row input {
   margin: 0;
