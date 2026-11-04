@@ -7,7 +7,7 @@ import { SeenMark } from "@/components/seen-mark";
 import { Avatar, VerifiedMark } from "@/components/people";
 import { Vista } from "@/components/vista";
 import { categoryLabel } from "@/lib/categories";
-import { formatCount, formatDuration } from "@/lib/format";
+import { formatCount, formatDuration, uploadedAgo } from "@/lib/format";
 import { rarityClass, rarityFor } from "@/lib/rarity";
 import type { Clip } from "@/lib/types";
 import { platformLabel, smallThumbnail, thumbnailSrcSet } from "@/lib/video";
@@ -86,6 +86,9 @@ export function ClipCard({ clip, deletable = false, tab }: { clip: Clip; deletab
         <CreditLine clip={clip} />
         <div className="clip-meta">
           <span>{categoryLabel(clip.category)}</span>
+          <time className="clip-age" dateTime={clip.uploaded_at ?? clip.published_at ?? clip.created_at}>
+            {uploadedAgo(clip)}
+          </time>
           <span className="push icon-stat" title={`${formatCount(clip.view_count)} views`}>
             <EyeIcon size={14} />
             {formatCount(clip.view_count)}

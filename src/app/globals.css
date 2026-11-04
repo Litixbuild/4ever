@@ -4858,3 +4858,13 @@ a.plaque:hover {
     animation: none;
   }
 }
+
+/* "3 days ago" on video cards */
+.clip-age {
+  color: var(--text-3);
+}
+.clip-age::before {
+  content: "·";
+  margin-right: 6px;
+  opacity: 0.6;
+}

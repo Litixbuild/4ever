@@ -20,7 +20,16 @@ const PLAY_EVENT = "4ever:play";
 // The front page's big player. It works through a queue (movies first, then the newest clips): once a video
 // starts, a small "Play next video" window shows the next one in the lower corner. YouTube videos move on
 // by themselves when they end; Twitch doesn't tell the page when a clip ends, so those wait for a click.
-export function HomeStage({ queue, feature }: { queue: Clip[]; feature: Feature | null }) {
+export function HomeStage({
+  queue,
+  ages,
+  feature,
+}: {
+  queue: Clip[];
+  // "3 days ago" per video, worked out on the server so it matches the page.
+  ages: Record<string, string>;
+  feature: Feature | null;
+}) {
   const [index, setIndex] = useState(0);
   const [host, setHost] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState(false);
@@ -147,6 +156,9 @@ export function HomeStage({ queue, feature }: { queue: Clip[]; feature: Feature 
             <span>{categoryLabel(clip.category)}</span>
             {duration ? <span>{duration}</span> : null}
           </span>
+          {ages[clip.id] ? (
+            <span className="tip-muted">Uploaded {ages[clip.id].replace(/^Yesterday$/, "yesterday")}</span>
+          ) : null}
           <span className="tip-gap">+{formatCount(clip.view_count)} Views</span>
           <span className="tip-extra">+{formatCount(clip.vote_count)} Votes</span>
           <span className="tip-muted tip-extra">{musicLabel(clip.music_source, clip.music_credit)}</span>
@@ -194,7 +206,10 @@ export function HomeStage({ queue, feature }: { queue: Clip[]; feature: Feature 
               </span>
             </span>
             <span className={`up-next-title ${rarityClass(next.view_count)}`}>{next.title}</span>
-            <span className="up-next-meta">{next.creator?.display_name ?? next.channel_name}</span>
+            <span className="up-next-meta">
+              {next.creator?.display_name ?? next.channel_name}
+              {ages[next.id] ? ` · ${ages[next.id]}` : ""}
+            </span>
           </button>
         </aside>
       ) : null}

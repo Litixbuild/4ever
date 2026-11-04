@@ -27,6 +27,8 @@ export type FeedClip = {
   duration: string;
   durationSeconds: number | null;
   playerMade: boolean;
+  // "3 days ago": when it went up on YouTube or Twitch.
+  uploaded: string;
   category: string;
   channelName: string;
   channelAvatar: string | null;
@@ -451,6 +453,7 @@ export function ClipFeed({
             {clip.playerMade ? <PlayerMadeMark /> : null}
             <span>{person?.isCreator ? person.name : clip.channelName}</span>
             <span>{clip.category}</span>
+            <span>{clip.uploaded}</span>
             <span className="row" style={{ gap: 5 }}>
               <EyeIcon size={13} /> {formatCount(clip.views)}
             </span>
@@ -499,11 +502,8 @@ export function ClipFeed({
 function feedOrder(clips: FeedClip[], startShortId: string | null): FeedClip[] {
   const seen = new Set(readSeen());
   const start = startShortId ? clips.find((c) => c.shortId === startShortId) : undefined;
+  // Newest first (the server sends them in that order), leaving out ones already watched.
   const rest = clips.filter((c) => c !== start && !seen.has(c.id));
-  for (let i = rest.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [rest[i], rest[j]] = [rest[j], rest[i]];
-  }
   return start ? [start, ...rest] : rest;
 }
 

@@ -59,7 +59,10 @@ export async function listClips(filters: ClipFilters = {}): Promise<{ clips: Cli
         .order("vote_count", { ascending: false });
       break;
     default:
-      query = query.order("published_at", { ascending: false });
+      // Newest first: by when it went up on YouTube or Twitch, then when it was shared here.
+      query = query
+        .order("uploaded_at", { ascending: false, nullsFirst: false })
+        .order("published_at", { ascending: false });
   }
 
   const from = (page - 1) * perPage;
@@ -136,10 +139,10 @@ export async function listFeatures(limit = 24): Promise<Feature[]> {
 // Trending movies for the front page: recent movies ranked by how fast they're being watched and voted
 // on, newest first among equals, with Player-made ones lifted ahead of the rest.
 export function trendingScore(
-  clip: Pick<Clip, "view_count" | "vote_count" | "published_at" | "player_made">,
+  clip: Pick<Clip, "view_count" | "vote_count" | "published_at" | "player_made"> & { uploaded_at?: string | null },
   now = Date.now(),
 ) {
-  const hours = Math.max(0, (now - new Date(clip.published_at ?? now).getTime()) / 3_600_000);
+  const hours = Math.max(0, (now - new Date(clip.uploaded_at ?? clip.published_at ?? now).getTime()) / 3_600_000);
   const heat = ((clip.view_count ?? 0) + 3 * (clip.vote_count ?? 0) + 2) / (hours + 6) ** 1.2;
   return heat * (clip.player_made ? 1.75 : 1);
 }
@@ -151,6 +154,7 @@ export async function getTrendingMovies(limit = 6): Promise<Clip[]> {
     .select(CLIP_COLUMNS)
     .eq("status", "approved")
     .eq("kind", "movie")
+    .order("uploaded_at", { ascending: false, nullsFirst: false })
     .order("published_at", { ascending: false })
     .limit(60);
   const movies = (data ?? []) as unknown as Clip[];
@@ -166,23 +170,9 @@ export async function getHeroFallback(): Promise<Clip | null> {
   // Movies come first on the front page: the top trending one leads when there's no Movie of the Week.
   const [topMovie] = await getTrendingMovies(1);
   if (topMovie) return topMovie;
-  const supabase = await createClient();
-  const weekAgo = new Date(Date.now() - 7 * 86400_000).toISOString();
-  const { data: recent } = await supabase
-    .from("clips")
-    .select(CLIP_COLUMNS)
-    .eq("status", "approved")
-    .gte("published_at", weekAgo)
-    .order("view_count", { ascending: false })
-    .limit(1);
-  if (recent?.[0]) return recent[0] as unknown as Clip;
-  const { data: latest } = await supabase
-    .from("clips")
-    .select(CLIP_COLUMNS)
-    .eq("status", "approved")
-    .order("published_at", { ascending: false })
-    .limit(1);
-  return (latest?.[0] as unknown as Clip) ?? null;
+  // Otherwise the newest video.
+  const { clips } = await listClips({ perPage: 1, sort: "new" });
+  return clips[0] ?? null;
 }
 
 // The contest happening now, or the next one coming up.

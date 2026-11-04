@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ClipFeed, type FeedClip } from "@/components/clip-feed";
 import { getViewer } from "@/lib/auth";
 import { categoryLabel, isKind } from "@/lib/categories";
-import { formatDuration } from "@/lib/format";
+import { formatDuration, uploadedAgo } from "@/lib/format";
 import { getClipByShortId, listClips } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { Clip } from "@/lib/types";
@@ -27,6 +27,7 @@ function toFeedClip(clip: Clip, voted: boolean): FeedClip {
     duration: formatDuration(clip.duration_seconds),
     durationSeconds: clip.duration_seconds,
     playerMade: clip.player_made,
+    uploaded: uploadedAgo(clip),
     category: categoryLabel(clip.category),
     channelName: clip.channel_name,
     views: clip.view_count,
@@ -52,10 +53,10 @@ export default async function WatchPage({
 }) {
   const params = await searchParams;
   const kind = isKind(params.kind) ? params.kind : "clip";
-  // Up to 300 clips, five pages of 60. The browser shuffles them and leaves out ones already watched.
+  // Up to 300 clips, five pages of 60, newest first. The browser leaves out ones already watched.
   const [viewer, ...pages] = await Promise.all([
     getViewer(),
-    ...[1, 2, 3, 4, 5].map((page) => listClips({ kind, sort: "views", perPage: 60, page })),
+    ...[1, 2, 3, 4, 5].map((page) => listClips({ kind, sort: "new", perPage: 60, page })),
   ]);
   const clips = pages.flatMap((p) => p.clips);
 

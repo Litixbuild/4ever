@@ -90,9 +90,7 @@ export function formatDateTime(date: string | Date): string {
 // For calendar tiles: { month: "DEC", day: "09" }
 export function dateTile(date: string | Date): { month: string; day: string } {
   const d = typeof date === "string" ? new Date(date) : date;
-  const month = new Intl.DateTimeFormat("en-US", { month: "short", timeZone: site.timeZone })
-    .format(d)
-    .toUpperCase();
+  const month = new Intl.DateTimeFormat("en-US", { month: "short", timeZone: site.timeZone }).format(d).toUpperCase();
   const day = new Intl.DateTimeFormat("en-US", { day: "2-digit", timeZone: site.timeZone }).format(d);
   return { month, day };
 }
@@ -131,4 +129,22 @@ export function cleanSearch(value: string | null | undefined): string {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 60);
+}
+
+// When a video went up on YouTube or Twitch ("3 days ago"); falls back to when it was shared on 4Ever.
+export function uploadedAgo(
+  clip: { uploaded_at?: string | null; published_at?: string | null; created_at: string },
+  now: Date = new Date(),
+): string {
+  return timeAgo(clip.uploaded_at ?? clip.published_at ?? clip.created_at, now);
+}
+
+// Videos that went up in the last `days` days.
+export function uploadedWithin<T extends { uploaded_at?: string | null; published_at?: string | null }>(
+  clips: T[],
+  days: number,
+  now: number = Date.now(),
+): T[] {
+  const since = now - days * 86400_000;
+  return clips.filter((c) => new Date(c.uploaded_at ?? c.published_at ?? 0).getTime() > since);
 }

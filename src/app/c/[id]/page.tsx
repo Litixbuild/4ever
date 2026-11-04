@@ -15,7 +15,7 @@ import { Avatar, VerifiedMark } from "@/components/people";
 import { VideoPlayer } from "@/components/video-player";
 import { getViewer } from "@/lib/auth";
 import { categoryLabel, musicLabel } from "@/lib/categories";
-import { formatCount, formatDate, formatDuration, timeAgo } from "@/lib/format";
+import { formatCount, formatDuration, timeAgo, uploadedAgo } from "@/lib/format";
 import { getClipByShortId, getComments, getMoreFromSameSource, getViewerClipState } from "@/lib/queries";
 import { rarityClass } from "@/lib/rarity";
 import { site } from "@/lib/site";
@@ -150,7 +150,9 @@ export default async function ClipPage({
                     <ClockIcon size={14} /> {duration}
                   </span>
                 ) : null}
-                <span className="meta-item">Posted {formatDate(clip.published_at ?? clip.created_at)}</span>
+                <time className="meta-item" dateTime={clip.uploaded_at ?? clip.published_at ?? clip.created_at}>
+                  Uploaded {uploadedAgo(clip).replace(/^Yesterday$/, "yesterday")}
+                </time>
                 <span className="meta-item">
                   <EyeIcon size={14} /> {formatCount(clip.view_count)} {clip.view_count === 1 ? "view" : "views"}
                 </span>

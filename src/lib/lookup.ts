@@ -18,6 +18,7 @@ export type VideoMeta = {
   channelName: string;
   channelUrl: string | null;
   channelAvatarUrl: string | null;
+  uploadedAt: string | null;
 };
 
 export async function lookupVideo(input: string): Promise<VideoMeta> {

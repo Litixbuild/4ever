@@ -5,6 +5,7 @@ import { EmptyHero } from "@/components/hero";
 import { HomeStage } from "@/components/home-stage";
 import { ActivityFeed, LaunchBar } from "@/components/widgets";
 import { isCategory, isKind } from "@/lib/categories";
+import { uploadedAgo, uploadedWithin } from "@/lib/format";
 import type { Clip } from "@/lib/types";
 import { getActivity, getCurrentFeature, getHeroFallback, getTrendingMovies, listClips } from "@/lib/queries";
 
@@ -39,11 +40,14 @@ export default async function HomePage({
     page === 1 && !kind && !cat ? null : listClips({ perPage: 12, sort: "new" }),
   ]).then(([f, fr, a, t, l]) => [f, fr, a, t, l ?? fr] as const);
   const heroClip = feature?.clip ?? (await getHeroFallback());
-  // The big player's queue: the feature (or top movie), then trending movies, then the newest videos.
+  // The big player's queue, newest first: the feature (or top movie), this week's trending movies, then
+  // the newest videos.
+  const freshMovies = uploadedWithin(trending, 7);
   const queue: Clip[] = [];
-  for (const c of [heroClip, ...trending, ...latest.clips]) {
+  for (const c of [heroClip, ...freshMovies, ...latest.clips]) {
     if (c && !queue.some((q) => q.id === c.id)) queue.push(c);
   }
+  const ages = Object.fromEntries(queue.map((c) => [c.id, uploadedAgo(c)]));
 
   const lastPage = Math.max(1, Math.ceil(fresh.total / PER_PAGE));
   // A page past the end (an old link) goes to the last page that has videos.
@@ -53,7 +57,7 @@ export default async function HomePage({
     <div className="container page">
       <div className="stack" style={{ gap: 20 }}>
         <LaunchBar />
-        {queue.length > 0 ? <HomeStage queue={queue.slice(0, 20)} feature={feature} /> : <EmptyHero />}
+        {queue.length > 0 ? <HomeStage queue={queue.slice(0, 20)} ages={ages} feature={feature} /> : <EmptyHero />}
       </div>
 
       <div className="split">

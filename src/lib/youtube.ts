@@ -34,6 +34,8 @@ export type YouTubeVideo = {
   channelName: string;
   channelUrl: string | null;
   channelAvatarUrl: string | null;
+  // When it was uploaded to YouTube.
+  uploadedAt: string | null;
 };
 
 type Thumb = { url?: string } | undefined;
@@ -64,6 +66,7 @@ export async function fetchYouTubeVideo(id: string): Promise<YouTubeVideo> {
       channelName: data.author_name ?? "Unknown channel",
       channelUrl: data.author_url ?? null,
       channelAvatarUrl: null,
+      uploadedAt: null,
     };
   }
 
@@ -79,6 +82,7 @@ export async function fetchYouTubeVideo(id: string): Promise<YouTubeVideo> {
           description?: string;
           channelId?: string;
           channelTitle?: string;
+          publishedAt?: string;
           thumbnails?: { maxres?: Thumb; standard?: Thumb; high?: Thumb; medium?: Thumb; default?: Thumb };
         };
         contentDetails?: { duration?: string };
@@ -108,6 +112,7 @@ export async function fetchYouTubeVideo(id: string): Promise<YouTubeVideo> {
     channelName: item.snippet.channelTitle ?? "Unknown channel",
     channelUrl: channelId ? `https://www.youtube.com/channel/${channelId}` : null,
     channelAvatarUrl: channelId ? await fetchYouTubeChannelAvatar(channelId).catch(() => null) : null,
+    uploadedAt: item.snippet.publishedAt ?? null,
   };
 }
 

@@ -23,6 +23,7 @@ type Update = {
   duration_seconds?: number | null;
   channel_name?: string;
   channel_avatar_url?: string | null;
+  uploaded_at?: string | null;
 };
 
 export type RefreshResult = { checked: number; updated: number; removed: number };
@@ -61,6 +62,7 @@ async function refreshYouTube(rows: Row[]): Promise<Map<string, Update> | null> 
           title?: string;
           channelId?: string;
           channelTitle?: string;
+          publishedAt?: string;
           thumbnails?: { maxres?: Thumb; standard?: Thumb; high?: Thumb; medium?: Thumb };
         };
         contentDetails?: { duration?: string };
@@ -73,6 +75,7 @@ async function refreshYouTube(rows: Row[]): Promise<Map<string, Update> | null> 
         thumbnail_url: t?.maxres?.url ?? t?.standard?.url ?? t?.high?.url ?? t?.medium?.url ?? null,
         duration_seconds: parseIsoDuration(item.contentDetails?.duration),
         channel_name: (item.snippet.channelTitle ?? "Unknown channel").slice(0, 120),
+        uploaded_at: item.snippet.publishedAt ?? null,
       });
       if (item.snippet.channelId) channelIds.add(item.snippet.channelId);
     }
@@ -108,6 +111,7 @@ async function refreshTwitch(rows: Row[]): Promise<Map<string, Update> | null> {
         broadcaster_name: string;
         thumbnail_url: string;
         duration: number;
+        created_at?: string;
       }>(`clips?${group.map((r) => `id=${encodeURIComponent(r.source_id)}`).join("&")}`);
       for (const c of list) {
         found.set(c.id, {
@@ -115,6 +119,7 @@ async function refreshTwitch(rows: Row[]): Promise<Map<string, Update> | null> {
           thumbnail_url: c.thumbnail_url || null,
           duration_seconds: c.duration ? Math.round(c.duration) : null,
           channel_name: c.broadcaster_name.slice(0, 120),
+          uploaded_at: c.created_at ?? null,
         });
         userIds.add(c.broadcaster_id);
       }
@@ -127,6 +132,7 @@ async function refreshTwitch(rows: Row[]): Promise<Map<string, Update> | null> {
         user_name: string;
         thumbnail_url: string;
         duration: string;
+        created_at?: string;
       }>(`videos?${group.map((r) => `id=${encodeURIComponent(r.source_id)}`).join("&")}`);
       for (const v of list) {
         const thumb = v.thumbnail_url ? v.thumbnail_url.replace("%{width}", "640").replace("%{height}", "360") : null;
@@ -135,6 +141,7 @@ async function refreshTwitch(rows: Row[]): Promise<Map<string, Update> | null> {
           thumbnail_url: thumb && !thumb.includes("_404") ? thumb : null,
           duration_seconds: parseTwitchDuration(v.duration),
           channel_name: v.user_name.slice(0, 120),
+          uploaded_at: v.created_at ?? null,
         });
         userIds.add(v.user_id);
       }
@@ -164,7 +171,8 @@ export async function refreshStaleClips(): Promise<RefreshResult> {
     .from("clips")
     .select("id, platform, source_type, source_id, channel_id, title_locked")
     .neq("status", "removed")
-    .lt("details_refreshed_at", cutoff)
+    // Stale details, or older videos saved before we stored the upload date.
+    .or(`details_refreshed_at.lt."${cutoff}",uploaded_at.is.null`)
     .order("details_refreshed_at", { ascending: true })
     .limit(PER_RUN);
   const rows = (data ?? []) as Row[];

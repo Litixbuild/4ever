@@ -71,6 +71,8 @@ export type TwitchVideoInfo = {
   channelName: string;
   channelUrl: string;
   channelAvatarUrl: string | null;
+  // When it was clipped or uploaded on Twitch.
+  uploadedAt: string | null;
 };
 
 export async function fetchTwitchClip(slug: string): Promise<TwitchVideoInfo> {
@@ -80,6 +82,7 @@ export async function fetchTwitchClip(slug: string): Promise<TwitchVideoInfo> {
     broadcaster_name: string;
     thumbnail_url: string;
     duration: number;
+    created_at?: string;
   }>(`clips?id=${encodeURIComponent(slug)}`);
   const clip = clips[0];
   if (!clip) throw new LookupError("We couldn't find that Twitch clip. It may have been deleted.");
@@ -94,6 +97,7 @@ export async function fetchTwitchClip(slug: string): Promise<TwitchVideoInfo> {
     channelName: user?.display_name ?? clip.broadcaster_name,
     channelUrl: `https://www.twitch.tv/${login}`,
     channelAvatarUrl: user?.profile_image_url || null,
+    uploadedAt: clip.created_at ?? null,
   };
 }
 
@@ -106,6 +110,7 @@ export async function fetchTwitchVideo(id: string): Promise<TwitchVideoInfo> {
     user_name: string;
     thumbnail_url: string;
     duration: string;
+    created_at?: string;
   }>(`videos?id=${encodeURIComponent(id)}`);
   const video = videos[0];
   if (!video) throw new LookupError("We couldn't find that Twitch video. It may have expired or been deleted.");
@@ -120,5 +125,6 @@ export async function fetchTwitchVideo(id: string): Promise<TwitchVideoInfo> {
     channelName: video.user_name,
     channelUrl: `https://www.twitch.tv/${video.user_login}`,
     channelAvatarUrl: user?.profile_image_url || null,
+    uploadedAt: video.created_at ?? null,
   };
 }
