@@ -100,7 +100,7 @@ export function HomeStage({
 
   // Keep the video that's playing in sight in the rail.
   useEffect(() => {
-    const card = rail.current?.children[index] as HTMLElement | undefined;
+    const card = rail.current?.children[index - 1] as HTMLElement | undefined;
     const list = rail.current;
     if (!card || !list) return;
     const left = card.offsetLeft - list.offsetLeft;
@@ -205,7 +205,14 @@ export function HomeStage({
         )}
 
         <div className="showcase-side">
-          {featured ? <FeaturedLabel /> : null}
+          {featured ? (
+            <FeaturedLabel />
+          ) : ranked > 0 && index > 0 ? (
+            <button type="button" className="back-featured" onClick={() => playAt(0)}>
+              <ChevronLeftIcon size={16} />
+              Back to the Featured Video
+            </button>
+          ) : null}
           <div className="wow-tip">
             <h1 id="hero-title" className={`tip-title ${titleClass(index, ranked, clip.view_count)}`}>
               <Link href={href}>{clip.title}</Link>
@@ -281,6 +288,8 @@ export function HomeStage({
         <section aria-label="More videos" className="stage-rail">
           <ol ref={rail} className="stage-rail-list">
             {queue.map((item, position) => {
+              // The Featured Video is already the big player; the rail starts with the 2nd.
+              if (position === 0) return null;
               const playing = Boolean(host) && position === index;
               return (
                 <li key={item.id}>
@@ -293,7 +302,6 @@ export function HomeStage({
                   >
                     <span className="rail-thumb">
                       <ClipThumbImage clip={item} small />
-                      {position === 0 && ranked > 0 ? <span className="rail-featured">Featured</span> : null}
                       {playing ? <span className="rail-now">Playing</span> : null}
                       {formatDuration(item.duration_seconds) ? (
                         <span className="rail-time">{formatDuration(item.duration_seconds)}</span>

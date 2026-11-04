@@ -415,16 +415,12 @@ export async function getChampions(limit = 24): Promise<Champion[]> {
     .sort((a, b) => b.contest.ends_at.localeCompare(a.contest.ends_at));
 }
 
-// The front page's top three: the most watched videos today, topped up from the last week, then the
-// fallbacks given (so there are always three when the site has three videos).
+// The front page's top three: the most watched videos today (the day resets at midnight Eastern time).
+// Early in the day, before three videos have views, the fallbacks given fill the gaps.
 export async function getMostWatchedToday(limit = 3, fallbacks: (Clip | null)[] = []): Promise<Clip[]> {
   const supabase = await createClient();
-  const ids: string[] = [];
-  for (const days of [1, 7]) {
-    if (ids.length >= limit) break;
-    const { data } = await supabase.rpc("most_watched", { p_days: days, p_limit: limit });
-    for (const row of (data ?? []) as { clip_id: string }[]) if (!ids.includes(row.clip_id)) ids.push(row.clip_id);
-  }
+  const { data: rows } = await supabase.rpc("most_watched", { p_days: 1, p_limit: limit });
+  const ids = ((rows ?? []) as { clip_id: string }[]).map((row) => row.clip_id);
   const picked: Clip[] = [];
   if (ids.length > 0) {
     const { data } = await supabase.from("clips").select(CLIP_COLUMNS).in("id", ids.slice(0, limit));

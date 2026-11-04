@@ -27,7 +27,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     request.headers.get("x-nf-client-connection-ip") ||
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     "unknown";
-  const day = new Date().toISOString().slice(0, 10);
+  // The day turns over at midnight Eastern time, when the front page's Featured Video resets.
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
   // Logged-out visitors count once per connection per day. The browser name isn't part of it,
   // because anyone can change that on every request to rack up views.
   const who = viewer ? `user:${viewer.userId}` : `anon:${ip}`;

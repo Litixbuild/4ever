@@ -129,13 +129,6 @@ export default async function HomePage({
           <ActivityFeed items={activity} />
         </aside>
       </div>
-
-      <Link href="/help" className="help-strip">
-        <span>
-          <strong>New here?</strong> How credit, ranks and sharing clips work on 4Ever.
-        </span>
-        <span className="help-strip-go">Read how it works</span>
-      </Link>
     </div>
   );
 }
