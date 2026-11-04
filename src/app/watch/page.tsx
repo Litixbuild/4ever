@@ -25,6 +25,7 @@ function toFeedClip(clip: Clip, voted: boolean): FeedClip {
     channelAvatar: clip.channel_avatar_url,
     thumbnailUrl: clip.thumbnail_url,
     duration: formatDuration(clip.duration_seconds),
+    durationSeconds: clip.duration_seconds,
     category: categoryLabel(clip.category),
     channelName: clip.channel_name,
     views: clip.view_count,

@@ -24,6 +24,7 @@ export function Hero({ clip, feature }: { clip: Clip; feature: Feature | null })
         sourceId={clip.source_id}
         platform={clip.platform}
         title={clip.title}
+        durationSeconds={clip.duration_seconds}
         className="showcase-media"
       >
         <ClipThumbImage clip={clip} large />

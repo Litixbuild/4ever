@@ -4200,7 +4200,13 @@ a.plaque:hover {
 }
 @media (max-width: 760px) {
   body {
-    padding-bottom: calc(78px + env(safe-area-inset-bottom));
+    padding-bottom: calc(102px + env(safe-area-inset-bottom));
+  }
+  .tabbar-buttons {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    padding: 0 14px;
   }
   .tabbar {
     position: fixed;
@@ -4209,9 +4215,9 @@ a.plaque:hover {
     bottom: 0;
     z-index: 45;
     display: flex;
-    align-items: flex-end;
-    justify-content: space-around;
-    padding: 8px 28px max(10px, env(safe-area-inset-bottom));
+    flex-direction: column;
+    gap: 9px;
+    padding: 8px 14px max(10px, env(safe-area-inset-bottom));
     background: rgba(14, 11, 9, 0.96);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -4286,4 +4292,203 @@ a.plaque:hover {
   .tab-slot {
     transition: none;
   }
+}
+
+/* ---------- Experience bar ----------
+   Watch-time XP toward the PvP-style ranks (src/lib/ranks.ts): a dark track with a purple fill split
+   into 20 bubbles, like the experience bar under the game's action bars. */
+.xp {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: #f1e9da;
+}
+.xp-track {
+  position: relative;
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid #4a3b2a;
+  border-radius: 3px;
+  background: #0b0908;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+/* The 19 dividers that split the bar into 20 bubbles, drawn over the fill. */
+.xp-track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(5% - 1px), rgba(0, 0, 0, 0.75) calc(5% - 1px) 5%);
+}
+.xp-feed .xp-track::after {
+  display: none;
+}
+.xp-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--xp, 0%);
+  background: linear-gradient(#b07cff, #7b3fe0 55%, #5a2ab0);
+  box-shadow: 0 0 8px rgba(155, 90, 255, 0.55);
+  transition: width 0.6s ease-out;
+}
+.xp-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 3px #000;
+  pointer-events: none;
+}
+.xp-guest .xp-label {
+  color: #cfc4b1;
+}
+.xp-guest:hover .xp-label {
+  color: var(--gold-hi);
+}
+.xp-tabbar {
+  height: 16px;
+}
+.xp-header-row {
+  padding-bottom: 8px;
+}
+.xp-header {
+  height: 14px;
+}
+.xp-header .xp-track {
+  border-radius: 4px;
+}
+.xp-header:hover .xp-track {
+  border-color: var(--gold);
+}
+.xp-feed {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 4px;
+  pointer-events: none;
+}
+.xp-feed .xp-track {
+  border: 0;
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: none;
+}
+@media (max-width: 760px) {
+  .xp-header-row {
+    display: none;
+  }
+}
+@media (min-width: 761px) {
+  .xp-tabbar {
+    display: none;
+  }
+}
+
+/* "Rank up" banner over everything, including the swipe feed. */
+.rank-toast {
+  position: fixed;
+  left: 50%;
+  top: max(18px, env(safe-area-inset-top));
+  z-index: 400;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 230px;
+  padding: 12px 26px 13px;
+  transform: translateX(-50%);
+  background: var(--tip-bg, #0f0c1a);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 26px rgba(226, 182, 92, 0.35),
+    0 18px 44px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  animation: rank-toast-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+  pointer-events: none;
+}
+.rank-toast-eyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+}
+.rank-toast-name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.15;
+  text-shadow: var(--game-shadow);
+}
+.rank-toast-sub {
+  font-size: 13px;
+  color: #b9ad98;
+}
+@keyframes rank-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.9);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .xp-fill {
+    transition: none;
+  }
+  .rank-toast {
+    animation: none;
+  }
+}
+
+/* Profile rank section */
+.rank-now {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+}
+.rank-now-name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.1;
+  text-shadow: var(--game-shadow);
+}
+.xp-profile {
+  height: 18px;
+  max-width: 520px;
+}
+.rank-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rank-cell {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 14px 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  text-align: center;
+}
+.rank-cell.is-locked {
+  opacity: 0.6;
+}
+.rank-cell-name {
+  font-size: 13.5px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text-3);
 }

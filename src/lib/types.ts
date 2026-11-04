@@ -20,6 +20,8 @@ export type Profile = {
   active_title: string | null;
   role: Role;
   created_at: string;
+  // Watch-time XP (minutes watched), drives the PvP-style rank. See src/lib/ranks.ts.
+  xp_minutes?: number | null;
 };
 
 export type PersonSummary = {

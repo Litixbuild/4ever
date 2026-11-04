@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlayIcon } from "@/components/icons";
 import { Vista } from "@/components/vista";
 import { markSeen } from "@/lib/seen";
 import { embedUrl, platformLabel } from "@/lib/video";
+import { budgetFor, setWatching } from "@/lib/watch-xp";
 
 // Shows the thumbnail first and only loads YouTube or Twitch after a click.
 // That keeps pages fast, keeps trackers away until someone actually watches,
@@ -18,6 +19,7 @@ export function VideoPlayer({
   title,
   thumbnailUrl,
   duration,
+  durationSeconds,
   countView = true,
 }: {
   clipId: string;
@@ -28,9 +30,17 @@ export function VideoPlayer({
   title: string;
   thumbnailUrl: string | null;
   duration: string;
+  durationSeconds?: number | null;
   countView?: boolean;
 }) {
   const [host, setHost] = useState<string | null>(null);
+
+  // Once playing, the video earns watch-time XP for about its own length (src/lib/watch-xp.ts).
+  useEffect(() => {
+    if (!host) return;
+    setWatching(true, budgetFor(durationSeconds));
+    return () => setWatching(false);
+  }, [host, durationSeconds]);
 
   function play() {
     setHost(window.location.hostname);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { budgetFor, setWatching } from "@/lib/watch-xp";
 import { markSeen } from "@/lib/seen";
 import { embedUrl } from "@/lib/video";
 
@@ -15,6 +16,7 @@ export function InlinePlayer({
   platform,
   title,
   className,
+  durationSeconds,
   children,
 }: {
   clipId: string;
@@ -23,6 +25,7 @@ export function InlinePlayer({
   platform: string;
   title: string;
   className: string;
+  durationSeconds?: number | null;
   children: ReactNode;
 }) {
   const [host, setHost] = useState<string | null>(null);
@@ -34,6 +37,13 @@ export function InlinePlayer({
     window.addEventListener(PLAY_EVENT, onPlay);
     return () => window.removeEventListener(PLAY_EVENT, onPlay);
   }, [clipId]);
+
+  // A playing video earns watch-time XP until it's closed, another one starts, or its length runs out.
+  useEffect(() => {
+    if (!host) return;
+    setWatching(true, budgetFor(durationSeconds));
+    return () => setWatching(false);
+  }, [host, durationSeconds]);
 
   function play() {
     window.dispatchEvent(new CustomEvent(PLAY_EVENT, { detail: clipId }));

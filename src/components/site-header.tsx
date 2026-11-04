@@ -5,6 +5,8 @@ import { CommentIcon, GearIcon, LogOutIcon, PlusIcon, SearchIcon, ShieldIcon, Us
 import { MainNav } from "@/components/main-nav";
 import { Avatar } from "@/components/people";
 import { UserMenu } from "@/components/user-menu";
+import { XpBar } from "@/components/xp-bar";
+import type { Faction } from "@/lib/ranks";
 import { getViewer } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { unreadReplies } from "@/lib/suggestions-server";
@@ -85,6 +87,17 @@ export async function SiteHeader() {
             </span>
           </Link>
         </div>
+      </div>
+      <div className="container xp-header-row">
+        <XpBar
+          variant="header"
+          seed={{
+            xp: profile?.xp_minutes ?? 0,
+            faction: (profile?.faction ?? null) as Faction | null,
+            loggedIn: Boolean(profile),
+            username: profile?.username ?? null,
+          }}
+        />
       </div>
     </header>
   );

@@ -66,6 +66,7 @@ export function ClipCard({ clip, deletable = false, tab }: { clip: Clip; deletab
         sourceId={clip.source_id}
         platform={clip.platform}
         title={clip.title}
+        durationSeconds={clip.duration_seconds}
         className="thumb"
       >
         <ClipThumbImage clip={clip} />

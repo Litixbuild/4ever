@@ -6,6 +6,9 @@ import "./globals.css";
 import { Suspense } from "react";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { RollPrompt } from "@/components/roll-prompt";
+import { RankToast, XpBar, XpInit } from "@/components/xp-bar";
+import { getViewer } from "@/lib/auth";
+import type { Faction } from "@/lib/ranks";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -34,8 +37,15 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const configured = isSupabaseConfigured();
+  const viewer = configured ? await getViewer() : null;
+  const xpSeed = {
+    xp: viewer?.profile?.xp_minutes ?? 0,
+    faction: (viewer?.profile?.faction ?? null) as Faction | null,
+    loggedIn: Boolean(viewer?.profile),
+    username: viewer?.profile?.username ?? null,
+  };
   return (
     <html lang="en">
       <body>
@@ -63,8 +73,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <SiteFooter />
         {configured ? (
           <Suspense fallback={null}>
-            <MobileTabBar />
+            <MobileTabBar meter={<XpBar variant="tabbar" seed={xpSeed} />} />
           </Suspense>
+        ) : null}
+        {configured ? (
+          <>
+            <XpInit xp={xpSeed.xp} faction={xpSeed.faction} loggedIn={xpSeed.loggedIn} />
+            <RankToast />
+          </>
         ) : null}
         {configured ? <RollPrompt /> : null}
       </body>

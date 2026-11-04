@@ -129,6 +129,7 @@ export default async function ClipPage({
             title={clip.title}
             thumbnailUrl={clip.thumbnail_url}
             duration={duration}
+            durationSeconds={clip.duration_seconds}
             countView={approved}
           />
 

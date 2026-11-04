@@ -11,6 +11,8 @@ import { formatCount, timeAgo } from "@/lib/format";
 import { rarityClass } from "@/lib/rarity";
 import { clearSeen, markSeen, readSeen } from "@/lib/seen";
 import { embedUrl, smallThumbnail } from "@/lib/video";
+import { budgetFor, setWatching } from "@/lib/watch-xp";
+import { XpBar } from "@/components/xp-bar";
 
 export type FeedClip = {
   id: string;
@@ -21,6 +23,7 @@ export type FeedClip = {
   platform: string;
   thumbnailUrl: string | null;
   duration: string;
+  durationSeconds: number | null;
   category: string;
   channelName: string;
   channelAvatar: string | null;
@@ -126,6 +129,14 @@ export function ClipFeed({
   } else if (!keepPlayer && player) {
     setPlayer(null);
   }
+  // Watch time earns XP while a clip is on screen and not paused (see src/lib/watch-xp.ts).
+  const watchingId = clip && host && !paused ? clip.id : null;
+  const watchingSeconds = clip?.durationSeconds ?? null;
+  useEffect(() => {
+    setWatching(watchingId !== null, budgetFor(watchingSeconds));
+  }, [watchingId, watchingSeconds]);
+  useEffect(() => () => setWatching(false), []);
+
   const feedPath = (shortId: string) => `/watch?start=${shortId}${kind === "clip" ? "" : `&kind=${kind}`}`;
 
   const go = useCallback(
@@ -364,6 +375,7 @@ export function ClipFeed({
 
   return (
     <div className="feed" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onWheel={onWheel}>
+      <XpBar variant="feed" />
       <div className="feed-top">
         <Link href="/" className="feed-icon-btn" aria-label="Close clips">
           <XIcon size={20} />

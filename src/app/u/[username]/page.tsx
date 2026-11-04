@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CharacterTip, hasCharacter } from "@/components/character-tip";
+import { RankList } from "@/components/rank-list";
 import { ClipGrid } from "@/components/clip-card";
 import { OpenClassPicker } from "@/components/open-class-picker";
 import { DotIcon, LockIcon, StarIcon, StreamIcon, VideoIcon } from "@/components/icons";
@@ -162,6 +163,12 @@ export default async function ProfilePage({
           ))}
         </dl>
       </section>
+
+      <RankList
+        xp={profile.xp_minutes ?? 0}
+        faction={profile.faction === "horde" || profile.faction === "alliance" ? profile.faction : null}
+        isOwn={isOwn}
+      />
 
       <section aria-labelledby="achievements" className="stack" style={{ gap: 16 }}>
         <h2 id="achievements" className="h2">
