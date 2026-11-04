@@ -1,5 +1,6 @@
 // Watch-time ranks, modeled on the original game's PvP honor ranks.
-// One minute of watching = 1 XP. Each rank takes about 45% longer to fill than the one before,
+// One minute of watching = 1 XP. Each rank takes about 45% longer to fill than the one before (rank 2 at 30 minutes,
+// the top rank at about 138 hours),
 // so the early ranks come quickly and the top ones take weeks.
 
 export type Faction = "horde" | "alliance";
@@ -45,7 +46,7 @@ export const DAILY_XP_CAP = 180;
 
 // Minutes needed to go from rank r to rank r + 1.
 export function minutesForRank(rank: number): number {
-  return Math.round(10 * 1.45 ** (rank - 1));
+  return Math.round(30 * 1.45 ** (rank - 1));
 }
 
 // XP at which each rank starts: RANK_START[0] is rank 1 (0 XP).

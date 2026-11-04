@@ -4,12 +4,12 @@ import { DAILY_XP_CAP, MAX_RANK, RANK_START, minutesForRank, rankName, rankProgr
 describe("ranks", () => {
   it("starts everyone at rank 1 with an empty bar", () => {
     const p = rankProgress(0, "horde");
-    expect(p).toMatchObject({ rank: 1, name: "Scout", percent: 0, into: 0, needed: 10, maxed: false });
+    expect(p).toMatchObject({ rank: 1, name: "Scout", percent: 0, into: 0, needed: 30, maxed: false });
   });
 
   it("moves up a rank exactly at the threshold", () => {
-    expect(rankProgress(9, "alliance").rank).toBe(1);
-    expect(rankProgress(10, "alliance")).toMatchObject({ rank: 2, name: "Corporal", into: 0 });
+    expect(rankProgress(29, "alliance").rank).toBe(1);
+    expect(rankProgress(30, "alliance")).toMatchObject({ rank: 2, name: "Corporal", into: 0 });
     expect(rankProgress(RANK_START[13], "horde")).toMatchObject({ rank: 14, name: "High Warlord", maxed: true });
   });
 
@@ -20,7 +20,7 @@ describe("ranks", () => {
   });
 
   it("shows a percentage inside the current rank", () => {
-    expect(rankProgress(5, "horde").percent).toBe(50);
+    expect(rankProgress(15, "horde").percent).toBe(50);
     expect(rankProgress(99999, "alliance")).toMatchObject({ rank: 14, percent: 100, name: "Grand Marshal" });
   });
 
