@@ -7,7 +7,7 @@ import { SeenMark } from "@/components/seen-mark";
 import { Avatar, VerifiedMark } from "@/components/people";
 import { Vista } from "@/components/vista";
 import { categoryLabel } from "@/lib/categories";
-import { formatCount, formatDuration, uploadedAgo } from "@/lib/format";
+import { displayTitle, formatCount, formatDuration, uploadedAgo } from "@/lib/format";
 import { rarityClass, rarityFor } from "@/lib/rarity";
 import type { Clip } from "@/lib/types";
 import { platformLabel, smallThumbnail, thumbnailSrcSet } from "@/lib/video";
@@ -81,7 +81,7 @@ export function ClipCard({ clip, deletable = false, tab }: { clip: Clip; deletab
       </InlinePlayer>
       <div className="clip-body">
         <Link href={href} className={`clip-title ${rarityClass(clip.view_count)}`}>
-          {clip.title}
+          {displayTitle(clip.title)}
         </Link>
         <CreditLine clip={clip} />
         <div className="clip-meta">
@@ -139,7 +139,7 @@ export function MiniClip({ clip }: { clip: Clip }) {
         ) : null}
       </span>
       <span className="stack-sm" style={{ gap: 4, minWidth: 0 }}>
-        <span className={`mini-title ${rarityClass(clip.view_count)}`}>{clip.title}</span>
+        <span className={`mini-title ${rarityClass(clip.view_count)}`}>{displayTitle(clip.title)}</span>
         <span className="tiny muted">{clip.creator?.display_name ?? clip.channel_name}</span>
         <span className="tiny muted row" style={{ gap: 5 }}>
           <EyeIcon size={12} /> {formatCount(clip.view_count)}

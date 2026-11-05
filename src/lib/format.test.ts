@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cleanSearch,
+  displayTitle,
   formatCount,
   formatDuration,
   normalizeUsername,
@@ -89,5 +90,21 @@ describe("cleanSearch", () => {
     expect(cleanSearch("tarren mill, (dusk)")).toBe("tarren mill dusk");
     expect(cleanSearch("%_*")).toBe("");
     expect(cleanSearch("Mind-Control off the ledge")).toBe("Mind-Control off the ledge");
+  });
+});
+
+describe("displayTitle", () => {
+  it("drops hashtags at the end", () => {
+    expect(displayTitle("Me and the Boys on Launch Day #worldofwarcraft #wowforever #shorts")).toBe(
+      "Me and the Boys on Launch Day",
+    );
+    expect(displayTitle("Why Rogue PvP Never Gets Old | WoW Forever #wowforever #rogue")).toBe(
+      "Why Rogue PvP Never Gets Old | WoW Forever",
+    );
+    expect(displayTitle("Big Warrior Cleaves | #pvp")).toBe("Big Warrior Cleaves");
+  });
+  it("keeps hashtags in the middle, and titles that are only hashtags", () => {
+    expect(displayTitle("The #1 rogue opener in Forever")).toBe("The #1 rogue opener in Forever");
+    expect(displayTitle("#wowforever #shorts")).toBe("#wowforever #shorts");
   });
 });

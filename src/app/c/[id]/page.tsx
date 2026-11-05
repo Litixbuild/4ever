@@ -15,7 +15,7 @@ import { Avatar, VerifiedMark } from "@/components/people";
 import { VideoPlayer } from "@/components/video-player";
 import { getViewer } from "@/lib/auth";
 import { categoryLabel, musicLabel } from "@/lib/categories";
-import { formatCount, formatDuration, timeAgo, uploadedAgo } from "@/lib/format";
+import { displayTitle, formatCount, formatDuration, timeAgo, uploadedAgo } from "@/lib/format";
 import { getClipByShortId, getComments, getMoreFromSameSource, getViewerClipState } from "@/lib/queries";
 import { rarityClass } from "@/lib/rarity";
 import { site } from "@/lib/site";
@@ -135,7 +135,7 @@ export default async function ClipPage({
           />
 
           <div className="stack-sm" style={{ gap: 14 }}>
-            <h1 className={`h1 clip-h1 ${rarityClass(clip.view_count)}`}>{clip.title}</h1>
+            <h1 className={`h1 clip-h1 ${rarityClass(clip.view_count)}`}>{displayTitle(clip.title)}</h1>
             <div className="row-between" style={{ alignItems: "center", gap: "14px 24px" }}>
               <span className="meta-row">
                 {clip.player_made ? <PlayerMadeMark /> : null}

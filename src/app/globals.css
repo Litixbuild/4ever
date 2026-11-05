@@ -5762,3 +5762,52 @@ a.plaque:hover {
     font-size: 15px;
   }
 }
+
+/* Shown on a YouTube clip that had to start muted: a tap anywhere on the clip turns the sound on. */
+.feed-sound-hint {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  margin-left: -64px;
+  width: 128px;
+  padding: 7px 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Desktop: the big player and its card always fit on the screen with the top of the rail showing below,
+   so nothing is cut off at the bottom, even on a laptop. The player gets shorter on short screens, and the
+   card's title stops at three lines. */
+@media (min-width: 901px) {
+  .showcase {
+    grid-template-columns:
+      minmax(0, min(calc(100% - 360px), calc((100svh - 330px) * 16 / 9)))
+      minmax(320px, 1fr);
+  }
+  .showcase .tip-title a {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+@media (min-width: 901px) and (max-height: 820px) {
+  .showcase .wow-tip {
+    padding: 13px 16px 14px;
+    font-size: 14px;
+  }
+  .showcase .tip-title {
+    font-size: clamp(22px, 2vw, 26px);
+  }
+  .showcase .tip-extra {
+    display: none;
+  }
+  .featured-label {
+    font-size: 22px;
+  }
+}

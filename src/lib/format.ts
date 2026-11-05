@@ -148,3 +148,13 @@ export function uploadedWithin<T extends { uploaded_at?: string | null; publishe
   const since = now - days * 86400_000;
   return clips.filter((c) => new Date(c.uploaded_at ?? c.published_at ?? 0).getTime() > since);
 }
+
+// YouTube titles often end in a pile of hashtags ("... #wowforever #shorts #gaming"). For display, drop
+// hashtags at the end of the title (and stray separators before them), keeping the words that say what it is.
+export function displayTitle(title: string): string {
+  const trimmed = title
+    .replace(/(\s*[|·•\-–—]?\s*#[\p{L}\p{N}_]+)+\s*$/u, "")
+    .replace(/\s*[|·•\-–—]\s*$/u, "")
+    .trim();
+  return trimmed || title.trim();
+}

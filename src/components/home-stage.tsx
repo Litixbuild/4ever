@@ -7,7 +7,7 @@ import { ChevronLeftIcon, ChevronRightIcon, PlayIcon, XIcon } from "@/components
 import { VerifiedMark } from "@/components/people";
 import { PlayerMadeMark } from "@/components/player-made";
 import { categoryLabel, musicLabel } from "@/lib/categories";
-import { formatCount, formatDuration } from "@/lib/format";
+import { displayTitle, formatCount, formatDuration } from "@/lib/format";
 import { rarityClass } from "@/lib/rarity";
 import { markSeen } from "@/lib/seen";
 import type { Clip, Feature } from "@/lib/types";
@@ -160,6 +160,9 @@ export function HomeStage({
       const state =
         data.event === "onStateChange" ? data.info : typeof data.info === "object" ? data.info?.playerState : undefined;
       if (typeof state === "number") ytState.current = state;
+      if (typeof data.info === "object" && (data.info as { currentTime?: number } | null)?.currentTime) {
+        if (((data.info as { currentTime?: number }).currentTime ?? 0) > 0.2) ytState.current = 1;
+      }
       if (state === 0) playNext();
     }
     window.addEventListener("message", onMessage);
@@ -176,14 +179,13 @@ export function HomeStage({
     if (clip?.platform !== "youtube") return;
     ytState.current = null;
     const started = () => ytState.current === 1 || ytState.current === 3;
-    window.setTimeout(() => {
-      if (!started()) send({ event: "command", func: "playVideo", args: [] });
-    }, 1200);
+    // If the browser wouldn't start it with sound, start it muted (always allowed); YouTube's own
+    // speaker button turns the sound back on.
     window.setTimeout(() => {
       if (started()) return;
       send({ event: "command", func: "mute", args: [] });
       send({ event: "command", func: "playVideo", args: [] });
-    }, 2600);
+    }, 1000);
   }
 
   if (!clip) return null;
@@ -232,7 +234,7 @@ export function HomeStage({
           ) : null}
           <div className="wow-tip">
             <h1 id="hero-title" className={`tip-title ${titleClass(index, ranked, clip.view_count)}`}>
-              <Link href={href}>{clip.title}</Link>
+              <Link href={href}>{displayTitle(clip.title)}</Link>
             </h1>
             <span className="row" style={{ gap: 8 }}>
               {label}
@@ -293,7 +295,9 @@ export function HomeStage({
                         <span className="rail-time">{formatDuration(item.duration_seconds)}</span>
                       ) : null}
                     </span>
-                    <span className={`rail-title ${titleClass(position, ranked, item.view_count)}`}>{item.title}</span>
+                    <span className={`rail-title ${titleClass(position, ranked, item.view_count)}`}>
+                      {displayTitle(item.title)}
+                    </span>
                     <span className="rail-meta">
                       {item.creator?.display_name ?? item.channel_name}
                       {ages[item.id] ? <time> {ages[item.id]}</time> : null}
@@ -327,7 +331,7 @@ export function HomeStage({
           <div className="theater-bar">
             <span className={`theater-title ${titleClass(index, ranked, clip.view_count)}`}>
               {featured ? <span className="theater-featured">Featured Video</span> : null}
-              {clip.title}
+              {displayTitle(clip.title)}
             </span>
             <button type="button" className="theater-close" onClick={close} aria-label="Close the player" autoFocus>
               <XIcon size={22} />
@@ -361,7 +365,7 @@ export function HomeStage({
               <span className="theater-next-text">
                 <span className="theater-next-head">Play next video</span>
                 <span className={`theater-next-title ${titleClass(index + 1, ranked, next.view_count)}`}>
-                  {next.title}
+                  {displayTitle(next.title)}
                 </span>
               </span>
             </button>

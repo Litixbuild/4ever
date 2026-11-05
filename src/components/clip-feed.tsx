@@ -7,7 +7,7 @@ import { postComment, toggleVote, type CommentState } from "@/app/actions/clip";
 import type { FeedComment } from "@/app/api/clips/[id]/comments/route";
 import { ChevronDownIcon, CommentIcon, EyeIcon, PlayIcon, ThumbsUpIcon, XIcon } from "@/components/icons";
 import { Avatar } from "@/components/people";
-import { formatCount, timeAgo } from "@/lib/format";
+import { displayTitle, formatCount, timeAgo } from "@/lib/format";
 import { rarityClass } from "@/lib/rarity";
 import { clearSeen, markSeen, readSeen } from "@/lib/seen";
 import { embedUrl, smallThumbnail } from "@/lib/video";
@@ -104,6 +104,10 @@ export function ClipFeed({
   );
   // Taps on a touch screen: the first one turns the sound on, then each tap pauses or plays.
   const [soundOn, setSoundOn] = useState(false);
+  // Set when the browser refused to start a YouTube clip with sound, so it was started muted instead.
+  const [forcedSilent, setForcedSilent] = useState(false);
+  // The current YouTube player's last reported state (1 = playing, 3 = buffering).
+  const ytState = useRef<number | null>(null);
   const [paused, setPaused] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
   // iPhones only allow sound after a tap on the player itself, and a new player starts silent again. So there one
@@ -111,6 +115,8 @@ export function ClipFeed({
   const apple = useSyncExternalStore(noopSubscribe, isAppleTouch, () => false);
   const [player, setPlayer] = useState<{ src: string; first: string } | null>(null);
   const playerReady = useRef(false);
+  // The clip on screen, for callbacks that finish after the visitor may have moved on.
+  const wantedShort = useRef<string | null>(null);
   const playerVideo = useRef<string | null>(null);
   const wantedVideo = useRef<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -123,6 +129,9 @@ export function ClipFeed({
   const touch = useRef<{ x: number; y: number } | null>(null);
   const wheel = useRef({ total: 0, lastEvent: 0, lockedFrom: 0, lockedUntil: 0 });
   const clip = mounted && list ? list[index] : undefined;
+  useEffect(() => {
+    wantedShort.current = clip?.shortId ?? null;
+  }, [clip?.shortId]);
   const atEnd = Boolean(mounted && list && index >= list.length);
   const keepPlayer = Boolean(host && apple && clip?.platform === "youtube");
   // Open the shared player for the first YouTube clip, and let it go when a Twitch clip comes up.
@@ -277,8 +286,47 @@ export function ClipFeed({
     return () => window.removeEventListener("message", onMessage);
   }, [keepPlayer, command, loadWanted]);
 
+  // Listen to the YouTube player of the clip on screen, so the page knows whether it really started.
+  useEffect(() => {
+    if (keepPlayer || clip?.platform !== "youtube") return;
+    function onMessage(event: MessageEvent) {
+      if (event.source !== frame.current?.contentWindow || typeof event.data !== "string") return;
+      let data: { event?: string; info?: { playerState?: number; currentTime?: number } | number | null };
+      try {
+        data = JSON.parse(event.data);
+      } catch {
+        return;
+      }
+      const info = typeof data.info === "object" ? data.info : null;
+      const state = data.event === "onStateChange" ? data.info : info?.playerState;
+      if (typeof state === "number") ytState.current = state;
+      // The clock moving also means it's playing.
+      if ((info?.currentTime ?? 0) > 0.2) ytState.current = 1;
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [keepPlayer, clip?.platform]);
+
   function onFrameLoad() {
     setSoundOn(false);
+    setForcedSilent(false);
+    if (!keepPlayer && clip?.platform === "youtube") {
+      // Every clip should start by itself. Browsers sometimes refuse to start one with sound (a scroll
+      // doesn't count as a click, for one), and YouTube then just waits. If it hasn't started shortly after
+      // loading, start it muted; a tap on the clip turns the sound on.
+      const target = frame.current?.contentWindow;
+      const shortId = clip.shortId;
+      ytState.current = null;
+      target?.postMessage(JSON.stringify({ event: "listening", id: "4ever", channel: "widget" }), "*");
+      const started = () => ytState.current === 1 || ytState.current === 3;
+      window.setTimeout(() => {
+        if (started() || frame.current?.contentWindow !== target) return;
+        target?.postMessage(JSON.stringify({ event: "command", func: "mute", args: [] }), "*");
+        target?.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*");
+        if (wantedShort.current === shortId) setForcedSilent(true);
+      }, 1000);
+      return;
+    }
     if (!keepPlayer || !player) return;
     playerReady.current = false;
     playerVideo.current = player.first;
@@ -292,7 +340,7 @@ export function ClipFeed({
   function onTap() {
     if (!clip) return;
     if (clip.platform !== "youtube") return;
-    const silent = muted && !soundOn;
+    const silent = (muted || forcedSilent) && !soundOn;
     if (silent) {
       command("unMute");
       command("playVideo");
@@ -434,8 +482,11 @@ export function ClipFeed({
               type="button"
               className="feed-touch"
               onClick={onTap}
-              aria-label={paused ? "Play" : muted && !soundOn ? "Turn sound on" : "Pause"}
+              aria-label={paused ? "Play" : (muted || forcedSilent) && !soundOn ? "Turn sound on" : "Pause"}
             >
+              {!paused && (muted || forcedSilent) && !soundOn ? (
+                <span className="feed-sound-hint">{touchScreen ? "Tap for sound" : "Click for sound"}</span>
+              ) : null}
               {paused ? (
                 <span className="feed-touch-icon">
                   <PlayIcon size={34} style={{ marginLeft: 4 }} />
@@ -447,7 +498,7 @@ export function ClipFeed({
 
         <div className="feed-info">
           <Link href={`/c/${clip.shortId}`} className={`feed-title ${rarityClass(clip.views)}`}>
-            {clip.title}
+            {displayTitle(clip.title)}
           </Link>
           <span className="feed-meta">
             {clip.playerMade ? <PlayerMadeMark /> : null}
@@ -516,7 +567,9 @@ function feedEmbed(clip: FeedClip, host: string, muted: boolean, touchScreen: bo
   if (clip.platform === "youtube") {
     const repeat = loop ? `&loop=1&playlist=${encodeURIComponent(clip.sourceId)}` : "";
     const touch = touchScreen ? "&controls=0" : "";
-    return `${base}&playsinline=1&enablejsapi=1${repeat}${touch}${muted ? "&mute=1" : ""}`;
+    // origin= lets the player report back to this page (playing, ended).
+    const origin = typeof window === "undefined" ? "" : `&origin=${encodeURIComponent(window.location.origin)}`;
+    return `${base}&playsinline=1&enablejsapi=1${origin}${repeat}${touch}${muted ? "&mute=1" : ""}`;
   }
   return `${base}&muted=${muted ? "true" : "false"}`;
 }
