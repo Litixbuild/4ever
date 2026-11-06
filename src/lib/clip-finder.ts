@@ -12,6 +12,7 @@ import {
   FOREVER_LAUNCH,
   guessCategory,
   isWowForever,
+  looksEnglish,
   looksLikeReposter,
   looksLikeSpam,
   MAX_CLIP_SECONDS,
@@ -39,6 +40,8 @@ type VideoItem = {
     channelTitle?: string;
     publishedAt?: string;
     liveBroadcastContent?: string;
+    defaultLanguage?: string;
+    defaultAudioLanguage?: string;
     thumbnails?: { maxres?: Thumb; standard?: Thumb; high?: Thumb; medium?: Thumb };
   };
   contentDetails?: { duration?: string };
@@ -157,6 +160,7 @@ export async function findNewClips(): Promise<FindResult> {
     if (!s.publishedAt || s.publishedAt < FOREVER_LAUNCH) continue;
     if (!isWowForever(s.title, s.description ?? "", s.tags ?? [])) continue;
     if (looksLikeSpam(s.title)) continue;
+    if (!looksEnglish(s.title, s.defaultAudioLanguage ?? s.defaultLanguage)) continue;
     // New channels have to look like a player's own channel; channels already on 4Ever are trusted.
     if (!knownSet.has(s.channelId) && looksLikeReposter(s.channelTitle ?? "")) continue;
     // The same video uploaded twice by one channel only goes up once.

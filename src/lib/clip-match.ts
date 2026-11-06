@@ -34,6 +34,19 @@ export function looksLikeSpam(title: string): boolean {
   return SPAM_TITLE.test(title) || NOT_GAMEPLAY.test(title);
 }
 
+// 4Ever is English only. YouTube's language tag decides when the creator set one; otherwise the title has to
+// read as English: no other alphabets, no accented letters, none of the common German, Spanish, Portuguese,
+// Polish, French or Italian little words.
+const OTHER_SCRIPT = /[\u0400-\u04FF\u0590-\u06FF\u0E00-\u0E7F\u3040-\u30FF\u3400-\u9FFF\uAC00-\uD7AF]/;
+const ACCENTED = /[äöüßñãõçéèêëáíóúàâîïôûąęłśżźćń]/i;
+const FOREIGN_WORDS =
+  /\b(und|der|die|das|ist|nicht|mit|auf|ich|war|von|vom|zum|beim|einfach|erste[rn]?|kein|knapp|para|una|historia|que|bueno|los|las|el|del|con|por|muy|mais|não|nao|uma|com|na|nie|jest|się|le|les|des|une|est|pour|avec|il|lo|della|che|non|per)\b/i;
+
+export function looksEnglish(title: string, language?: string | null): boolean {
+  if (language && !/^en\b/i.test(language)) return false;
+  return !OTHER_SCRIPT.test(title) && !ACCENTED.test(title) && !FOREIGN_WORDS.test(title);
+}
+
 // Channels that collect other people's clips. Only the streamers' own channels count.
 const REPOSTER_CHANNEL =
   /(forever|clips?|clipz|feed|replays?|best of|moments|compilations?|highlights?|daily|news|boost(ing)?|carr(y|ies)|gold|shop|store|services?|vods?|archive|fan ?page)\b/i;

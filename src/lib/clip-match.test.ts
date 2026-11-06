@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { guessCategory, isWowForever, looksLikeReposter, looksLikeSpam } from "@/lib/clip-match";
+import { guessCategory, isWowForever, looksEnglish, looksLikeReposter, looksLikeSpam } from "@/lib/clip-match";
 
 describe("isWowForever", () => {
   it("accepts titles, hashtags and tags that name WoW Forever", () => {
@@ -60,5 +60,21 @@ describe("guessCategory", () => {
     expect(guessCategory("biggest fail 😂")).toBe("funny");
     expect(guessCategory("Ding 60!")).toBe("leveling");
     expect(guessCategory("Look at this view")).toBe("other");
+  });
+});
+
+describe("looksEnglish", () => {
+  it("keeps English titles", () => {
+    expect(looksEnglish("Hunter's a TERROR in WoW Forever!")).toBe(true);
+    expect(looksEnglish("Mages Were MADE for AV.", "en-US")).toBe(true);
+    expect(looksEnglish("HUGE W in Warsong Gulch")).toBe(true);
+  });
+  it("leaves out other languages", () => {
+    expect(looksEnglish("Das war der beste Release EVER!!!")).toBe(false);
+    expect(looksEnglish("Проиграл меч… Тойоте Камри")).toBe(false);
+    expect(looksEnglish("Jagódki Nadina SĄ WSZĘDZIE w WoW Forever")).toBe(false);
+    expect(looksEnglish("Una TÍPICA historia en WoW forever")).toBe(false);
+    expect(looksEnglish("Kein Stress in WoW Forever")).toBe(false);
+    expect(looksEnglish("WoW Forever clip", "de")).toBe(false);
   });
 });
