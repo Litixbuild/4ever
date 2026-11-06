@@ -12,6 +12,8 @@ describe("isWowForever", () => {
     expect(isWowForever("Forever young cover")).toBe(false);
     expect(isWowForever("WoW Classic hardcore death")).toBe(false);
     expect(isWowForever("Minecraft forever world #shorts")).toBe(false);
+    expect(isWowForever("iPhone duo #wow #iphone #nice #forever #shorts")).toBe(false);
+    expect(isWowForever("Hunter's a TERROR in WoW Forever!")).toBe(true);
   });
 });
 
@@ -30,6 +32,8 @@ describe("looksLikeSpam", () => {
     expect(looksLikeSpam("Blizzard Announces WoW Forever: Same Same, But Different")).toBe(true);
     expect(looksLikeSpam("3 Macros Every Player Needs in WoW Forever")).toBe(true);
     expect(looksLikeSpam("Warlock Pets Cut From 7.5 to 2: WoW Forever Voidwalker")).toBe(true);
+    expect(looksLikeSpam("WoW Forever BIGGEST Problem…")).toBe(true);
+    expect(looksLikeSpam("Respeccing Legacy Points in WoW Forever")).toBe(true);
     expect(looksLikeSpam("Thought two gnolls at once was still an easy fight #WoWForever")).toBe(false);
     expect(looksLikeSpam("This Duel Was Absolute Cinema | $100K WoW Forever Dueling Tournament")).toBe(false);
   });

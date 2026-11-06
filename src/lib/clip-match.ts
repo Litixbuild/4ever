@@ -18,7 +18,8 @@ export function isWowForever(title: string, description = "", tags: string[] = [
     // Hashtags like #WoWForever; squashing spaces also catches "WoW Forever".
     return true;
   }
-  return /\bforever\b/.test(text) && /\b(wow|warcraft)\b/.test(text);
+  // "WoW Forever", "World of Warcraft: Forever", "Warcraft Forever" written out, not "#wow ... #forever".
+  return /\b(wow|warcraft)\s*:?\s*forever\b/.test(text);
 }
 
 // Selling, boosting and giveaway videos never go up.
@@ -27,7 +28,7 @@ const SPAM_TITLE =
 
 // News, guides and launch-time videos aren't clips of something happening in the game.
 const NOT_GAMEPLAY =
-  /\b(fix(es)?|skips|min ?max(ing)?|cut from|on the map|new players|good for|\d+ (quests|ways|tips|things|reasons)|removed|deleted|nerf(s|ed)?|buff(s|ed)?|changes?|changed|announce[sd]?|blizzard|rules|macros?|addons?|ui|settings|keybinds?|t(ier)? ?\d set|sets?|free|launch|patch|hotfix|update[sd]?|is (it|this) (worth|good)|worth it|explain(ed|s)?|reasons?|things|mistakes|you need|dont|don't|stop|never|always|every player|community|thoughts|opinion|rested ?xp|customization|preview|first look|leak(ed|s)?|coming|should|tier ?list|launch time|time ?zones?|how to|guide|explained|predictions?|news|patch notes|poll|should you|tips?|checklist|reviews?|release date|countdown|days? left|hours? (left|until)|pvp or pve|pve or pvp|beginners?|which (class|server|faction)|best class(es)?|everything you need)\b/i;
+  /\b(fix(es)?|skips|min ?max(ing)?|cut from|on the map|new players|good for|\d+ (quests|ways|tips|things|reasons)|removed|deleted|nerf(s|ed)?|buff(s|ed)?|changes?|changed|announce[sd]?|blizzard|rules|macros?|addons?|ui|settings|keybinds?|t(ier)? ?\d set|sets?|free|launch|patch|hotfix|update[sd]?|is (it|this) (worth|good)|worth it|explain(ed|s)?|reasons?|things|mistakes|you need|dont|don't|stop|never|always|every player|community|thoughts|opinion|rested ?xp|customization|preview|first look|leak(ed|s)?|coming|should|tier ?list|launch time|time ?zones?|how to|guide|explained|predictions?|news|patch notes|poll|should you|tips?|checklist|reviews?|release date|countdown|days? left|hours? (left|until)|pvp or pve|pve or pvp|beginners?|which (class|server|faction)|best class(es)?|everything you need|costs?|use the|layering|layers|watched|trailer|cinematic|available now|why do|care about|hate[sd]?|respec\w*|legacy points|earn|pets?|mounts?|profession|race to|took over|new best|raids open|attunement|secret|hidden|location|where to|farm(ing)?|money|talents?|build|rotation|bis|best in slot|recipe|problem|ruined|hype|hotfix(es)?|camera|graphics?|queue|servers?|rollback|bans?|banned|hypocrisy|youtubers|terrible idea)\b/i;
 
 export function looksLikeSpam(title: string): boolean {
   return SPAM_TITLE.test(title) || NOT_GAMEPLAY.test(title);
