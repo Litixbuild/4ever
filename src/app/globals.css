@@ -5963,6 +5963,16 @@ a.plaque:hover {
     background: rgba(18, 12, 8, 0.82);
     border-color: rgba(18, 12, 8, 0.9);
   }
+  .site-header .header-actions .submit-btn {
+    background: rgba(18, 12, 8, 0.82);
+    border-color: rgba(18, 12, 8, 0.9);
+    color: #ecd9ae;
+    box-shadow: none;
+  }
+  .site-header .header-actions .submit-btn:hover {
+    background: rgba(40, 24, 12, 0.92);
+    color: #f6e8c4;
+  }
   .site-header .user-name {
     color: #140c06;
     font-weight: 700;
