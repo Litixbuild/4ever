@@ -1,7 +1,6 @@
 import { EmptyHero } from "@/components/hero";
 import { CategoryTiles, FactionWarBar, HOME_CATEGORIES, PlayerMadeShelf } from "@/components/home-boards";
 import { HomeStage } from "@/components/home-stage";
-import { LaunchBar } from "@/components/widgets";
 import { uploadedAgo } from "@/lib/format";
 import type { Clip } from "@/lib/types";
 import {
@@ -38,7 +37,6 @@ export default async function HomePage() {
   return (
     <div className="container page">
       <div className="stack" style={{ gap: 20 }}>
-        <LaunchBar />
         {queue.length > 0 ? (
           <HomeStage queue={queue.slice(0, 24)} ages={ages} feature={featureNotes} ranked={top.length} />
         ) : (
