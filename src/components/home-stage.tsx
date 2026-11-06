@@ -236,18 +236,30 @@ export function HomeStage({
             <h1 id="hero-title" className={`tip-title ${titleClass(index, ranked, clip.view_count)}`}>
               <Link href={href}>{displayTitle(clip.title)}</Link>
             </h1>
-            <span className="row" style={{ gap: 8 }}>
+            {/* Phones: everything about the video on one short line. */}
+            <span className="tip-line">
+              {[
+                categoryLabel(clip.category),
+                duration,
+                ages[clip.id] ? ages[clip.id].replace(/^Yesterday$/, "yesterday") : null,
+                `${formatCount(clip.view_count)} ${clip.view_count === 1 ? "view" : "views"}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              {clip.player_made ? <PlayerMadeMark /> : null}
+            </span>
+            <span className="row tip-wide" style={{ gap: 8 }}>
               {label}
               {clip.player_made ? <PlayerMadeMark /> : null}
             </span>
-            <span className="tip-split">
+            <span className="tip-split tip-wide">
               <span>{categoryLabel(clip.category)}</span>
               {duration ? <span>{duration}</span> : null}
             </span>
             {ages[clip.id] ? (
-              <span className="tip-muted">Uploaded {ages[clip.id].replace(/^Yesterday$/, "yesterday")}</span>
+              <span className="tip-muted tip-wide">Uploaded {ages[clip.id].replace(/^Yesterday$/, "yesterday")}</span>
             ) : null}
-            <span className="tip-gap">+{formatCount(clip.view_count)} Views</span>
+            <span className="tip-gap tip-wide">+{formatCount(clip.view_count)} Views</span>
             <span className="tip-extra">+{formatCount(clip.vote_count)} Votes</span>
             <span className="tip-muted tip-extra">{musicLabel(clip.music_source, clip.music_credit)}</span>
             {index === 0 && feature?.use_text ? (

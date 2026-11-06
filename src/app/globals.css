@@ -5811,3 +5811,97 @@ a.plaque:hover {
     font-size: 22px;
   }
 }
+
+/* Phones and small tablets: the front page reads top to bottom with no scrolling to see what's playing.
+   "Featured Video" sits above the player, and the video's details are a short block under it (title,
+   one line of facts, the maker) instead of the tall tooltip. */
+.tip-line {
+  display: none;
+}
+@media (max-width: 900px) {
+  .showcase-side {
+    display: contents;
+  }
+  .showcase .featured-label,
+  .showcase .back-featured {
+    grid-row: 1;
+    margin: 0 0 10px 2px;
+  }
+  .showcase .featured-label {
+    font-size: 24px;
+  }
+  .showcase-media {
+    grid-row: 2;
+  }
+  .showcase .wow-tip {
+    grid-row: 3;
+    margin-top: 10px;
+    padding: 0 2px;
+    gap: 4px;
+    background: none;
+    border: 0;
+    box-shadow: none;
+  }
+  .showcase .tip-title {
+    font-size: 19px;
+    line-height: 1.22;
+    margin: 0;
+  }
+  .showcase .tip-title a {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .showcase .tip-wide,
+  .showcase .tip-extra,
+  .showcase .tip-use,
+  .showcase .tip-flavor {
+    display: none;
+  }
+  .showcase .tip-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    color: var(--text-2);
+    font-size: 13.5px;
+  }
+  .showcase .tip-made {
+    margin-top: 0;
+    font-size: 13.5px;
+  }
+}
+@media (max-width: 760px) {
+  .launch-bar {
+    padding: 8px 12px;
+    gap: 6px 12px;
+    font-size: 13.5px;
+  }
+  .launch-bar p {
+    flex: 1 1 auto;
+  }
+  .launch-extra,
+  .launch-sigil {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .launch-bar {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+  .launch-bar p {
+    min-width: 0;
+  }
+  .launch-link {
+    flex: none;
+  }
+}
+@media (max-width: 900px) {
+  .showcase .tip-line .player-made {
+    transform: scale(0.82);
+    transform-origin: left center;
+  }
+}

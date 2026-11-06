@@ -38,7 +38,10 @@ export function LaunchBar() {
       <p>
         {live ? (
           <>
-            <strong>World of Warcraft: Forever is live.</strong> Share your first-day moments and get featured.
+            <strong>
+              <span className="launch-extra">World of Warcraft: </span>Forever is live.
+            </strong>{" "}
+            <span className="launch-extra">Share your first-day moments and get featured.</span>
           </>
         ) : (
           <>
