@@ -5979,3 +5979,51 @@ a.plaque:hover {
     text-shadow: 0 1px 0 rgba(255, 244, 214, 0.45);
   }
 }
+
+/* Phone banner: the parchment sits behind the logo row only, its burnt edge just above the Clips and Movies
+   tabs, which stay on dark in the same distressed type (beige, gold icons and underline). */
+@media (max-width: 760px) {
+  .site-header {
+    background: rgba(14, 11, 9, 0.97);
+    border-bottom: 1px solid #3a2f23;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    isolation: isolate;
+  }
+  .site-header::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 72px;
+    z-index: -1;
+    background: url("/brand/parchment.webp") center bottom / cover no-repeat;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+    pointer-events: none;
+  }
+  .site-header .header-actions .btn-ghost,
+  .site-header .search-link {
+    background: rgba(18, 12, 8, 0.82);
+    border-color: rgba(18, 12, 8, 0.9);
+    color: #ecd9ae;
+  }
+  .main-nav {
+    border-top: 0;
+    margin-top: 20px;
+    font-family: "Metal Mania", var(--font-display);
+    font-weight: 400;
+    font-size: 24px;
+  }
+  .main-nav a {
+    color: #ecd9ae;
+    padding: 6px 0 8px;
+  }
+  .main-nav a[aria-current="page"] {
+    color: #f6e8c4;
+    border-bottom-color: #c99a4a;
+  }
+  .main-nav .nav-icon {
+    color: #c99a4a;
+  }
+}
