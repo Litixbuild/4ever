@@ -25,8 +25,12 @@ export function isWowForever(title: string, description = "", tags: string[] = [
 const SPAM_TITLE =
   /\b(boost(s|ing)?|carry|carries|gold (for sale|selling|farm(ing)? guide)|for sale|buy(ing)?|selling|giveaway|discount|coupon|promo code|accounts?)\b/i;
 
+// News, guides and launch-time videos aren't clips of something happening in the game.
+const NOT_GAMEPLAY =
+  /\b(tier ?list|launch time|time ?zones?|how to|guide|explained|predictions?|news|patch notes|poll|should you|tips?|checklist|reviews?|release date|countdown|days? left|hours? (left|until)|pvp or pve|pve or pvp|beginners?|which (class|server|faction)|best class(es)?|everything you need)\b/i;
+
 export function looksLikeSpam(title: string): boolean {
-  return SPAM_TITLE.test(title);
+  return SPAM_TITLE.test(title) || NOT_GAMEPLAY.test(title);
 }
 
 // Channels that collect other people's clips. Only the streamers' own channels count.

@@ -1,5 +1,5 @@
 // Finds brand new WoW Forever clips on YouTube and adds them to 4Ever as the site. Server only.
-// YouTube only, never Twitch. Runs every two hours (netlify/functions/find-clips.mts) and from the
+// YouTube only, never Twitch. Runs every hour (netlify/functions/find-clips.mts) and from the
 // "Find new clips now" button on the Videos admin page.
 //
 // Two places to look, both on the free YouTube quota (10,000 units a day):

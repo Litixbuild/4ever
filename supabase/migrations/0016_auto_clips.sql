@@ -1,4 +1,4 @@
--- The clip finder: every couple of hours the site looks on YouTube for brand new WoW Forever clips
+-- The clip finder: every hour the site looks on YouTube for brand new WoW Forever clips
 -- (under a minute, embeddable) and adds them as 4Ever. Twitch is never searched; people can still submit it.
 
 -- Marks videos the finder added, so curators can tell them apart.

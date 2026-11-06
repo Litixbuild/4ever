@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
 import { findNewClips } from "@/lib/clip-finder";
 
-// Called every two hours by the scheduled Netlify function in netlify/functions/find-clips.mts.
+// Called every hour by the scheduled Netlify function in netlify/functions/find-clips.mts.
 // The caller proves itself with a token derived from the server's secret key, which never leaves the server.
 function expectedToken(): string | null {
   const secret = process.env.SUPABASE_SECRET_KEY;

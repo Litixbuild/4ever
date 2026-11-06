@@ -21,6 +21,12 @@ describe("looksLikeSpam", () => {
     expect(looksLikeSpam("Deadmines boost run WoW Forever")).toBe(true);
     expect(looksLikeSpam("Warrior one-shots a mage")).toBe(false);
   });
+  it("leaves out news, guides and launch-time videos", () => {
+    expect(looksLikeSpam("WoW Forever PvP Tier List Prediction")).toBe(true);
+    expect(looksLikeSpam("WoW Forever Launch Time in Every Time Zone (Nov 4)")).toBe(true);
+    expect(looksLikeSpam("PvP or PVE Server? WoW Forever")).toBe(true);
+    expect(looksLikeSpam("WoW Forever Guild Ganking in STV #wowforever")).toBe(false);
+  });
 });
 
 describe("looksLikeReposter", () => {

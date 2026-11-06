@@ -37,7 +37,7 @@ export default async function VideosAdminPage({
           <div className="stack-sm" style={{ gap: 4, maxWidth: 560 }}>
             <strong>Clip finder</strong>
             <span className="small muted">
-              Every two hours 4Ever adds brand new WoW Forever clips from YouTube: under a minute, from the
+              Every hour 4Ever adds brand new WoW Forever clips from YouTube: under a minute, from the
               players&apos; own channels. Twitch is never searched. Videos it added say &quot;Found automatically&quot;.
             </span>
           </div>

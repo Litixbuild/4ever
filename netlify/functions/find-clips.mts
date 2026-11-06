@@ -1,4 +1,4 @@
-// Runs every two hours on Netlify (scheduled functions are included in every plan) and asks the site to
+// Runs every hour on Netlify (scheduled functions are included in every plan) and asks the site to
 // look on YouTube for brand new WoW Forever clips. YouTube only; see src/lib/clip-finder.ts.
 import { createHash } from "node:crypto";
 
@@ -16,4 +16,4 @@ export default async function findClips() {
   return new Response(body, { status: res.status });
 }
 
-export const config = { schedule: "20 */2 * * *" };
+export const config = { schedule: "50 * * * *" };

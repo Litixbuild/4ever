@@ -148,7 +148,7 @@ export async function updateClip(formData: FormData) {
   back(formData, "Saved.");
 }
 
-// Runs the YouTube clip finder right away instead of waiting for the next two-hourly run.
+// Runs the YouTube clip finder right away instead of waiting for the next hourly run.
 export async function findClipsNow(formData: FormData) {
   const viewer = await curator();
   if (!viewer.isAdmin) back(formData, "Only admins can do that.");
@@ -162,7 +162,7 @@ export async function findClipsNow(formData: FormData) {
   back(
     formData,
     result.added === 0
-      ? "No new WoW Forever clips right now. It checks again every two hours."
+      ? "No new WoW Forever clips right now. It checks again every hour."
       : `Added ${result.added} new WoW Forever ${result.added === 1 ? "clip" : "clips"} from YouTube.`,
   );
 }
