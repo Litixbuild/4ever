@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { setClipStatus, updateClip } from "@/app/admin/actions";
+import { blockChannel, findClipsNow, setClipStatus, updateClip } from "@/app/admin/actions";
 import { AdminNotice } from "@/components/admin-notice";
 import { requireCurator } from "@/lib/auth";
 import { CATEGORIES } from "@/lib/categories";
@@ -14,7 +14,7 @@ export default async function VideosAdminPage({
 }: {
   searchParams: Promise<{ notice?: string; q?: string; status?: string }>;
 }) {
-  await requireCurator();
+  const viewer = await requireCurator();
   const { notice, q: rawQ, status: rawStatus } = await searchParams;
   const q = cleanSearch(rawQ);
   const status = STATUSES.includes(rawStatus as (typeof STATUSES)[number]) ? rawStatus : "all";
@@ -32,6 +32,23 @@ export default async function VideosAdminPage({
   return (
     <div className="stack-lg">
       <AdminNotice notice={notice} />
+      {viewer.isAdmin ? (
+        <div className="card row-between" style={{ padding: 18, gap: 14, flexWrap: "wrap" }}>
+          <div className="stack-sm" style={{ gap: 4, maxWidth: 560 }}>
+            <strong>Clip finder</strong>
+            <span className="small muted">
+              Every two hours 4Ever adds brand new WoW Forever clips from YouTube: under a minute, from the
+              players&apos; own channels. Twitch is never searched. Videos it added say &quot;Found automatically&quot;.
+            </span>
+          </div>
+          <form action={findClipsNow}>
+            <input type="hidden" name="returnTo" value="/admin/videos" />
+            <button type="submit" className="btn btn-gold btn-sm">
+              Find new clips now
+            </button>
+          </form>
+        </div>
+      ) : null}
       <form action="/admin/videos" method="get" className="row" role="search">
         <label htmlFor="video-search" className="sr-only">
           Search videos
@@ -70,6 +87,7 @@ export default async function VideosAdminPage({
                   {clip.title}
                 </Link>
                 <span className="tiny muted">
+                  {clip.auto_found ? "Found automatically · " : ""}
                   {clip.short_id} · {clip.channel_name} · {formatCount(clip.view_count)} views ·{" "}
                   {formatCount(clip.vote_count)} votes · added {timeAgo(clip.created_at)}
                 </span>
@@ -152,6 +170,19 @@ export default async function VideosAdminPage({
                   />
                   <button type="submit" className="btn btn-danger btn-sm">
                     Remove
+                  </button>
+                </form>
+              ) : null}
+              {clip.auto_found && clip.channel_id ? (
+                <form action={blockChannel}>
+                  <input type="hidden" name="clipId" value={clip.id} />
+                  <input type="hidden" name="returnTo" value="/admin/videos" />
+                  <button
+                    type="submit"
+                    className="btn btn-ghost btn-sm"
+                    title="Reposter or spam: never take its videos again"
+                  >
+                    Block this channel
                   </button>
                 </form>
               ) : null}

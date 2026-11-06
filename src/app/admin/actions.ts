@@ -7,6 +7,7 @@ import { getViewer } from "@/lib/auth";
 import { isBadgeKey } from "@/lib/badges";
 import { isCategory, isKind } from "@/lib/categories";
 import { parseTags } from "@/lib/format";
+import { findNewClips } from "@/lib/clip-finder";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { localInputToIso } from "@/lib/time";
 
@@ -145,6 +146,59 @@ export async function updateClip(formData: FormData) {
     .maybeSingle<{ short_id: string }>();
   if (data) revalidatePath(`/c/${data.short_id}`);
   back(formData, "Saved.");
+}
+
+// Runs the YouTube clip finder right away instead of waiting for the next two-hourly run.
+export async function findClipsNow(formData: FormData) {
+  const viewer = await curator();
+  if (!viewer.isAdmin) back(formData, "Only admins can do that.");
+  const result = await findNewClips();
+  if (result.error) back(formData, `The clip finder couldn't run: ${result.error}`);
+  if (result.added > 0) {
+    revalidatePath("/");
+    revalidatePath("/browse");
+    revalidatePath("/watch");
+  }
+  back(
+    formData,
+    result.added === 0
+      ? "No new WoW Forever clips right now. It checks again every two hours."
+      : `Added ${result.added} new WoW Forever ${result.added === 1 ? "clip" : "clips"} from YouTube.`,
+  );
+}
+
+// Stops the clip finder taking anything from this video's channel, and takes down what it already added.
+export async function blockChannel(formData: FormData) {
+  const viewer = await curator();
+  const clipId = id(formData, "clipId");
+  if (!clipId) back(formData, "That video wasn't found.");
+  const admin = createAdminClient();
+  const { data: clip } = await admin
+    .from("clips")
+    .select("channel_id, channel_name, platform")
+    .eq("id", clipId)
+    .maybeSingle<{ channel_id: string | null; channel_name: string; platform: string }>();
+  if (!clip?.channel_id || clip.platform !== "youtube") back(formData, "That video has no YouTube channel to block.");
+  await admin
+    .from("clip_source_blocks")
+    .upsert({ channel_id: clip.channel_id, channel_name: clip.channel_name }, { onConflict: "channel_id" });
+  const { data: removed } = await admin
+    .from("clips")
+    .update({
+      status: "removed",
+      review_note: "Channel blocked from the clip finder.",
+      reviewed_by: viewer.userId,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("channel_id", clip.channel_id)
+    .eq("auto_found", true)
+    .neq("status", "removed")
+    .select("id");
+  revalidatePath("/");
+  back(
+    formData,
+    `Blocked ${clip.channel_name}. Took down ${removed?.length ?? 0} of its automatically added ${removed?.length === 1 ? "clip" : "clips"}.`,
+  );
 }
 
 // ---------- Reports ----------
