@@ -26,6 +26,12 @@ describe("looksLikeSpam", () => {
     expect(looksLikeSpam("WoW Forever Launch Time in Every Time Zone (Nov 4)")).toBe(true);
     expect(looksLikeSpam("PvP or PVE Server? WoW Forever")).toBe(true);
     expect(looksLikeSpam("WoW Forever Guild Ganking in STV #wowforever")).toBe(false);
+    expect(looksLikeSpam("WoW Forever Just REMOVED Lava Burst")).toBe(true);
+    expect(looksLikeSpam("Blizzard Announces WoW Forever: Same Same, But Different")).toBe(true);
+    expect(looksLikeSpam("3 Macros Every Player Needs in WoW Forever")).toBe(true);
+    expect(looksLikeSpam("Warlock Pets Cut From 7.5 to 2: WoW Forever Voidwalker")).toBe(true);
+    expect(looksLikeSpam("Thought two gnolls at once was still an easy fight #WoWForever")).toBe(false);
+    expect(looksLikeSpam("This Duel Was Absolute Cinema | $100K WoW Forever Dueling Tournament")).toBe(false);
   });
 });
 

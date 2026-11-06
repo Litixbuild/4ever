@@ -16,4 +16,4 @@ export default async function findClips() {
   return new Response(body, { status: res.status });
 }
 
-export const config = { schedule: "50 * * * *" };
+export const config = { schedule: "5 * * * *" };

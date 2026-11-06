@@ -2,8 +2,8 @@
 // so it can be tested on its own.
 import type { Category } from "@/lib/categories";
 
-// Forever launched on Nov 4, 2026. Anything older is beta or a different game.
-export const FOREVER_LAUNCH = "2026-11-04T00:00:00Z";
+// Forever went live Nov 4, 2026 at 6 PM Eastern. Anything older is beta, hype or a different game.
+export const FOREVER_LAUNCH = "2026-11-04T23:00:00Z";
 export const MAX_CLIP_SECONDS = 60;
 export const MIN_CLIP_SECONDS = 5;
 
@@ -27,7 +27,7 @@ const SPAM_TITLE =
 
 // News, guides and launch-time videos aren't clips of something happening in the game.
 const NOT_GAMEPLAY =
-  /\b(tier ?list|launch time|time ?zones?|how to|guide|explained|predictions?|news|patch notes|poll|should you|tips?|checklist|reviews?|release date|countdown|days? left|hours? (left|until)|pvp or pve|pve or pvp|beginners?|which (class|server|faction)|best class(es)?|everything you need)\b/i;
+  /\b(fix(es)?|skips|min ?max(ing)?|cut from|on the map|new players|good for|\d+ (quests|ways|tips|things|reasons)|removed|deleted|nerf(s|ed)?|buff(s|ed)?|changes?|changed|announce[sd]?|blizzard|rules|macros?|addons?|ui|settings|keybinds?|t(ier)? ?\d set|sets?|free|launch|patch|hotfix|update[sd]?|is (it|this) (worth|good)|worth it|explain(ed|s)?|reasons?|things|mistakes|you need|dont|don't|stop|never|always|every player|community|thoughts|opinion|rested ?xp|customization|preview|first look|leak(ed|s)?|coming|should|tier ?list|launch time|time ?zones?|how to|guide|explained|predictions?|news|patch notes|poll|should you|tips?|checklist|reviews?|release date|countdown|days? left|hours? (left|until)|pvp or pve|pve or pvp|beginners?|which (class|server|faction)|best class(es)?|everything you need)\b/i;
 
 export function looksLikeSpam(title: string): boolean {
   return SPAM_TITLE.test(title) || NOT_GAMEPLAY.test(title);
@@ -35,7 +35,7 @@ export function looksLikeSpam(title: string): boolean {
 
 // Channels that collect other people's clips. Only the streamers' own channels count.
 const REPOSTER_CHANNEL =
-  /(clips?|clipz|feed|replays?|best of|moments|compilations?|highlights?|daily|news|boost(ing)?|carr(y|ies)|gold|shop|store|services?|vods?|archive|fan ?page)\b/i;
+  /(forever|clips?|clipz|feed|replays?|best of|moments|compilations?|highlights?|daily|news|boost(ing)?|carr(y|ies)|gold|shop|store|services?|vods?|archive|fan ?page)\b/i;
 
 export function looksLikeReposter(channelName: string): boolean {
   return REPOSTER_CHANNEL.test(channelName);

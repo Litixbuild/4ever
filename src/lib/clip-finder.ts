@@ -24,7 +24,7 @@ const SEARCHES = ["wow forever", "#wowforever"];
 const SEARCH_BACK_HOURS = 48;
 const MAX_CHANNELS = 150;
 const PER_CHANNEL_PER_RUN = 4;
-const PER_RUN = 40;
+const PER_RUN = 60;
 
 export type FindResult = { looked: number; added: number; skipped: number; error?: string };
 
@@ -144,8 +144,9 @@ export async function findNewClips(): Promise<FindResult> {
   const knownSet = new Set(knownChannels);
   const perChannel = new Map<string, number>();
   const picked: VideoItem[] = [];
-  // Oldest first, so if a channel posts a burst the earlier ones go up first and later runs pick up the rest.
-  videos.sort((a, b) => (a.snippet?.publishedAt ?? "").localeCompare(b.snippet?.publishedAt ?? ""));
+  // Newest first: the freshest clips go up before anything else.
+  videos.sort((a, b) => (b.snippet?.publishedAt ?? "").localeCompare(a.snippet?.publishedAt ?? ""));
+  const seenTitles = new Set<string>();
   for (const v of videos) {
     const s = v.snippet;
     if (!s?.channelId || !s.title || blocked.has(s.channelId)) continue;
@@ -158,6 +159,10 @@ export async function findNewClips(): Promise<FindResult> {
     if (looksLikeSpam(s.title)) continue;
     // New channels have to look like a player's own channel; channels already on 4Ever are trusted.
     if (!knownSet.has(s.channelId) && looksLikeReposter(s.channelTitle ?? "")) continue;
+    // The same video uploaded twice by one channel only goes up once.
+    const titleKey = `${s.channelId}:${s.title.trim().toLowerCase()}`;
+    if (seenTitles.has(titleKey)) continue;
+    seenTitles.add(titleKey);
     const count = perChannel.get(s.channelId) ?? 0;
     if (count >= PER_CHANNEL_PER_RUN) continue;
     perChannel.set(s.channelId, count + 1);
